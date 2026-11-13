@@ -1,0 +1,66 @@
+{
+  "nom": "Kova",
+  "principe": "Nombre d'or (1,618) pour les tailles de texte et les proportions, suite de Fibonacci pour les espacements",
+  "ecran": { "largeur": 390, "hauteur": 844, "margeHaut": 55, "margeCotes": 21, "margeBas": 34 },
+  "couleurs": {
+    "fond": "#0E0E10",
+    "carte": "#1A1A1E",
+    "carteSelectionnee": "#23261A",
+    "ligne": "#2C2C33",
+    "ligneFine": "#26262B",
+    "pointille": "#3A3A42",
+    "texte": "#F4F4F1",
+    "texteSecondaire": "#A3A3AB",
+    "accent": "#C8F53C",
+    "texteSurAccent": "#0E0E10",
+    "barreInactive": "#4A4D3A"
+  },
+  "polices": {
+    "titres": { "famille": "Space Grotesk", "graisse": 700 },
+    "texte": { "famille": "Inter", "graisses": [400, 500, 600] }
+  },
+  "taillesTexte": {
+    "legende": 13,
+    "corps": 16,
+    "corpsFort": 20,
+    "titreCarte": 26,
+    "titreEcran": 33,
+    "titreAccueil": 42,
+    "chiffre": 68,
+    "chiffreGeant": 110,
+    "chiffreChoc": 178
+  },
+  "interligne": { "paragraphe": 1.618, "titre": 1.12, "chiffre": 1.0 },
+  "espacements": [3, 5, 8, 13, 21, 34, 55, 89, 144],
+  "arrondis": { "petit": 8, "moyen": 13, "grand": 21, "tresGrand": 34, "rond": "50%" },
+  "hauteurs": {
+    "boutonPrincipal": 55,
+    "option": 55,
+    "onglet": 55,
+    "boutonSecondaire": 44,
+    "boutonIcone": 44,
+    "ligneReglage": 55
+  },
+  "composants": {
+    "interrupteur": { "largeur": 55, "hauteur": 34, "pastille": 28, "decalageActif": 21 },
+    "vignetteApp": { "taille": 34, "arrondi": 8 },
+    "logo": { "taille": 89, "arrondi": 21, "proportionSymbole": 0.618 },
+    "vueCamera": { "hauteurSeance": 322, "hauteurEssai": 233, "partDeLecran": 0.382 },
+    "barreProgression": { "segments": 10, "hauteur": 8, "ecart": 5 }
+  },
+  "animations": {
+    "dureeStandard": 0.5,
+    "courbe": "ease",
+    "entree": { "nom": "up", "opacite": [0, 1], "translationY": [18, 0], "cascade": [0.07, 0.15] },
+    "pop": { "duree": 0.6, "echelle": [0.6, 1.06, 1.0] },
+    "pulsation": { "duree": 2.4, "echelle": [1.0, 1.035, 1.0], "boucle": true },
+    "croissanceBarre": { "duree": 0.6, "origine": "bas" },
+    "remplissage": { "duree": 0.6, "origine": "gauche" },
+    "anneau": { "duree": 2.0, "echelle": [0.7, 1.9], "opacite": [0.8, 0], "boucle": true },
+    "scanCamera": { "duree": 3.0, "boucle": true },
+    "compteurChoc": { "pas": 2, "intervalleMs": 28 },
+    "compteurGain": { "pas": 1, "intervalleMs": 55 },
+    "reduireLesAnimations": "respecter le réglage système"
+  },
+  "haptique": { "repetition": "léger", "serieValidee": "fort" }
+}

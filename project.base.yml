@@ -1,0 +1,74 @@
+# Kova : socle du projet (app seule, sans verrouillage).
+#
+# Sert aux builds TestFlight tant qu'Apple n'a pas accordé l'autorisation
+# Family Controls. Le projet complet (4 cibles, App Group) est dans project.yml,
+# qui inclut ce fichier.
+#
+# Générer :  xcodegen generate --spec project.base.yml
+#
+# Identifiant de l'app : com.getkova.app. Pour le changer, remplacer cette
+# chaîne partout dans project.base.yml, project.yml et codemagic.yaml.
+
+name: Kova
+
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  developmentLanguage: fr
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    # Vide dans le socle. project.yml y met l'identifiant de l'App Group.
+    KOVA_APP_GROUP: ""
+
+targets:
+  Kova:
+    type: application
+    platform: iOS
+    sources:
+      - path: Kova
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: Kova/Info.plist
+      properties:
+        CFBundleDisplayName: Kova
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen:
+          UIColorName: Fond
+        UIAppFonts:
+          - SpaceGrotesk-Bold.ttf
+          - Inter-Regular.ttf
+          - Inter-Medium.ttf
+          - Inter-SemiBold.ttf
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIUserInterfaceStyle: Dark
+        UIRequiresFullScreen: true
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        # Texte de secours. Les versions FR et EN sont dans InfoPlist.strings.
+        NSCameraUsageDescription: "La caméra compte tes pompes en direct. L'image est analysée sur ton téléphone. Rien n'est enregistré ni envoyé."
+        KovaGroupePartage: $(KOVA_APP_GROUP)
+
+schemes:
+  Kova:
+    build:
+      targets:
+        Kova: all
+    run:
+      config: Debug
+    archive:
+      config: Release

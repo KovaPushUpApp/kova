@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Ta règle</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+body{margin: 0}
+a{color:#F4F4F1}a:hover{color:#FFFFFF}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ring{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+@keyframes pushup{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+@keyframes scan{0%{top:8%}50%{top:88%}100%{top:8%}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 55px 21px 34px; background: #0E0E10; color: #F4F4F1; font-family: Inter, sans-serif; display: flex; flex-direction: column; gap: 21px; overflow: hidden; position: relative">
+<div style="display: flex; align-items: center; gap: 13px"><a href="Apps.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 13px; background: #1A1A1E; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></a><div role="img" aria-label="Étape 5 sur 8" style="flex: 1; height: 5px; border-radius: 3px; background: #2C2C33; overflow: hidden"><div style="width: 62%; height: 100%; border-radius: 3px; background: {{accent}}; transform-origin: left; animation: fill .6s ease both"></div></div></div><h1 style="margin: 13px 0 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 33px; line-height: 1.12; animation: up 0.5s ease both; animation-delay: 0.05s">Fixe ta règle.</h1><p style="margin: 0; font-size: 16px; line-height: 1.618; color: #A3A3AB; animation: up 0.5s ease both; animation-delay: 0.12s">Tu pourras la changer plus tard, avec un délai de 24 h.</p><div style="display: flex; flex-direction: column; gap: 13px; margin-top: 13px; animation: up 0.5s ease both; animation-delay: 0.2s"><div style="display: flex; align-items: center; justify-content: space-between; padding: 21px; border-radius: 21px; background: #1A1A1E"><button onClick="{{ repsMinus }}" aria-label="Moins de pompes" style="width: 55px; height: 55px; border: 0; border-radius: 21px; background: #2C2C33; color: #F4F4F1; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px">&minus;</button><div style="display: flex; flex-direction: column; align-items: center"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 68px; line-height: 1">{{reps}}</span><span style="font-size: 13px; color: #A3A3AB">pompes</span></div><button onClick="{{ repsPlus }}" aria-label="Plus de pompes" style="width: 55px; height: 55px; border: 0; border-radius: 21px; background: #2C2C33; color: #F4F4F1; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px">+</button></div><div aria-hidden="true" style="align-self: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; color: #A3A3AB">=</div><div style="display: flex; align-items: center; justify-content: space-between; padding: 21px; border-radius: 21px; background: #1A1A1E"><button onClick="{{ minsMinus }}" aria-label="Moins de minutes" style="width: 55px; height: 55px; border: 0; border-radius: 21px; background: #2C2C33; color: #F4F4F1; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px">&minus;</button><div style="display: flex; flex-direction: column; align-items: center"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 68px; line-height: 1">{{mins}}</span><span style="font-size: 13px; color: #A3A3AB">minutes d'écran</span></div><button onClick="{{ minsPlus }}" aria-label="Plus de minutes" style="width: 55px; height: 55px; border: 0; border-radius: 21px; background: #2C2C33; color: #F4F4F1; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px">+</button></div></div><p style="margin: 0; font-size: 13px; color: #A3A3AB; text-align: center">Soit {{perHour}} pompes pour 1 h de scroll.</p><div style="margin-top: auto; display: flex; flex-direction: column"><a href="AutoEcran.dc.html" style="display: flex; align-items: center; justify-content: center; height: 55px; border-radius: 21px; background: {{accent}}; color: #0E0E10; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; text-decoration: none; animation: up 0.5s ease both; animation-delay: 0.35s; ">Valider ma règle</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C8F53C"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+state = { reps: 10, mins: 15 };
+renderVals() {
+const s = this.state;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+return {
+accent: this.props.accent ?? '#C8F53C',
+reps: s.reps, mins: s.mins,
+perHour: Math.round((s.reps * 60) / s.mins),
+repsMinus: () => this.setState({ reps: clamp(s.reps - 5, 5, 100) }),
+repsPlus: () => this.setState({ reps: clamp(s.reps + 5, 5, 100) }),
+minsMinus: () => this.setState({ mins: clamp(s.mins - 5, 5, 120) }),
+minsPlus: () => this.setState({ mins: clamp(s.mins + 5, 5, 120) })
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+/* Shield shown over a blocked app. */
+"verrou.titre" = "App locked";
+"verrou.sous_titre" = "Earn your screen time with your arms.";
+"verrou.bouton_principal" = "Do my push-ups";
+"verrou.bouton_secondaire" = "Close";

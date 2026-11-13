@@ -1,0 +1,81 @@
+# Kova : CI Codemagic. Tout build passe par ici (pas de Mac en local).
+#
+# Réglages à faire une fois dans Codemagic :
+#   1. Team settings > Integrations > App Store Connect : ajouter la clé API
+#      et la nommer "codemagic" (c'est le nom utilisé plus bas).
+#   2. Dans l'app Codemagic > Environment variables : créer la variable
+#      CERTIFICATE_PRIVATE_KEY dans un groupe nommé "signature", cochée "Secure".
+#      Valeur : le contenu d'une clé privée RSA 2048 au format PEM, créée avec
+#        ssh-keygen -t rsa -b 2048 -m PEM -f kova_cert_key -q -N ""
+#      Ne jamais mettre ce fichier dans le dépôt.
+
+workflows:
+  socle-testflight:
+    name: Kova - TestFlight (sans verrouillage)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      groups:
+        - signature
+      vars:
+        BUNDLE_ID: "com.getkova.app"
+        XCODE_PROJECT: "Kova.xcodeproj"
+        XCODE_SCHEME: "Kova"
+      xcode: latest
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Vérifier que les tokens Swift sont à jour
+        script: python3 scripts/generate_tokens.py --check
+
+      - name: Vérifier les textes français et anglais
+        script: python3 scripts/check_localisation.py
+
+      - name: Installer XcodeGen
+        script: brew install xcodegen
+
+      # Contrôle de compilation du projet complet (app + 3 extensions),
+      # pour le simulateur et sans signature. Rien n'est envoyé.
+      - name: Compiler le projet complet
+        script: |
+          xcodegen generate --spec project.yml
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+      # Le build envoyé sur TestFlight : l'app seule, sans Family Controls.
+      - name: Générer le projet du socle
+        script: xcodegen generate --spec project.base.yml
+
+      - name: Préparer la signature
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Construire l'ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --archive-xcargs "COMPILER_INDEX_STORE_ENABLE=NO CURRENT_PROJECT_VERSION=$PROJECT_BUILD_NUMBER"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Le build arrive dans TestFlight pour les testeurs internes.
+        # Passer à true pour l'envoyer aussi en revue bêta (testeurs externes).
+        submit_to_testflight: false

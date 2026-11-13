@@ -1,0 +1,50 @@
+/* Kova: English strings. */
+
+/* Common */
+"commun.continuer" = "Continue";
+"commun.retour" = "Back";
+
+/* Tabs */
+"onglet.accueil" = "Home";
+"onglet.stats" = "Stats";
+"onglet.planning" = "Schedule";
+"onglet.reglages" = "Settings";
+
+/* Screen names (foundation placeholders) */
+"ecran.bienvenue" = "Welcome";
+"ecran.temps" = "Your screen time";
+"ecran.choc" = "The facts";
+"ecran.objectif" = "Your goal";
+"ecran.apps" = "Apps to lock";
+"ecran.regle" = "Your rule";
+"ecran.auto_ecran" = "Screen Time access";
+"ecran.auto_camera" = "Camera access";
+"ecran.essai" = "Try it: 3 push-ups";
+"ecran.paywall" = "Subscription";
+"ecran.offre" = "Last chance offer";
+"ecran.exercice" = "Pick your exercise";
+"ecran.placement" = "Phone placement";
+"ecran.compteur" = "Workout";
+"ecran.gagne" = "Time earned";
+"ecran.urgence" = "Emergency unlock";
+"ecran.apps_reglage" = "Locked apps";
+"ecran.abonnement" = "My subscription";
+
+/* Foundation: work-in-progress screens, removed in step 7 */
+"socle.ecran_provisoire" = "Placeholder screen. Its content arrives in step 2.";
+"socle.terminer_onboarding" = "Enter the app";
+"socle.retour_accueil" = "Back to home";
+"socle.revoir_onboarding" = "Replay onboarding";
+"socle.titre" = "Foundation check";
+"socle.polices" = "FONTS";
+"socle.couleurs" = "COLORS";
+"socle.build" = "BUILD";
+"socle.ok" = "loaded";
+"socle.absente" = "missing";
+"socle.exemple_titre" = "Earn your screen time.";
+"socle.exemple_texte" = "Your apps stay locked until you do your push-ups.";
+"socle.langue" = "Language";
+"socle.langue_valeur" = "English";
+"socle.version" = "Version";
+"socle.extensions" = "Extensions";
+"socle.groupe" = "Shared group";

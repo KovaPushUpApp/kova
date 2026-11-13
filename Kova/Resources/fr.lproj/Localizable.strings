@@ -1,0 +1,50 @@
+/* Kova : textes français (langue de référence). */
+
+/* Commun */
+"commun.continuer" = "Continuer";
+"commun.retour" = "Retour";
+
+/* Onglets */
+"onglet.accueil" = "Accueil";
+"onglet.stats" = "Stats";
+"onglet.planning" = "Planning";
+"onglet.reglages" = "Réglages";
+
+/* Noms des écrans (gabarits d'attente du socle) */
+"ecran.bienvenue" = "Bienvenue";
+"ecran.temps" = "Ton temps d'écran";
+"ecran.choc" = "Le constat";
+"ecran.objectif" = "Ton objectif";
+"ecran.apps" = "Tes apps à verrouiller";
+"ecran.regle" = "Ta règle";
+"ecran.auto_ecran" = "Autorisation Temps d'écran";
+"ecran.auto_camera" = "Autorisation caméra";
+"ecran.essai" = "Essai : 3 pompes";
+"ecran.paywall" = "Abonnement";
+"ecran.offre" = "Offre de rattrapage";
+"ecran.exercice" = "Choix de l'exercice";
+"ecran.placement" = "Placement du téléphone";
+"ecran.compteur" = "Séance";
+"ecran.gagne" = "Temps gagné";
+"ecran.urgence" = "Déblocage d'urgence";
+"ecran.apps_reglage" = "Apps verrouillées";
+"ecran.abonnement" = "Mon abonnement";
+
+/* Socle : écrans de chantier, retirés à l'étape 7 */
+"socle.ecran_provisoire" = "Écran en attente. Son contenu arrive à l'étape 2.";
+"socle.terminer_onboarding" = "Entrer dans l'app";
+"socle.retour_accueil" = "Revenir à l'accueil";
+"socle.revoir_onboarding" = "Revoir l'onboarding";
+"socle.titre" = "Contrôle du socle";
+"socle.polices" = "POLICES";
+"socle.couleurs" = "COULEURS";
+"socle.build" = "BUILD";
+"socle.ok" = "chargée";
+"socle.absente" = "absente";
+"socle.exemple_titre" = "Gagne ton temps d'écran.";
+"socle.exemple_texte" = "Tes apps restent verrouillées tant que tu n'as pas fait tes pompes.";
+"socle.langue" = "Langue";
+"socle.langue_valeur" = "Français";
+"socle.version" = "Version";
+"socle.extensions" = "Extensions";
+"socle.groupe" = "Groupe partagé";

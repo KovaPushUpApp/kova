@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Temps d'écran quotidien</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+body{margin: 0}
+a{color:#F4F4F1}a:hover{color:#FFFFFF}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ring{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+@keyframes pushup{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+@keyframes scan{0%{top:8%}50%{top:88%}100%{top:8%}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 55px 21px 34px; background: #0E0E10; color: #F4F4F1; font-family: Inter, sans-serif; display: flex; flex-direction: column; gap: 21px; overflow: hidden; position: relative">
+<div style="display: flex; align-items: center; gap: 13px"><a href="Bienvenue.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 13px; background: #1A1A1E; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></a><div role="img" aria-label="Étape 1 sur 8" style="flex: 1; height: 5px; border-radius: 3px; background: #2C2C33; overflow: hidden"><div style="width: 12%; height: 100%; border-radius: 3px; background: {{accent}}; transform-origin: left; animation: fill .6s ease both"></div></div></div><h1 style="margin: 13px 0 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 33px; line-height: 1.12; animation: up 0.5s ease both; animation-delay: 0.05s">Combien de temps par jour sur ton téléphone ?</h1><p style="margin: 0; font-size: 16px; line-height: 1.618; color: #A3A3AB; animation: up 0.5s ease both; animation-delay: 0.12s">Sois honnête, personne ne regarde.</p><div style="display: flex; flex-direction: column; gap: 13px; margin-top: 13px; animation: up 0.5s ease both; animation-delay: 0.2s"><sc-for list="{{ opts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="display: flex; align-items: center; justify-content: space-between; height: 55px; padding: 0 21px; border-radius: 21px; border: 2px solid {{ o.border }}; background: {{ o.bg }}; color: #F4F4F1; font-family: Inter, sans-serif; font-size: 16px; font-weight: 600; text-align: left"><span>{{ o.label }}</span><span style="font-size: 13px; font-weight: 500; color: #A3A3AB">{{ o.hint }}</span></button></sc-for></div><div style="margin-top: auto; display: flex; flex-direction: column"><a href="Choc.dc.html" style="display: flex; align-items: center; justify-content: center; height: 55px; border-radius: 21px; background: {{accent}}; color: #0E0E10; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; text-decoration: none; animation: up 0.5s ease both; animation-delay: 0.35s; ">Continuer</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C8F53C"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+state = { picked: 'c' };
+renderVals() {
+const a = this.props.accent ?? '#C8F53C';
+const src = [
+{ id: 'a', label: 'Moins de 2 h', hint: '' },
+{ id: 'b', label: '3 à 4 h', hint: '' },
+{ id: 'c', label: '5 à 6 h', hint: 'la moyenne' },
+{ id: 'd', label: '7 h ou plus', hint: '' }
+];
+const opts = src.map((o) => ({
+...o,
+on: this.state.picked === o.id,
+border: this.state.picked === o.id ? a : '#2C2C33',
+bg: this.state.picked === o.id ? '#23261A' : '#1A1A1E',
+pick: () => this.setState({ picked: o.id })
+}));
+return { accent: a, opts };
+}
+}
+</script>
+</body>
+</html>

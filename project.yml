@@ -1,0 +1,118 @@
+# Kova : projet complet. L'app, ses 3 extensions Temps d'écran et l'App Group.
+#
+# Générer :  xcodegen generate
+#
+# Ce projet demande la capacité Family Controls sur les 4 identifiants.
+# Tant qu'Apple ne l'a pas accordée pour la distribution, il ne peut pas partir
+# sur TestFlight : la CI le compile seulement, et envoie project.base.yml.
+#
+# Identifiants :
+#   com.getkova.app                app
+#   com.getkova.app.monitor        extension DeviceActivityMonitor
+#   com.getkova.app.shieldconfig   extension ShieldConfiguration
+#   com.getkova.app.shieldaction   extension ShieldAction
+#   group.com.getkova.app          App Group
+
+include:
+  - project.base.yml
+
+settings:
+  base:
+    KOVA_APP_GROUP: group.com.getkova.app
+
+targets:
+  Kova:
+    dependencies:
+      - target: KovaMonitor
+      - target: KovaShieldConfig
+      - target: KovaShieldAction
+    entitlements:
+      path: Kova/Kova.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.getkova.app
+
+  # Reverrouille à la fin d'une fenêtre, applique les plages du planning.
+  KovaMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KovaMonitor
+      - path: Shared/Stockage
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app.monitor
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: KovaMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: Kova
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KovaGroupePartage: $(KOVA_APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KovaMonitor
+    entitlements:
+      path: KovaMonitor/KovaMonitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.getkova.app
+
+  # Dessine l'écran de verrou aux couleurs de Kova.
+  KovaShieldConfig:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KovaShieldConfig
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app.shieldconfig
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: KovaShieldConfig/Info.plist
+      properties:
+        CFBundleDisplayName: Kova
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KovaGroupePartage: $(KOVA_APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KovaShieldConfiguration
+    entitlements:
+      path: KovaShieldConfig/KovaShieldConfig.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.getkova.app
+
+  # Gère les deux boutons de l'écran de verrou.
+  KovaShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KovaShieldAction
+      - path: Shared/Stockage
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app.shieldaction
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: KovaShieldAction/Info.plist
+      properties:
+        CFBundleDisplayName: Kova
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KovaGroupePartage: $(KOVA_APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KovaShieldAction
+    entitlements:
+      path: KovaShieldAction/KovaShieldAction.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.getkova.app

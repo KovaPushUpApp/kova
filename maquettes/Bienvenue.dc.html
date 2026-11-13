@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bienvenue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+body{margin: 0}
+a{color:#F4F4F1}a:hover{color:#FFFFFF}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ring{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+@keyframes pushup{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+@keyframes scan{0%{top:8%}50%{top:88%}100%{top:8%}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 55px 21px 34px; background: #0E0E10; color: #F4F4F1; font-family: Inter, sans-serif; display: flex; flex-direction: column; gap: 21px; overflow: hidden; position: relative">
+<div style="margin-top: 144px; display: flex; flex-direction: column; gap: 34px"><div style="width: 89px; height: 89px; border-radius: 21px; background: {{accent}}; display: flex; align-items: center; justify-content: center; animation: pop 0.6s ease both; animation-delay: 0s"><svg role="img" aria-label="Logo Kova : cadenas ouvert" width="52" height="52" viewBox="0 0 104 104" fill="none" stroke="#0E0E10" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="48" width="56" height="40" rx="10" stroke-width="10"></rect><path d="M36 48V34a16 16 0 0 1 32 0" stroke-width="10"></path><path d="M42 72L52 62L62 72" stroke-width="7"></path></svg></div><h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 42px; line-height: 1.02; animation: up 0.5s ease both; animation-delay: 0.25s">Gagne ton temps d'écran.</h1><p style="margin: 0; font-size: 16px; line-height: 1.618; color: #A3A3AB; max-width: 300px; animation: up 0.5s ease both; animation-delay: 0.4s">Tes apps restent verrouillées tant que tu n'as pas fait tes pompes.</p></div><div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px"><a href="Temps.dc.html" style="display: flex; align-items: center; justify-content: center; height: 55px; border-radius: 21px; background: {{accent}}; color: #0E0E10; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; text-decoration: none; animation: up 0.5s ease both; animation-delay: 0.6s; ">Commencer</a><a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 13px; color: #A3A3AB; font-weight: 500; font-size: 16px; text-decoration: none">J'ai déjà un compte</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C8F53C"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#C8F53C' };
+}
+}
+</script>
+</body>
+</html>

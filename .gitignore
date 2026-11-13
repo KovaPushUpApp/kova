@@ -1,0 +1,19 @@
+# Projet Xcode généré par XcodeGen dans la CI
+*.xcodeproj
+*.xcworkspace
+# Fichiers réécrits par XcodeGen à chaque génération
+**/Info.plist
+*.entitlements
+# Builds
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+# Secrets
+*.p8
+*.p12
+*.mobileprovision
+.env
+# Divers
+.DS_Store
+__pycache__/

@@ -1,0 +1,5 @@
+/* Écran de verrou affiché par dessus une app bloquée. */
+"verrou.titre" = "App verrouillée";
+"verrou.sous_titre" = "Gagne ton temps d'écran avec tes bras.";
+"verrou.bouton_principal" = "Faire mes pompes";
+"verrou.bouton_secondaire" = "Fermer";
