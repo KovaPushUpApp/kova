@@ -21,6 +21,7 @@ LANGUES = ["fr", "en"]
 ENSEMBLES = {
     "Kova/Resources": ["Kova"],
     "KovaShieldConfig": ["KovaShieldConfig"],
+    "KovaShieldAction": ["KovaShieldAction"],
 }
 
 LIGNE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')

@@ -1,0 +1,3 @@
+/* Notification sent when "Do my push-ups" is tapped on the shield. */
+"notification.titre" = "Time for your push-ups";
+"notification.texte" = "Tap here to open Kova and earn your screen time.";

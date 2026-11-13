@@ -3,16 +3,14 @@ import UIKit
 
 /// Écran 16 : la séance. Vue caméra, compteur géant, barre à segments.
 /// Le bouton de validation n'apparaît qu'à la fin. Abandonner ne donne rien.
-/// À l'étape 2, le comptage est simulé. La caméra arrive à l'étape 3.
 struct EcranCompteur: View {
     @EnvironmentObject private var etat: EtatApp
+    @ObservedObject var camera: CameraSeance
     let abandonner: () -> Void
     let valider: () -> Void
 
-    @State private var faites = 0
-    private let minuterie = Timer.publish(every: DonneesFictives.rythmeSeance, on: .main, in: .common).autoconnect()
-
     private var total: Int { etat.repetitionsDeLaSeance }
+    private var faites: Int { min(camera.repetitions, total) }
 
     /// Segments allumés, au prorata des répétitions faites.
     private var segmentsFaits: Int {
@@ -23,12 +21,20 @@ struct EcranCompteur: View {
     var body: some View {
         EcranKova(espacement: Tokens.Espacements.e13) {
             HStack {
-                BoutonFermer(libelle: L.t("a11y.arreter_seance"), action: abandonner)
+                BoutonFermer(libelle: L.t("a11y.arreter_seance")) {
+                    Analytique.envoyer(.seanceAbandonnee)
+                    abandonner()
+                }
                 Spacer()
                 Text(verbatim: L.f("seance.pour_minutes", etat.regle.minutes)).legende(graisse: .moyen)
             }
-            VueCameraFictive(hauteur: Tokens.Composants.VueCamera.hauteurSeance)
-            CompteurGeant(faites: faites, total: total, tailleTotal: Tokens.TaillesTexte.titreAccueil)
+            VueCamera(camera: camera, hauteur: Tokens.Composants.VueCamera.hauteurSeance)
+            CompteurGeant(
+                faites: faites,
+                total: total,
+                tailleTotal: Tokens.TaillesTexte.titreAccueil,
+                corpsVisible: camera.corpsVisible
+            )
             BarreSegments(faits: segmentsFaits, total: Tokens.Composants.BarreProgression.segments)
         } bas: {
             if faites >= total {
@@ -38,17 +44,24 @@ struct EcranCompteur: View {
                 Color.clear.frame(height: Tokens.Hauteurs.boutonPrincipal)
             }
         }
-        .onReceive(minuterie) { _ in
-            guard faites < total else { return }
-            faites += 1
-            if faites >= total {
-                Haptique.serieValidee()
-            } else {
-                Haptique.repetition()
+        .onAppear {
+            // L'écran reste allumé pendant la séance.
+            UIApplication.shared.isIdleTimerDisabled = true
+            let objectif = total
+            let aVoixHaute = etat.compterAVoixHaute
+            camera.surRepetition = { compte in
+                if compte >= objectif {
+                    Haptique.serieValidee()
+                } else {
+                    Haptique.repetition()
+                }
+                if aVoixHaute {
+                    Voix.dire(compte)
+                }
             }
+            camera.demarrer(exercice: etat.exercice, objectif: objectif)
+            Analytique.envoyer(.seanceCommencee, ["exercice": etat.exercice.rawValue])
         }
-        // L'écran reste allumé pendant la séance.
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }
 }

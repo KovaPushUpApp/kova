@@ -1,5 +1,8 @@
-/* Shield shown over a blocked app. */
+/* Shield shown over a blocked app.
+   %@ = the app name, %lld = a number. */
 "verrou.titre" = "App locked";
-"verrou.sous_titre" = "Earn your screen time with your arms.";
+"verrou.titre_app" = "%@ is locked";
+"verrou.sous_titre" = "%lld push-ups for %lld min. Earn your time with your arms.";
+"verrou.notification" = "Tap the Kova notification to start.";
 "verrou.bouton_principal" = "Do my push-ups";
 "verrou.bouton_secondaire" = "Close";

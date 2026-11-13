@@ -1,46 +1,71 @@
 import SwiftUI
 
-/// Bloc commun aux écrans Apps et AppsReglage : le bouton qui ouvre le
-/// sélecteur d'apps, puis la liste des apps choisies.
-///
-/// Adaptation de la section 9 du brief : pas de liste maison avec interrupteurs,
-/// les apps choisies sont des jetons opaques. À l'étape 4, le bouton ouvre le
-/// sélecteur système d'Apple et la liste affiche ses Label.
-struct ListeApps: View {
-    let apps: [String]
-    let choisir: () -> Void
-
-    var body: some View {
-        VStack(spacing: Tokens.Espacements.e8) {
-            BoutonPointille(titre: L.t("apps.choisir"), action: choisir)
-            ForEach(apps, id: \.self) { app in
-                LigneApp(nom: app)
-            }
-        }
-    }
-}
-
 /// Écran 5 : choix des apps à verrouiller.
+///
+/// Adaptation de la section 9 du brief : le titre et le bouton de la maquette
+/// sont gardés, le sélecteur système d'Apple s'ouvre au milieu, et les apps
+/// choisies s'affichent avec le composant Label d'Apple. Le temps d'usage par
+/// app de la maquette est retiré.
 struct EcranApps: View {
     @EnvironmentObject private var etat: EtatApp
+    @EnvironmentObject private var apps: GestionApps
     let retour: () -> Void
     let suivant: () -> Void
 
     var body: some View {
         EcranKova(espacement: Tokens.Espacements.e13) {
-            EnTeteEtapes(etape: 4, total: EtapeOnboarding.nombreEtapes, retour: retour)
+            EnTeteEtapes(etape: 5, total: EtapeOnboarding.nombreEtapes, retour: retour)
             Text(verbatim: L.t("apps.titre"))
                 .titreEcran()
                 .padding(.top, Tokens.Espacements.e13)
                 .entree(rang: 1)
-            Text(verbatim: L.n("apps.compte", etat.apps.count))
+            Text(verbatim: apps.nombre == 0 ? L.t("apps.aucune") : L.n("apps.compte", apps.nombre))
                 .paragraphe()
                 .entree(rang: 2)
-            ListeApps(apps: etat.apps, choisir: { etat.apps = DonneesFictives.appsVerrouillees })
-                .entree(rang: 3)
+            SelecteurApps(apps: apps) { choix in
+                // Pendant l'onboarding, rien n'est encore verrouillé : pas de délai.
+                apps.enregistrer(choix, immediat: true)
+            }
+            .entree(rang: 3)
         } bas: {
             BoutonPrincipal(L.t("apps.bouton"), action: suivant)
+                .opacity(apps.nombre == 0 ? Double(Tokens.Opacites.scan) : 1)
+                .disabled(apps.nombre == 0)
                 .entree(rang: 5)
+        }
+    }
+}
+
+/// Affiché quand l'utilisateur n'a pas pris l'abonnement et a choisi plus d'une
+/// app : sans abonnement, une seule app peut être verrouillée (brief, section 4).
+struct EcranLimiteGratuite: View {
+    @EnvironmentObject private var apps: GestionApps
+    let voirAbonnement: () -> Void
+    let terminer: () -> Void
+
+    var body: some View {
+        EcranKova {
+            IconeAnneau(icone: .cadenas, avecAnneau: false)
+            Text(verbatim: L.t("limite.titre"))
+                .titreEcran()
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, Tokens.Espacements.e13)
+                .entree(rang: 2)
+            Text(verbatim: L.t("limite.texte"))
+                .paragraphe()
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .entree(rang: 3)
+            SelecteurApps(apps: apps) { choix in
+                apps.enregistrer(choix, immediat: true)
+            }
+            .entree(rang: 4)
+        } bas: {
+            if apps.respecteLaLimiteGratuite && apps.nombre > 0 {
+                BoutonPrincipal(L.t("commun.continuer"), action: terminer)
+            }
+            BoutonSecondaire(L.t("limite.abonnement"), action: voirAbonnement)
         }
     }
 }

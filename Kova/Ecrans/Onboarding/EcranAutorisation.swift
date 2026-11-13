@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Écrans 7 et 8 : explication puis demande d'une autorisation.
-/// À l'étape 2, le bouton passe à la suite. La vraie demande arrive
-/// à l'étape 3 (caméra) et à l'étape 4 (Temps d'écran).
+/// Écrans d'autorisation : une explication, puis la demande du système.
+/// En cas de refus, l'écran explique pourquoi l'accès est nécessaire et
+/// propose de réessayer ou d'ouvrir les Réglages (brief, section 7).
 struct EcranAutorisation: View {
     let etape: Int
     let icone: Icone.Nom
@@ -10,6 +10,9 @@ struct EcranAutorisation: View {
     let texte: String
     let arguments: [String]
     let bouton: String
+    /// Message affiché après un refus. Nil tant que rien n'a été refusé.
+    var refus: String?
+    var enCours = false
     let retour: () -> Void
     let autoriser: () -> Void
 
@@ -37,30 +40,52 @@ struct EcranAutorisation: View {
             .carte()
             .padding(.top, Tokens.Espacements.e13)
             .entree(rang: 4)
+            if let refus {
+                Text(verbatim: refus)
+                    .paragraphe(Tokens.Couleurs.accent)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
         } bas: {
-            BoutonPrincipal(bouton, action: autoriser)
+            BoutonPrincipal(refus == nil ? bouton : L.t("autorisation.reessayer"), action: autoriser)
+                .opacity(enCours ? Double(Tokens.Opacites.scan) : 1)
+                .disabled(enCours)
                 .entree(rang: 6)
+            if refus != nil {
+                BoutonSecondaire(L.t("camera.ouvrir_reglages"), action: ouvrirReglagesSysteme)
+            }
         }
     }
 }
 
 extension EcranAutorisation {
-    /// Écran 7 : accès Temps d'écran.
-    static func tempsDEcran(retour: @escaping () -> Void, autoriser: @escaping () -> Void) -> EcranAutorisation {
+    /// Accès Temps d'écran. On ne peut pas continuer sans.
+    static func tempsDEcran(
+        refuse: Bool,
+        enCours: Bool,
+        retour: @escaping () -> Void,
+        autoriser: @escaping () -> Void
+    ) -> EcranAutorisation {
         EcranAutorisation(
-            etape: 6,
+            etape: 4,
             icone: .cadenas,
             titre: L.t("auto_ecran.titre"),
             texte: L.t("auto_ecran.texte"),
             arguments: [L.t("auto_ecran.argument.1"), L.t("auto_ecran.argument.2"), L.t("auto_ecran.argument.3")],
             bouton: L.t("auto_ecran.bouton"),
+            refus: refuse ? L.t("auto_ecran.refus") : nil,
+            enCours: enCours,
             retour: retour,
             autoriser: autoriser
         )
     }
 
-    /// Écran 8 : accès caméra.
-    static func camera(retour: @escaping () -> Void, autoriser: @escaping () -> Void) -> EcranAutorisation {
+    /// Accès caméra.
+    static func camera(
+        refuse: Bool,
+        retour: @escaping () -> Void,
+        autoriser: @escaping () -> Void
+    ) -> EcranAutorisation {
         EcranAutorisation(
             etape: 7,
             icone: .camera,
@@ -68,6 +93,7 @@ extension EcranAutorisation {
             texte: L.t("auto_camera.texte"),
             arguments: [L.t("auto_camera.argument.1"), L.t("auto_camera.argument.2"), L.t("auto_camera.argument.3")],
             bouton: L.t("auto_camera.bouton"),
+            refus: refuse ? L.t("auto_camera.refus") : nil,
             retour: retour,
             autoriser: autoriser
         )

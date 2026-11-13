@@ -1,9 +1,11 @@
 import SwiftUI
 
-/// Écran de contrôle du socle, pour vérifier un build sur l'iPhone :
-/// polices chargées, couleurs, langue, version, extensions embarquées.
-/// Écran de chantier, à retirer à l'étape 7.
+/// Écran de contrôle, pour vérifier un build sur l'iPhone : polices chargées,
+/// couleurs, langue, version, extensions embarquées, verrouillage et achats.
+/// Écran de chantier, à retirer avant la mise en ligne.
 struct ControleSocle: View {
+    @EnvironmentObject private var etat: EtatApp
+    @EnvironmentObject private var abonnements: Abonnements
     let retour: () -> Void
 
     var body: some View {
@@ -39,7 +41,26 @@ struct ControleSocle: View {
                     }
                 }
 
+                bloc("socle.chantier") {
+                    HStack {
+                        Text("socle.simulation")
+                            .font(.kovaTexte())
+                            .foregroundColor(Tokens.Couleurs.texte)
+                        Spacer()
+                        Interrupteur(actif: abonnements.simulation, libelle: L.t("socle.simulation")) {
+                            abonnements.simulation.toggle()
+                        }
+                    }
+                    BoutonSecondaire(L.t("socle.revoir_onboarding")) {
+                        etat.onboardingTermine = false
+                    }
+                }
+
                 bloc("socle.build") {
+                    ligne("socle.verrouillage", valeur: Verrouillage.disponible ? "socle.oui" : "socle.non",
+                          valide: Verrouillage.disponible)
+                    ligne("socle.achats", valeur: abonnements.configure ? "socle.oui" : "socle.non",
+                          valide: abonnements.configure)
                     ligne("socle.langue", valeur: "socle.langue_valeur", valide: true)
                     ligneTexte("socle.version", valeur: version)
                     ligneTexte("socle.extensions", valeur: extensions)

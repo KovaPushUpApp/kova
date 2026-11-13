@@ -31,27 +31,13 @@ workflows:
         - pattern: main
           include: true
     scripts:
-      - name: Vérifier que les tokens Swift sont à jour
-        script: python3 scripts/generate_tokens.py --check
-
-      - name: Vérifier les textes français et anglais
-        script: python3 scripts/check_localisation.py
-
       - name: Installer XcodeGen
         script: brew install xcodegen
 
-      # Contrôle de compilation du projet complet (app + 3 extensions),
-      # pour le simulateur et sans signature. Rien n'est envoyé.
-      - name: Compiler le projet complet
-        script: |
-          xcodegen generate --spec project.yml
-          xcodebuild build \
-            -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      # Projet complet (app + 3 extensions) compilé pour le simulateur, sans
+      # signature, puis tests des règles du jeu et du comptage. Rien n'est envoyé.
+      - name: Compiler le projet complet et lancer les tests
+        script: bash scripts/ci_tests.sh
 
       # Le build envoyé sur TestFlight : l'app seule, sans Family Controls.
       - name: Générer le projet du socle

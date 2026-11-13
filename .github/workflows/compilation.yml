@@ -1,0 +1,21 @@
+# Compile Kova et lance ses tests à chaque push, sans signature.
+# Ne demande ni compte Apple, ni iPhone, ni secret : il suffit que le dépôt
+# soit sur GitHub. Le build signé pour TestFlight est dans codemagic.yaml.
+name: Compilation et tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer XcodeGen
+        run: brew install xcodegen
+      - name: Compiler et tester
+        run: bash scripts/ci_tests.sh

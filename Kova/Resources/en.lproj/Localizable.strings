@@ -125,8 +125,8 @@
 "paywall.hebdo.detail" = "no commitment";
 "paywall.hebdo.etiquette" = "per week";
 "paywall.bouton.essai" = "Try 3 days free";
-"paywall.mentions.annuel" = "3 days free, then €29.99 a year. Cancel anytime in the App Store.";
-"paywall.mentions.hebdo" = "€4.99 a week. Cancel anytime in the App Store.";
+"paywall.mentions.annuel" = "%@ a year. Cancel anytime in the App Store.";
+"paywall.mentions.hebdo" = "%@ a week. Cancel anytime in the App Store.";
 "formule.annuel" = "Yearly";
 "formule.hebdomadaire" = "Weekly";
 "prix.annuel" = "€29.99";
@@ -137,10 +137,10 @@
 
 /* 11. Last chance offer */
 "offre.surtitre" = "Before you go";
-"offre.remise" = "-33%";
-"offre.texte" = "Your first year for €19.99 instead of €29.99. This offer shows only once.";
-"offre.detail" = "that's €0.38 a week";
-"offre.mentions" = "€19.99 for the first year, then €29.99 a year. Cancel anytime in the App Store.";
+"offre.remise" = "-%lld%%";
+"offre.texte" = "Your first year for %@ instead of %@. This offer shows only once.";
+"offre.detail" = "for the first year";
+"offre.mentions" = "%@ for the first year, then %@ a year. Cancel anytime in the App Store.";
 "offre.bouton" = "Take the offer";
 "offre.refuser" = "No thanks";
 
@@ -148,7 +148,7 @@
 "accueil.serie.un" = "Streak: %lld day";
 "accueil.serie.autre" = "Streak: %lld days";
 "accueil.solde" = "Screen time available";
-"accueil.aujourdhui" = "%lld push-ups done today";
+"accueil.aujourdhui" = "%lld reps done today";
 "accueil.bouton" = "Earn time";
 "accueil.apps" = "Locked apps";
 
@@ -175,8 +175,7 @@
 "gagne.valide.fentes" = "%lld lunges done";
 "gagne.valide.jumping_jacks" = "%lld jumping jacks done";
 "gagne.minutes" = "+%lld\nmin";
-"gagne.texte" = "Your apps are open until %@. You earned it.";
-"gagne.aujourdhui" = "%@ today";
+"gagne.texte" = "You can open your apps until %@. You earned it.";
 "gagne.serie" = "streak";
 "gagne.ouvrir" = "Open now";
 "gagne.garder" = "Save my time for later";
@@ -193,10 +192,8 @@
 "stats.titre" = "Your week";
 "stats.total" = "reps this week";
 "stats.seances" = "workouts completed";
-"stats.progression.valeur" = "+%lld%%";
 "stats.progression" = "vs last week";
 "stats.serie" = "current streak";
-"stats.gagne.valeur" = "%lld h";
 "stats.gagne" = "of screen earned";
 
 /* 20. Schedule */
@@ -206,9 +203,6 @@
 "planning.jours.semaine" = "Monday to Friday";
 "planning.jours.tous" = "Every day";
 "planning.jours.weekend" = "Saturday and Sunday";
-"planning.fictif.travail" = "Work";
-"planning.fictif.nuit" = "Night";
-"planning.fictif.revisions" = "Study";
 "planning.ajouter" = "Add a slot";
 
 /* 21. Settings */
@@ -229,11 +223,10 @@
 
 /* 23. Subscription */
 "abonnement.actuelle" = "Current plan";
-"abonnement.prix_annuel" = "€29.99 a year";
+"abonnement.prix_annuel" = "%@ a year";
 "abonnement.renouvellement" = "Next renewal";
 "abonnement.essai" = "Free trial";
 "abonnement.essai.termine" = "Ended";
-"abonnement.hebdo" = "Switch to weekly";
 "abonnement.texte" = "Manage or cancel your subscription in your App Store account settings.";
 "abonnement.gerer" = "Manage in the App Store";
 
@@ -269,3 +262,81 @@
 "socle.version" = "Version";
 "socle.extensions" = "Extensions";
 "socle.groupe" = "Shared group";
+
+/* Commun */
+"commun.ok" = "OK";
+"autorisation.reessayer" = "Try again";
+
+/* Caméra et comptage */
+"camera.hors_cadre" = "Get back in the frame";
+"camera.refusee" = "Kova can't use the camera. Allow it in Settings to count your push-ups.";
+"camera.indisponible" = "No usable camera on this device.";
+"camera.ouvrir_reglages" = "Open Settings";
+"essai.passer" = "Continue without trying";
+"auto_camera.refus" = "Without the camera, Kova can't count your push-ups. Allow it in Settings.";
+"auto_ecran.refus" = "Without this access, Kova can't lock anything. Try again to continue.";
+
+/* Apps */
+"apps.aucune" = "Choose at least one app to lock.";
+"limite.titre" = "One app without a subscription";
+"limite.texte" = "Without a subscription, you can lock one app, with no category or website. Keep the one that takes most of your time.";
+"limite.abonnement" = "See the subscription";
+
+/* Règle */
+"regle.en_attente" = "Your new rule applies on %@.";
+"reglages.regle.en_attente" = "%@, pending";
+
+/* Accueil et récompense */
+"accueil.ouvert_jusqua" = "Your apps are open until %@";
+"accueil.ouvrir" = "Open my apps now";
+"accueil.plage" = "Strict slot in progress. Your apps stay locked.";
+"gagne.texte_plage" = "A strict slot is in progress. Your time is saved for later.";
+"gagne.repetitions_jour" = "reps today";
+
+/* Urgence */
+"urgence.epuisee" = "You've used this week's emergency unlocks. Back on Monday.";
+"urgence.desactivee" = "Emergency unlock is turned off in your settings.";
+
+/* Stats */
+"stats.progression.hausse" = "+%lld%%";
+"stats.progression.baisse" = "-%lld%%";
+"stats.progression.aucune" = "-";
+"stats.gagne.heures" = "%lld h %02lld";
+"reserve.stats" = "Your weekly stats are part of the subscription.";
+
+/* Planning */
+"planning.sursis" = "Turns off within 24 h";
+"planning.editeur.nom" = "Slot name";
+"planning.editeur.sans_nom" = "Slot";
+"planning.editeur.debut" = "Start";
+"planning.editeur.fin" = "End";
+"planning.editeur.note" = "A new slot applies right away. Turning it off takes 24 h.";
+"planning.editeur.bouton" = "Add this slot";
+
+/* Abonnement et achats */
+"formule.gratuite" = "Free";
+"paywall.annuel.par_semaine" = "that's %@ a week";
+"paywall.annuel.par_an" = "per year";
+"paywall.mentions.annuel_essai" = "3 days free, then %@ a year. Cancel anytime in the App Store.";
+"abonnement.prix_hebdo" = "%@ a week";
+"abonnement.gratuit" = "1 locked app, push-ups only.";
+"abonnement.voir" = "See the subscription";
+"abonnement.fin" = "Subscription ends";
+"abonnement.essai.en_cours" = "Active";
+"achat.titre" = "Subscription";
+"achat.indisponible" = "Purchases aren't available right now. Try again later.";
+"achat.echec" = "The purchase didn't go through. You haven't been charged.";
+"achat.rien_a_restaurer" = "No active subscription to restore on this account.";
+"legal.conditions_longues" = "Terms of use";
+
+/* Rappel quotidien */
+"rappel.titre" = "Today's push-ups";
+"rappel.texte" = "One set, and your screen time is yours.";
+
+/* Chantier */
+"socle.chantier" = "DEV";
+"socle.simulation" = "Simulate subscription";
+"socle.verrouillage" = "Locking";
+"socle.achats" = "Purchases";
+"socle.oui" = "on";
+"socle.non" = "off";

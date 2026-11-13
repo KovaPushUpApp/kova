@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Écran 17 : la récompense, en plein fond accent. "+15 min" qui défile, deux stats,
-/// puis le choix : ouvrir maintenant ou garder son temps.
+/// puis le choix : ouvrir maintenant ou garder son temps (brief, règle 3).
+/// Les minutes sont déjà au solde quand cet écran s'affiche.
 struct EcranGagne: View {
     @EnvironmentObject private var etat: EtatApp
     @Environment(\.accessibilityReduceMotion) private var reduire
@@ -17,9 +18,22 @@ struct EcranGagne: View {
 
     private var cible: Int { etat.regle.minutes }
 
-    /// Heure de fin de la fenêtre si elle démarre maintenant.
-    private var heureDeFin: String {
-        Date().addingTimeInterval(Double(cible) * 60).formatted(date: .omitted, time: .shortened)
+    /// Pendant une plage stricte, la fenêtre ne peut pas s'ouvrir (règle 5).
+    private var plageEnCours: Bool {
+        etat.jeu.plageActive(Date(), etat.calendrier)
+    }
+
+    private var texte: String {
+        if plageEnCours {
+            return L.t("gagne.texte_plage")
+        }
+        // On calcule sur une copie ce que donnerait l'ouverture maintenant,
+        // plages strictes à venir comprises.
+        let maintenant = Date()
+        var essai = etat.jeu
+        essai.ouvrirFenetre(maintenant, etat.calendrier)
+        let fin = essai.finDOuverture(maintenant, etat.calendrier) ?? maintenant
+        return L.f("gagne.texte", fin.formatted(date: .omitted, time: .shortened))
     }
 
     var body: some View {
@@ -35,23 +49,25 @@ struct EcranGagne: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .pop(rang: 1)
                 .accessibilityLabel(Text(verbatim: L.f("gagne.minutes", cible)))
-            Text(verbatim: L.f("gagne.texte", heureDeFin))
+            Text(verbatim: texte)
                 .paragraphe(Tokens.Couleurs.texteSurAccent)
                 .padding(.top, Tokens.Espacements.e8)
                 .entree(rang: 10)
             HStack(spacing: Tokens.Espacements.e13) {
-                stat(
-                    String(DonneesFictives.pompesAujourdHui + etat.repetitionsDeLaSeance),
-                    L.f("gagne.aujourdhui", etat.exercice.nom.lowercased())
-                )
-                stat(L.n("commun.jours", DonneesFictives.serieJours), L.t("gagne.serie"))
+                stat(String(etat.jeu.repetitionsDuJour(Date(), etat.calendrier)), L.t("gagne.repetitions_jour"))
+                stat(L.n("commun.jours", etat.jeu.serie(Date(), etat.calendrier)), L.t("gagne.serie"))
             }
             .padding(.top, Tokens.Espacements.e13)
             .entree(rang: 12)
         } bas: {
-            BoutonPrincipal(L.t("gagne.ouvrir"), style: .sombre, action: ouvrir)
-                .entree(rang: 14)
-            BoutonSecondaire(L.t("gagne.garder"), couleur: Tokens.Couleurs.texteSurAccent, action: garder)
+            if plageEnCours {
+                BoutonPrincipal(L.t("gagne.garder"), style: .sombre, action: garder)
+                    .entree(rang: 14)
+            } else {
+                BoutonPrincipal(L.t("gagne.ouvrir"), style: .sombre, action: ouvrir)
+                    .entree(rang: 14)
+                BoutonSecondaire(L.t("gagne.garder"), couleur: Tokens.Couleurs.texteSurAccent, action: garder)
+            }
         }
         .onAppear {
             if reduire {

@@ -1,5 +1,8 @@
-/* Écran de verrou affiché par dessus une app bloquée. */
+/* Écran de verrou affiché par dessus une app bloquée.
+   %@ = le nom de l'app, %lld = un nombre. */
 "verrou.titre" = "App verrouillée";
-"verrou.sous_titre" = "Gagne ton temps d'écran avec tes bras.";
+"verrou.titre_app" = "%@ est verrouillée";
+"verrou.sous_titre" = "%lld pompes pour %lld min. Gagne ton temps avec tes bras.";
+"verrou.notification" = "Touche la notification Kova pour commencer.";
 "verrou.bouton_principal" = "Faire mes pompes";
 "verrou.bouton_secondaire" = "Fermer";

@@ -125,8 +125,8 @@
 "paywall.hebdo.detail" = "sans engagement";
 "paywall.hebdo.etiquette" = "par semaine";
 "paywall.bouton.essai" = "Essayer 3 jours gratuits";
-"paywall.mentions.annuel" = "3 jours gratuits, puis 29,99 € par an. Annulable à tout moment dans l'App Store.";
-"paywall.mentions.hebdo" = "4,99 € par semaine. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.annuel" = "%@ par an. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.hebdo" = "%@ par semaine. Annulable à tout moment dans l'App Store.";
 "formule.annuel" = "Annuel";
 "formule.hebdomadaire" = "Hebdomadaire";
 "prix.annuel" = "29,99 €";
@@ -137,10 +137,10 @@
 
 /* 11. Offre de rattrapage */
 "offre.surtitre" = "Avant de partir";
-"offre.remise" = "-33 %";
-"offre.texte" = "Ta première année à 19,99 € au lieu de 29,99 €. Offre affichée une seule fois.";
-"offre.detail" = "soit 0,38 € par semaine";
-"offre.mentions" = "19,99 € la première année, puis 29,99 € par an. Annulable à tout moment dans l'App Store.";
+"offre.remise" = "-%lld %%";
+"offre.texte" = "Ta première année à %@ au lieu de %@. Offre affichée une seule fois.";
+"offre.detail" = "la première année";
+"offre.mentions" = "%@ la première année, puis %@ par an. Annulable à tout moment dans l'App Store.";
 "offre.bouton" = "Prendre l'offre";
 "offre.refuser" = "Non merci";
 
@@ -148,7 +148,7 @@
 "accueil.serie.un" = "Série : %lld jour";
 "accueil.serie.autre" = "Série : %lld jours";
 "accueil.solde" = "Temps d'écran disponible";
-"accueil.aujourdhui" = "%lld pompes faites aujourd'hui";
+"accueil.aujourdhui" = "%lld répétitions faites aujourd'hui";
 "accueil.bouton" = "Gagner du temps";
 "accueil.apps" = "Apps verrouillées";
 
@@ -175,8 +175,7 @@
 "gagne.valide.fentes" = "%lld fentes validées";
 "gagne.valide.jumping_jacks" = "%lld jumping jacks validés";
 "gagne.minutes" = "+%lld\nmin";
-"gagne.texte" = "Tes apps sont ouvertes jusqu'à %@. Tu l'as mérité.";
-"gagne.aujourdhui" = "%@ aujourd'hui";
+"gagne.texte" = "Tu peux ouvrir tes apps jusqu'à %@. Tu l'as mérité.";
 "gagne.serie" = "de série";
 "gagne.ouvrir" = "Ouvrir maintenant";
 "gagne.garder" = "Garder mon temps pour plus tard";
@@ -193,10 +192,8 @@
 "stats.titre" = "Ta semaine";
 "stats.total" = "répétitions cette semaine";
 "stats.seances" = "séances validées";
-"stats.progression.valeur" = "+%lld %%";
 "stats.progression" = "vs semaine dernière";
 "stats.serie" = "de série en cours";
-"stats.gagne.valeur" = "%lld h";
 "stats.gagne" = "d'écran gagnées";
 
 /* 20. Planning */
@@ -206,9 +203,6 @@
 "planning.jours.semaine" = "Du lundi au vendredi";
 "planning.jours.tous" = "Tous les jours";
 "planning.jours.weekend" = "Samedi et dimanche";
-"planning.fictif.travail" = "Travail";
-"planning.fictif.nuit" = "Nuit";
-"planning.fictif.revisions" = "Révisions";
 "planning.ajouter" = "Ajouter une plage";
 
 /* 21. Réglages */
@@ -229,11 +223,10 @@
 
 /* 23. Abonnement */
 "abonnement.actuelle" = "Formule actuelle";
-"abonnement.prix_annuel" = "29,99 € par an";
+"abonnement.prix_annuel" = "%@ par an";
 "abonnement.renouvellement" = "Prochain renouvellement";
 "abonnement.essai" = "Essai gratuit";
 "abonnement.essai.termine" = "Terminé";
-"abonnement.hebdo" = "Passer en hebdomadaire";
 "abonnement.texte" = "L'abonnement se gère et s'annule dans les réglages de ton compte App Store.";
 "abonnement.gerer" = "Gérer dans l'App Store";
 
@@ -269,3 +262,81 @@
 "socle.version" = "Version";
 "socle.extensions" = "Extensions";
 "socle.groupe" = "Groupe partagé";
+
+/* Commun */
+"commun.ok" = "OK";
+"autorisation.reessayer" = "Réessayer";
+
+/* Caméra et comptage */
+"camera.hors_cadre" = "Reviens dans le cadre";
+"camera.refusee" = "Kova n'a pas accès à la caméra. Autorise-la dans les Réglages pour compter tes pompes.";
+"camera.indisponible" = "Aucune caméra utilisable sur cet appareil.";
+"camera.ouvrir_reglages" = "Ouvrir les Réglages";
+"essai.passer" = "Continuer sans essayer";
+"auto_camera.refus" = "Sans la caméra, Kova ne peut pas compter tes pompes. Autorise-la dans les Réglages.";
+"auto_ecran.refus" = "Sans cet accès, Kova ne peut rien verrouiller. Réessaie pour continuer.";
+
+/* Apps */
+"apps.aucune" = "Choisis au moins une app à verrouiller.";
+"limite.titre" = "Une seule app sans abonnement";
+"limite.texte" = "Sans abonnement, tu peux verrouiller une seule app, sans catégorie ni site. Garde celle qui te prend le plus de temps.";
+"limite.abonnement" = "Voir l'abonnement";
+
+/* Règle */
+"regle.en_attente" = "Ta nouvelle règle s'applique le %@.";
+"reglages.regle.en_attente" = "%@, en attente";
+
+/* Accueil et récompense */
+"accueil.ouvert_jusqua" = "Tes apps sont ouvertes jusqu'à %@";
+"accueil.ouvrir" = "Ouvrir mes apps maintenant";
+"accueil.plage" = "Plage stricte en cours. Tes apps restent verrouillées.";
+"gagne.texte_plage" = "Une plage stricte est en cours. Ton temps t'attend au solde.";
+"gagne.repetitions_jour" = "répétitions aujourd'hui";
+
+/* Urgence */
+"urgence.epuisee" = "Tu as utilisé tes urgences de la semaine. Retour lundi.";
+"urgence.desactivee" = "Le déblocage d'urgence est désactivé dans tes réglages.";
+
+/* Stats */
+"stats.progression.hausse" = "+%lld %%";
+"stats.progression.baisse" = "-%lld %%";
+"stats.progression.aucune" = "-";
+"stats.gagne.heures" = "%lld h %02lld";
+"reserve.stats" = "Les stats de ta semaine sont dans l'abonnement.";
+
+/* Planning */
+"planning.sursis" = "Désactivée dans moins de 24 h";
+"planning.editeur.nom" = "Nom de la plage";
+"planning.editeur.sans_nom" = "Plage";
+"planning.editeur.debut" = "Début";
+"planning.editeur.fin" = "Fin";
+"planning.editeur.note" = "Une plage ajoutée s'applique tout de suite. La désactiver prend 24 h.";
+"planning.editeur.bouton" = "Ajouter cette plage";
+
+/* Abonnement et achats */
+"formule.gratuite" = "Gratuite";
+"paywall.annuel.par_semaine" = "soit %@ par semaine";
+"paywall.annuel.par_an" = "par an";
+"paywall.mentions.annuel_essai" = "3 jours gratuits, puis %@ par an. Annulable à tout moment dans l'App Store.";
+"abonnement.prix_hebdo" = "%@ par semaine";
+"abonnement.gratuit" = "1 app verrouillée, pompes seulement.";
+"abonnement.voir" = "Voir l'abonnement";
+"abonnement.fin" = "Fin de l'abonnement";
+"abonnement.essai.en_cours" = "En cours";
+"achat.titre" = "Abonnement";
+"achat.indisponible" = "Les achats ne sont pas disponibles pour le moment. Réessaie plus tard.";
+"achat.echec" = "L'achat n'a pas abouti. Tu n'as pas été débité.";
+"achat.rien_a_restaurer" = "Aucun abonnement actif à restaurer sur ce compte.";
+"legal.conditions_longues" = "Conditions d'utilisation";
+
+/* Rappel quotidien */
+"rappel.titre" = "Tes pompes du jour";
+"rappel.texte" = "Une série, et ton temps d'écran est à toi.";
+
+/* Chantier */
+"socle.chantier" = "CHANTIER";
+"socle.simulation" = "Simuler l'abonnement";
+"socle.verrouillage" = "Verrouillage";
+"socle.achats" = "Achats";
+"socle.oui" = "actif";
+"socle.non" = "inactif";

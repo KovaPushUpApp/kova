@@ -17,7 +17,7 @@ struct EcranRegle: View {
     var body: some View {
         EcranKova {
             if contexte == .onboarding {
-                EnTeteEtapes(etape: 5, total: EtapeOnboarding.nombreEtapes, retour: retour)
+                EnTeteEtapes(etape: 6, total: EtapeOnboarding.nombreEtapes, retour: retour)
             } else {
                 BoutonRetour(action: retour)
             }
@@ -34,14 +34,21 @@ struct EcranRegle: View {
             Text(verbatim: L.f("regle.par_heure", brouillon.pompesParHeure))
                 .legende()
                 .frame(maxWidth: .infinity)
+            if contexte == .reglages, let le = etat.jeu.regleEnAttenteLe, etat.jeu.regleEnAttente != nil {
+                Text(verbatim: L.f("regle.en_attente", le.formatted(date: .abbreviated, time: .shortened)))
+                    .legende(Tokens.Couleurs.accent)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
         } bas: {
             BoutonPrincipal(L.t("regle.bouton")) {
-                etat.regle = brouillon
+                // Dans les réglages, assouplir la règle prend effet 24 h plus tard.
+                etat.proposerRegle(brouillon, immediat: contexte == .onboarding)
                 valider()
             }
             .entree(rang: 5)
         }
-        .onAppear { brouillon = etat.regle }
+        .onAppear { brouillon = etat.jeu.regleEnAttente ?? etat.regle }
     }
 
     private var compteurs: some View {

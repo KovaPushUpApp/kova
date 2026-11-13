@@ -1,0 +1,3 @@
+/* Notification envoyée quand on touche "Faire mes pompes" sur l'écran de verrou. */
+"notification.titre" = "C'est l'heure de tes pompes";
+"notification.texte" = "Touche ici pour ouvrir Kova et gagner ton temps d'écran.";

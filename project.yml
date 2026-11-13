@@ -22,6 +22,10 @@ settings:
 
 targets:
   Kova:
+    settings:
+      base:
+        # Le verrouillage réel est actif : on retire le drapeau du socle.
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
     dependencies:
       - target: KovaMonitor
       - target: KovaShieldConfig
@@ -40,6 +44,8 @@ targets:
     sources:
       - path: KovaMonitor
       - path: Shared/Stockage
+      - path: Shared/Jeu
+      - path: Shared/Verrouillage
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app.monitor

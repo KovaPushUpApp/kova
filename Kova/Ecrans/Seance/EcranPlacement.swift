@@ -1,15 +1,20 @@
 import SwiftUI
 
-/// Écran 15 : mise en place du téléphone. La suite s'ouvre quand le corps entier
-/// est détecté. À l'étape 2, la détection est simulée par un délai.
+/// Écran 15 : mise en place du téléphone. La caméra tourne déjà : le bouton
+/// apparaît quand le corps est détecté. La caméra est gérée par la navigation,
+/// qui l'éteint quand on quitte la séance.
 struct EcranPlacement: View {
+    @EnvironmentObject private var etat: EtatApp
+    @ObservedObject var camera: CameraSeance
     let retour: () -> Void
     let suivant: () -> Void
 
-    @State private var corpsDetecte = false
-
     /// Inclinaison du téléphone dessiné, reprise de la maquette.
     private let inclinaison = Angle.degrees(-12)
+
+    private var cameraRefusee: Bool {
+        camera.etat == .refusee || camera.etat == .indisponible
+    }
 
     var body: some View {
         EcranKova {
@@ -24,22 +29,26 @@ struct EcranPlacement: View {
             illustration
                 .padding(.top, Tokens.Espacements.e8)
                 .entree(rang: 3)
-            if corpsDetecte {
+            if camera.corpsVisible {
                 LigneCoche(texte: L.t("placement.detecte"))
                     .entree()
+            } else if cameraRefusee {
+                Text(verbatim: L.t("camera.refusee")).paragraphe()
             }
         } bas: {
-            if corpsDetecte {
+            if camera.corpsVisible {
                 BoutonPrincipal(L.t("placement.bouton"), action: suivant)
-                    .entree(rang: 2)
+                    .entree()
+            } else if cameraRefusee {
+                BoutonPrincipal(L.t("camera.ouvrir_reglages"), action: ouvrirReglagesSysteme)
             } else {
                 Color.clear.frame(height: Tokens.Hauteurs.boutonPrincipal)
             }
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + DonneesFictives.delaiDetection) {
-                corpsDetecte = true
-            }
+            // Objectif à zéro : la caméra observe sans s'arrêter seule.
+            camera.surRepetition = nil
+            camera.demarrer(exercice: etat.exercice, objectif: 0)
         }
     }
 

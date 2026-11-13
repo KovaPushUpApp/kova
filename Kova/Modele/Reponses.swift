@@ -1,24 +1,7 @@
 import Foundation
 
-/// Les exercices de Kova. Le taux de base est le nombre de répétitions
-/// demandé quand la règle vaut 10 pompes (brief, section 6, règle 2).
-enum Exercice: String, CaseIterable, Hashable {
-    case pompes, squats, abdos, fentes, jumpingJacks
-
-    /// Répétitions pour 10 pompes.
-    var tauxDeBase: Int {
-        switch self {
-        case .pompes: return 10
-        case .squats: return 15
-        case .abdos: return 15
-        case .fentes: return 12
-        case .jumpingJacks: return 25
-        }
-    }
-
-    /// Exercices dont le comptage est livré. Les autres arrivent quand il est fiable.
-    static let disponibles: [Exercice] = [.pompes, .squats]
-
+/// Noms affichés des exercices (le modèle est dans Shared/Jeu).
+extension Exercice {
     var nom: String {
         switch self {
         case .pompes: return L.t("exercice.pompes")
@@ -27,45 +10,6 @@ enum Exercice: String, CaseIterable, Hashable {
         case .fentes: return L.t("exercice.fentes")
         case .jumpingJacks: return L.t("exercice.jumping_jacks")
         }
-    }
-}
-
-/// La règle du jeu : X pompes donnent Y minutes (brief, section 6, règle 1).
-struct Regle: Equatable {
-    static let pas = 5
-    static let repetitionsPossibles = 5...100
-    static let minutesPossibles = 5...120
-    static let parDefaut = Regle(repetitions: 10, minutes: 15)
-
-    private(set) var repetitions: Int
-    private(set) var minutes: Int
-
-    init(repetitions: Int, minutes: Int) {
-        self.repetitions = Regle.borner(repetitions, Regle.repetitionsPossibles)
-        self.minutes = Regle.borner(minutes, Regle.minutesPossibles)
-    }
-
-    private static func borner(_ valeur: Int, _ bornes: ClosedRange<Int>) -> Int {
-        min(max(valeur, bornes.lowerBound), bornes.upperBound)
-    }
-
-    mutating func changerRepetitions(de pas: Int) {
-        repetitions = Regle.borner(repetitions + pas, Regle.repetitionsPossibles)
-    }
-
-    mutating func changerMinutes(de pas: Int) {
-        minutes = Regle.borner(minutes + pas, Regle.minutesPossibles)
-    }
-
-    /// Pompes à faire pour gagner une heure.
-    var pompesParHeure: Int {
-        Int((Double(repetitions) * 60 / Double(minutes)).rounded())
-    }
-
-    /// Répétitions demandées pour un exercice : même rapport que les pompes.
-    func repetitionsDemandees(pour exercice: Exercice) -> Int {
-        let base = Double(Exercice.pompes.tauxDeBase)
-        return max(1, Int((Double(exercice.tauxDeBase) * Double(repetitions) / base).rounded()))
     }
 }
 

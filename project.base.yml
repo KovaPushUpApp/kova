@@ -1,8 +1,9 @@
-# Kova : socle du projet (app seule, sans verrouillage).
+# Kova : socle du projet (app seule, sans verrouillage réel).
 #
 # Sert aux builds TestFlight tant qu'Apple n'a pas accordé l'autorisation
-# Family Controls. Le projet complet (4 cibles, App Group) est dans project.yml,
-# qui inclut ce fichier.
+# Family Controls : le verrouillage y est remplacé par des apps fictives.
+# Le projet complet (4 cibles, App Group) est dans project.yml, qui inclut
+# ce fichier.
 #
 # Générer :  xcodegen generate --spec project.base.yml
 #
@@ -17,6 +18,14 @@ options:
   developmentLanguage: fr
   createIntermediateGroups: true
 
+packages:
+  RevenueCat:
+    url: https://github.com/RevenueCat/purchases-ios-spm.git
+    from: 5.103.0
+  TelemetryDeck:
+    url: https://github.com/TelemetryDeck/SwiftSDK
+    from: 2.14.2
+
 settings:
   base:
     MARKETING_VERSION: "1.0.0"
@@ -25,6 +34,19 @@ settings:
     # Vide dans le socle. project.yml y met l'identifiant de l'App Group.
     KOVA_APP_GROUP: ""
 
+    # --- À renseigner par Julien (voir appstore/A_FAIRE.md) ---
+    # Clé publique du SDK RevenueCat pour iOS (commence par "appl_").
+    # Vide : les achats sont indisponibles dans l'app.
+    KOVA_REVENUECAT_CLE: ""
+    # Identifiant de l'app dans TelemetryDeck. Vide : aucune mesure d'audience.
+    KOVA_TELEMETRYDECK_ID: ""
+    # Adresse de la politique de confidentialité (obligatoire avant la mise en ligne).
+    KOVA_LIEN_CONFIDENTIALITE: ""
+    # Adresse des conditions d'utilisation. Vide : contrat standard d'Apple.
+    KOVA_LIEN_CONDITIONS: ""
+    # Adresse e-mail de contact affichée dans les réglages.
+    KOVA_CONTACT: ""
+
 targets:
   Kova:
     type: application
@@ -32,12 +54,19 @@ targets:
     sources:
       - path: Kova
       - path: Shared
+    dependencies:
+      - package: RevenueCat
+        product: RevenueCat
+      - package: TelemetryDeck
+        product: TelemetryDeck
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Coupe le verrouillage réel. project.yml retire ce drapeau.
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) KOVA_SANS_VERROUILLAGE"
     info:
       path: Kova/Info.plist
       properties:
@@ -62,13 +91,36 @@ targets:
         # Texte de secours. Les versions FR et EN sont dans InfoPlist.strings.
         NSCameraUsageDescription: "La caméra compte tes pompes en direct. L'image est analysée sur ton téléphone. Rien n'est enregistré ni envoyé."
         KovaGroupePartage: $(KOVA_APP_GROUP)
+        KovaRevenueCatCle: $(KOVA_REVENUECAT_CLE)
+        KovaTelemetryDeckID: $(KOVA_TELEMETRYDECK_ID)
+        KovaLienConfidentialite: $(KOVA_LIEN_CONFIDENTIALITE)
+        KovaLienConditions: $(KOVA_LIEN_CONDITIONS)
+        KovaContact: $(KOVA_CONTACT)
+
+  # Tests des règles du jeu et du comptage, lancés dans le simulateur par la CI.
+  KovaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: KovaTests
+    dependencies:
+      - target: Kova
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.getkova.app.tests
+        GENERATE_INFOPLIST_FILE: YES
 
 schemes:
   Kova:
     build:
       targets:
         Kova: all
+        KovaTests: [test]
     run:
       config: Debug
+    test:
+      config: Debug
+      targets:
+        - KovaTests
     archive:
       config: Release

@@ -207,53 +207,6 @@ struct IconeAnneau: View {
     }
 }
 
-/// Emplacement de la vue caméra, avec la ligne de scan.
-/// À l'étape 3, l'image réelle de la caméra remplace la silhouette.
-struct VueCameraFictive: View {
-    let hauteur: CGFloat
-    @Environment(\.accessibilityReduceMotion) private var reduire
-    @State private var enBas = false
-
-    var body: some View {
-        let forme = RoundedRectangle(cornerRadius: Tokens.Arrondis.grand, style: .continuous)
-        let debut = hauteur * Tokens.Animations.ScanCamera.debut
-        let fin = hauteur * Tokens.Animations.ScanCamera.fin
-        ZStack(alignment: .top) {
-            Tokens.Couleurs.carte
-            VStack(spacing: Tokens.Espacements.e13) {
-                FigurePompe()
-                Text(verbatim: L.t("camera.fictive")).legende()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Rectangle()
-                .fill(Tokens.Couleurs.accent)
-                .opacity(Double(Tokens.Opacites.scan))
-                .frame(height: Tokens.Traits.normal)
-                .offset(y: enBas ? fin : debut)
-                .opacity(reduire ? 0 : 1)
-                .accessibilityHidden(true)
-        }
-        .frame(height: hauteur)
-        .frame(maxWidth: .infinity)
-        .clipShape(forme)
-        .overlay(
-            forme.stroke(
-                Tokens.Couleurs.pointille,
-                style: StrokeStyle(lineWidth: Tokens.Traits.fin, dash: [Tokens.Espacements.e5, Tokens.Espacements.e5])
-            )
-        )
-        .onAppear {
-            guard !reduire else { return }
-            withAnimation(
-                .linear(duration: Double(Tokens.Animations.ScanCamera.duree) / 2)
-                    .repeatForever(autoreverses: true)
-            ) {
-                enBas = true
-            }
-        }
-    }
-}
-
 /// Barre de progression à segments de la séance.
 struct BarreSegments: View {
     let faits: Int
@@ -346,8 +299,8 @@ struct LigneReglageLien: View {
     }
 }
 
-/// Ligne d'une app verrouillée. À l'étape 4, le nom et l'icône viennent du
-/// composant Label d'Apple (les apps choisies sont des jetons opaques).
+/// Ligne d'une app fictive, pour le build sans verrouillage. Les vraies apps
+/// sont dessinées par VueAppsChoisies avec le composant Label d'Apple.
 struct LigneApp: View {
     let nom: String
 

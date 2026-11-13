@@ -2,9 +2,18 @@ import SwiftUI
 
 /// L'app après l'onboarding : quatre onglets, et les écrans poussés par dessus.
 struct VuePrincipale: View {
+    @EnvironmentObject private var etat: EtatApp
+    @EnvironmentObject private var abonnements: Abonnements
+    @Environment(\.scenePhase) private var phase
+
     @State private var onglet: Onglet = .accueil
     @State private var chemin: [Destination] = []
     @State private var paywallOuvert = false
+    /// La caméra de la séance, partagée entre le placement et le compteur.
+    @StateObject private var camera = CameraSeance()
+
+    /// Recalcul régulier tant que l'app est ouverte : filet de sécurité du reverrouillage.
+    private let battement = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack(path: $chemin) {
@@ -20,16 +29,42 @@ struct VuePrincipale: View {
             }
         }
         .fullScreenCover(isPresented: $paywallOuvert) {
-            // L'achat et la restauration arrivent à l'étape 6.
-            EcranPaywall(
-                fermer: { paywallOuvert = false },
-                restaurer: {},
-                acheter: { _ in paywallOuvert = false },
-                ouvrirConditions: {},
-                ouvrirConfidentialite: {}
-            )
-            .preferredColorScheme(.dark)
+            EcranPaywall(fermer: { paywallOuvert = false }, abonne: { paywallOuvert = false })
+                .preferredColorScheme(.dark)
         }
+        .onAppear {
+            etat.rafraichir(planning: true)
+            ouvrirLaSeanceDemandee()
+        }
+        .onChange(of: phase) { nouvelle in
+            if nouvelle == .active {
+                etat.rafraichir()
+                Task { await abonnements.charger() }
+            }
+        }
+        .onReceive(battement) { _ in
+            if phase == .active {
+                etat.rafraichir()
+            }
+        }
+        .onChange(of: chemin) { nouveau in
+            // La caméra s'éteint dès qu'on quitte le placement et le compteur.
+            if !nouveau.contains(.placement) && !nouveau.contains(.compteur) {
+                camera.arreter()
+            }
+        }
+        .onChange(of: etat.seanceDemandee) { _ in
+            ouvrirLaSeanceDemandee()
+        }
+    }
+
+    /// L'utilisateur arrive de l'écran de verrou d'une app bloquée.
+    private func ouvrirLaSeanceDemandee() {
+        guard etat.seanceDemandee else { return }
+        etat.seanceDemandee = false
+        paywallOuvert = false
+        onglet = .accueil
+        chemin = [.verrou]
     }
 
     @ViewBuilder
@@ -38,12 +73,15 @@ struct VuePrincipale: View {
         case .accueil:
             EcranAccueil(gagnerDuTemps: { aller(.exercice) }, ouvrirVerrou: { aller(.verrou) })
         case .stats:
-            EcranStats()
+            if abonnements.estAbonne {
+                EcranStats()
+            } else {
+                EcranReserve(titre: L.t("stats.titre"), texte: L.t("reserve.stats"), voir: { paywallOuvert = true })
+            }
         case .planning:
-            // L'ajout d'une plage arrive à l'étape 5.
-            EcranPlanning(ajouter: {})
+            EcranPlanning(ouvrirPaywall: { paywallOuvert = true })
         case .reglages:
-            EcranReglages(ouvrir: aller)
+            EcranReglages(ouvrir: { aller($0) })
         }
     }
 
@@ -53,31 +91,60 @@ struct VuePrincipale: View {
         case .verrou:
             EcranVerrou(
                 commencer: { chemin = [.exercice] },
-                fermer: reculer,
+                fermer: { reculer() },
                 urgence: { aller(.urgence) }
             )
         case .exercice:
-            EcranExercice(retour: reculer, commencer: { aller(.placement) })
+            EcranExercice(
+                contexte: .seance,
+                retour: { reculer() },
+                valider: { aller(.placement) },
+                ouvrirPaywall: { paywallOuvert = true }
+            )
         case .placement:
-            EcranPlacement(retour: reculer, suivant: { aller(.compteur) })
+            EcranPlacement(camera: camera, retour: { reculer() }, suivant: { aller(.compteur) })
         case .compteur:
-            EcranCompteur(abandonner: revenirAuxOnglets, valider: { aller(.gagne) })
+            EcranCompteur(
+                camera: camera,
+                abandonner: { revenirAuxOnglets() },
+                valider: {
+                    // Les minutes vont au solde dès la validation (brief, règle 3).
+                    etat.validerSeance()
+                    aller(.gagne)
+                }
+            )
         case .gagne:
-            EcranGagne(ouvrir: revenirAuxOnglets, garder: revenirAuxOnglets)
+            EcranGagne(
+                ouvrir: {
+                    etat.ouvrirFenetre()
+                    revenirAuxOnglets()
+                },
+                garder: { revenirAuxOnglets() }
+            )
         case .urgence:
             EcranUrgence(
-                retour: reculer,
-                debloquer: revenirAuxOnglets,
+                retour: { reculer() },
+                debloquer: {
+                    etat.utiliserUrgence()
+                    revenirAuxOnglets()
+                },
                 faireSesPompes: { chemin = [.exercice] }
             )
         case .appsReglage:
-            EcranAppsReglage(retour: reculer, enregistrer: reculer)
+            EcranAppsReglage(retour: { reculer() }, ouvrirPaywall: { paywallOuvert = true })
         case .regle:
-            EcranRegle(contexte: .reglages, retour: reculer, valider: reculer)
+            EcranRegle(contexte: .reglages, retour: { reculer() }, valider: { reculer() })
+        case .exerciceParDefaut:
+            EcranExercice(
+                contexte: .parDefaut,
+                retour: { reculer() },
+                valider: { reculer() },
+                ouvrirPaywall: { paywallOuvert = true }
+            )
         case .abonnement:
-            EcranAbonnement(retour: reculer, changerDeFormule: { paywallOuvert = true }, restaurer: {})
+            EcranAbonnement(retour: { reculer() }, ouvrirPaywall: { paywallOuvert = true })
         case .controleSocle:
-            ControleSocle(retour: reculer)
+            ControleSocle(retour: { reculer() })
         }
     }
 
@@ -93,6 +160,28 @@ struct VuePrincipale: View {
 
     private func revenirAuxOnglets() {
         chemin.removeAll()
+    }
+}
+
+/// Onglet réservé à l'abonnement : un titre, une phrase et l'accès au paywall.
+struct EcranReserve: View {
+    let titre: String
+    let texte: String
+    let voir: () -> Void
+
+    var body: some View {
+        EcranKova(espacement: Tokens.Espacements.e13) {
+            Text(verbatim: titre).titreEcran()
+            IconeAnneau(icone: .cadenas, avecAnneau: false)
+            Text(verbatim: texte)
+                .paragraphe()
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .entree(rang: 2)
+            BoutonPrincipal(L.t("abonnement.voir"), action: voir)
+                .padding(.top, Tokens.Espacements.e13)
+                .entree(rang: 3)
+        }
     }
 }
 

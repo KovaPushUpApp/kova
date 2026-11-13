@@ -3,12 +3,23 @@ import SwiftUI
 /// Écran 21 : les réglages, en trois groupes (règles, options, compte).
 struct EcranReglages: View {
     @EnvironmentObject private var etat: EtatApp
+    @EnvironmentObject private var apps: GestionApps
+    @EnvironmentObject private var abonnements: Abonnements
+    @Environment(\.openURL) private var ouvrirLien
     let ouvrir: (Destination) -> Void
 
-    // Options fictives à l'étape 2. Leur effet arrive aux étapes 5 et 7.
-    @State private var urgenceActive = true
-    @State private var rappelQuotidien = true
-    @State private var compterAVoixHaute = false
+    private var formule: String {
+        switch abonnements.formuleActuelle {
+        case .annuel: return L.t("formule.annuel")
+        case .hebdomadaire: return L.t("formule.hebdomadaire")
+        case .none: return abonnements.estAbonne ? "" : L.t("formule.gratuite")
+        }
+    }
+
+    private var regle: String {
+        let texte = L.f("reglages.regle.valeur", etat.regle.repetitions, etat.regle.minutes)
+        return etat.jeu.regleEnAttente == nil ? texte : L.f("reglages.regle.en_attente", texte)
+    }
 
     var body: some View {
         EcranKova(espacement: Tokens.Espacements.e13) {
@@ -16,35 +27,31 @@ struct EcranReglages: View {
             GroupeReglages {
                 LigneReglageLien(
                     libelle: L.t("ecran.apps_reglage"),
-                    valeur: L.n("reglages.apps", etat.apps.count),
+                    valeur: L.n("reglages.apps", apps.nombre),
                     action: { ouvrir(.appsReglage) }
                 )
-                LigneReglageLien(
-                    libelle: L.t("reglages.regle"),
-                    valeur: L.f("reglages.regle.valeur", etat.regle.repetitions, etat.regle.minutes),
-                    action: { ouvrir(.regle) }
-                )
+                LigneReglageLien(libelle: L.t("reglages.regle"), valeur: regle, action: { ouvrir(.regle) })
                 LigneReglageLien(
                     libelle: L.t("reglages.exercice"),
-                    valeur: etat.exercice.nom,
-                    action: { ouvrir(.exercice) }
+                    valeur: etat.jeu.exerciceParDefaut.nom,
+                    action: { ouvrir(.exerciceParDefaut) }
                 )
             }
             .entree(rang: 1)
             GroupeReglages {
                 LigneReglage(L.t("ecran.urgence")) {
-                    Interrupteur(actif: urgenceActive, libelle: L.t("ecran.urgence")) {
-                        urgenceActive.toggle()
+                    Interrupteur(actif: etat.jeu.urgenceActivee, libelle: L.t("ecran.urgence")) {
+                        etat.definirUrgenceActivee(!etat.jeu.urgenceActivee)
                     }
                 }
                 LigneReglage(L.t("reglages.rappel")) {
-                    Interrupteur(actif: rappelQuotidien, libelle: L.t("reglages.rappel")) {
-                        rappelQuotidien.toggle()
+                    Interrupteur(actif: etat.rappelQuotidien, libelle: L.t("reglages.rappel")) {
+                        etat.rappelQuotidien.toggle()
                     }
                 }
                 LigneReglage(L.t("reglages.voix")) {
-                    Interrupteur(actif: compterAVoixHaute, libelle: L.t("reglages.voix")) {
-                        compterAVoixHaute.toggle()
+                    Interrupteur(actif: etat.compterAVoixHaute, libelle: L.t("reglages.voix")) {
+                        etat.compterAVoixHaute.toggle()
                     }
                 }
             }
@@ -52,16 +59,22 @@ struct EcranReglages: View {
             GroupeReglages {
                 LigneReglageLien(
                     libelle: L.t("reglages.abonnement"),
-                    valeur: L.t("formule.annuel"),
+                    valeur: formule,
                     action: { ouvrir(.abonnement) }
                 )
-                LigneReglageLien(libelle: L.t("reglages.aide"), action: {})
-                LigneReglageLien(libelle: L.t("legal.confidentialite"), action: {})
+                if let contact = Liens.contact {
+                    LigneReglageLien(libelle: L.t("reglages.aide"), action: { ouvrirLien(contact) })
+                }
+                if let confidentialite = Liens.confidentialite {
+                    LigneReglageLien(libelle: L.t("legal.confidentialite"), action: { ouvrirLien(confidentialite) })
+                }
+                if let conditions = Liens.conditions {
+                    LigneReglageLien(libelle: L.t("legal.conditions_longues"), action: { ouvrirLien(conditions) })
+                }
             }
             .entree(rang: 3)
-            // Accès de chantier, retirés à l'étape 7.
+            // Accès de chantier, à retirer avant la mise en ligne.
             BoutonSecondaire(L.t("socle.titre")) { ouvrir(.controleSocle) }
-            BoutonSecondaire(L.t("socle.revoir_onboarding")) { etat.onboardingTermine = false }
         }
     }
 }
