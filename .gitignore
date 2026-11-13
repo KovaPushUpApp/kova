@@ -17,3 +17,14 @@ DerivedData/
 # Divers
 .DS_Store
 __pycache__/
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.kotlin/
+*.apk
+*.aab
+*.jks
+*.keystore
+livraison/

@@ -1,0 +1,36 @@
+/* Android-specific strings. They replace or add to the iPhone app's strings
+   (Kova/Resources/en.lproj/Localizable.strings), reused for everything else. */
+
+/* Locking permission: on Android, this is the accessibility service. */
+"auto_ecran.titre" = "Allow locking";
+"auto_ecran.texte" = "Kova needs the accessibility service to see which app opens and show the lock on the ones you picked.";
+"auto_ecran.argument.1" = "Only the apps you picked are blocked";
+"auto_ecran.argument.2" = "You can remove access at any time";
+"auto_ecran.argument.3" = "Kova doesn't read your screens or what you type";
+"auto_ecran.bouton" = "Open settings";
+"auto_ecran.refus" = "In the list, tap Kova and turn the service on. Then come back here.";
+"auto_ecran.aide" = "If Android shows \"Restricted setting\", open Kova's page in the app settings, tap the three dots in the top right, then \"Allow restricted settings\".";
+"auto_ecran.fiche" = "Open Kova's app page";
+"auto_ecran.verifier" = "I turned the service on";
+
+/* App choice: on Android, Kova can show its own list. */
+"apps.recherche" = "Search for an app";
+"limite.texte" = "Without a subscription, you can lock one app. Keep the one that takes most of your time.";
+
+/* Lock screen: on Android, Kova knows the blocked app's name. */
+"verrou.app.titre_nom" = "%@ is locked";
+"verrou.app.fermer_nom" = "Close %@";
+
+/* Subscriptions: Google Play. */
+"paywall.mentions.annuel" = "%@ a year. Cancel anytime on Google Play.";
+"paywall.mentions.annuel_essai" = "3 days free, then %@ a year. Cancel anytime on Google Play.";
+"paywall.mentions.hebdo" = "%@ a week. Cancel anytime on Google Play.";
+"offre.mentions" = "%@ for the first year, then %@ a year. Cancel anytime on Google Play.";
+"abonnement.texte" = "Manage or cancel your subscription in Google Play.";
+"abonnement.gerer" = "Manage on Google Play";
+
+/* Locking service (text shown by Android in its settings). */
+"service.description" = "Kova only looks at which app comes to the foreground, to show the lock on the apps you picked. Kova does not read the content of your screens and records nothing.";
+
+/* Chantier (version de test seulement). */
+"chantier.comptage" = "Count without camera (1 per second)";

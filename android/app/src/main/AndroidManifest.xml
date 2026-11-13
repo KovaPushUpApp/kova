@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- La caméra compte les répétitions. L'image est analysée sur le téléphone,
+         jamais enregistrée ni envoyée. L'app n'a pas la permission Internet. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+
+    <!-- Pour proposer la liste des apps à verrouiller : celles qui ont une icône dans le lanceur. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/nom_app"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Kova">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- L'écran de verrou, affiché par dessus une app bloquée. -->
+        <activity
+            android:name=".verrou.VerrouActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.getkova.app.verrou" />
+
+        <!-- Le service qui voit quelle app passe au premier plan. Il ne lit pas le contenu des écrans. -->
+        <service
+            android:name=".verrou.ServiceVerrou"
+            android:exported="true"
+            android:label="@string/nom_app"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/service_verrou" />
+        </service>
+    </application>
+
+</manifest>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fichier généré par android/outils/generer.py. Ne pas modifier à la main. -->
+<resources>
+    <color name="fond">#0E0E10</color>
+    <color name="accent">#C8F53C</color>
+</resources>

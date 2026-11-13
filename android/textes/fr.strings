@@ -1,0 +1,37 @@
+/* Textes propres à Android. Ils remplacent ou complètent ceux de l'app iPhone
+   (Kova/Resources/fr.lproj/Localizable.strings), repris pour tout le reste.
+   Même format : %lld = un nombre, %@ = un texte. */
+
+/* Autorisation de verrouillage : sur Android, c'est le service d'accessibilité. */
+"auto_ecran.titre" = "Autorise le verrouillage";
+"auto_ecran.texte" = "Kova a besoin du service d'accessibilité pour voir quelle app s'ouvre et afficher le verrou sur celles que tu as choisies.";
+"auto_ecran.argument.1" = "Seules tes apps choisies sont bloquées";
+"auto_ecran.argument.2" = "Tu peux retirer l'accès à tout moment";
+"auto_ecran.argument.3" = "Kova ne lit ni tes écrans ni ce que tu tapes";
+"auto_ecran.bouton" = "Ouvrir les réglages";
+"auto_ecran.refus" = "Dans la liste, touche Kova puis active le service. Reviens ensuite ici.";
+"auto_ecran.aide" = "Si Android affiche « Paramètre restreint », ouvre la fiche de Kova dans les réglages des applications, touche les trois points en haut à droite, puis « Autoriser les paramètres restreints ».";
+"auto_ecran.fiche" = "Ouvrir la fiche de Kova";
+"auto_ecran.verifier" = "J'ai activé le service";
+
+/* Choix des apps : sur Android, Kova peut afficher sa propre liste. */
+"apps.recherche" = "Rechercher une app";
+"limite.texte" = "Sans abonnement, tu peux verrouiller une seule app. Garde celle qui te prend le plus de temps.";
+
+/* Écran de verrou : sur Android, Kova connaît le nom de l'app bloquée. */
+"verrou.app.titre_nom" = "%@ est verrouillée";
+"verrou.app.fermer_nom" = "Fermer %@";
+
+/* Abonnements : Google Play. */
+"paywall.mentions.annuel" = "%@ par an. Annulable à tout moment sur Google Play.";
+"paywall.mentions.annuel_essai" = "3 jours gratuits, puis %@ par an. Annulable à tout moment sur Google Play.";
+"paywall.mentions.hebdo" = "%@ par semaine. Annulable à tout moment sur Google Play.";
+"offre.mentions" = "%@ la première année, puis %@ par an. Annulable à tout moment sur Google Play.";
+"abonnement.texte" = "L'abonnement se gère et s'annule dans Google Play.";
+"abonnement.gerer" = "Gérer sur Google Play";
+
+/* Service de verrouillage (texte affiché par Android dans ses réglages). */
+"service.description" = "Kova regarde seulement quelle app passe au premier plan, pour afficher le verrou sur les apps que tu as choisies. Kova ne lit pas le contenu de tes écrans et n'enregistre rien.";
+
+/* Chantier (version de test seulement). */
+"chantier.comptage" = "Compter sans caméra (1 par seconde)";
