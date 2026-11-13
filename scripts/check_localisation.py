@@ -5,7 +5,9 @@ Pour chaque dossier qui contient des .lproj :
   - le français et l'anglais ont exactement les mêmes clés, sans doublon ;
   - aucune valeur n'est vide ;
   - les textes français n'ont pas de tiret cadratin ;
-  - chaque clé citée dans le code Swift du dossier existe.
+  - les valeurs insérées (%lld, %@) sont les mêmes, dans le même ordre ;
+  - chaque clé citée dans le code Swift du dossier existe ;
+  - chaque clé des fichiers est utilisée par le code.
 
 Usage : python3 scripts/check_localisation.py
 """
@@ -22,6 +24,7 @@ ENSEMBLES = {
 }
 
 LIGNE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')
+FORMAT = re.compile(r"%(?:lld|@)")
 LITTERAL = re.compile(r'"([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+)"')
 
 
@@ -75,6 +78,9 @@ def main():
                     erreurs.append(f"{dossier}/{nom} : {cle} manque en {langue}")
                 for cle in sorted(set(tables[langue]) - reference):
                     erreurs.append(f"{dossier}/{nom} : {cle} manque en {LANGUES[0]}")
+            for cle in sorted(reference & set(tables["en"])):
+                if FORMAT.findall(tables["fr"][cle]) != FORMAT.findall(tables["en"][cle]):
+                    erreurs.append(f"{dossier}/{nom} : valeurs %lld ou %@ différentes entre fr et en pour {cle}")
             for cle, valeur in tables["fr"].items():
                 if "—" in valeur:
                     erreurs.append(f"{dossier}/{nom} : tiret cadratin dans {cle}")
@@ -84,12 +90,21 @@ def main():
 
         # Une chaîne Swift qui commence par un préfixe de clé connu doit exister.
         prefixes = {cle.split(".")[0] for cle in toutes_les_cles}
+        utilisees = set()
         for source in sources:
             for swift in sorted((RACINE / source).rglob("*.swift")):
                 for numero, ligne in enumerate(swift.read_text(encoding="utf-8").splitlines(), 1):
                     for cle in LITTERAL.findall(ligne):
-                        if cle.split(".")[0] in prefixes and cle not in toutes_les_cles:
+                        if cle.split(".")[0] not in prefixes:
+                            continue
+                        utilisees.add(cle)
+                        accordee = cle + ".un" in toutes_les_cles and cle + ".autre" in toutes_les_cles
+                        if cle not in toutes_les_cles and not accordee:
                             erreurs.append(f"{swift.relative_to(RACINE)}:{numero} : clé inconnue {cle}")
+        for cle in sorted(toutes_les_cles):
+            base = cle.rsplit(".", 1)[0] if cle.endswith((".un", ".autre")) else cle
+            if cle not in utilisees and base not in utilisees:
+                erreurs.append(f"{dossier} : clé jamais utilisée {cle}")
 
     if erreurs:
         print("\n".join(erreurs))

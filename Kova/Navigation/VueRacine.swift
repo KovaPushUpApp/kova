@@ -32,26 +32,62 @@ struct ParcoursOnboarding: View {
 
     @ViewBuilder
     private func ecran(_ etape: EtapeOnboarding) -> some View {
-        EcranProvisoire(titre: etape.cleTitre, retour: retour(pour: etape)) {
-            if let suivante = etape.suivante {
-                BoutonPrincipal("commun.continuer") { chemin.append(suivante) }
-            } else {
-                BoutonPrincipal("socle.terminer_onboarding") { etat.onboardingTermine = true }
-            }
+        switch etape {
+        case .bienvenue:
+            // La restauration des achats arrive à l'étape 6.
+            EcranBienvenue(commencer: { avancer(depuis: etape) }, restaurer: {})
+        case .temps:
+            EcranTemps(retour: reculer, suivant: { avancer(depuis: etape) })
+        case .choc:
+            EcranChoc(retour: reculer, suivant: { avancer(depuis: etape) })
+        case .objectif:
+            EcranObjectif(retour: reculer, suivant: { avancer(depuis: etape) })
+        case .apps:
+            EcranApps(retour: reculer, suivant: { avancer(depuis: etape) })
+        case .regle:
+            EcranRegle(contexte: .onboarding, retour: reculer, valider: { avancer(depuis: etape) })
+        case .autoEcran:
+            EcranAutorisation.tempsDEcran(retour: reculer, autoriser: { avancer(depuis: etape) })
+        case .autoCamera:
+            EcranAutorisation.camera(retour: reculer, autoriser: { avancer(depuis: etape) })
+        case .essai:
+            EcranEssai(retour: reculer, suivant: { avancer(depuis: etape) })
+        case .paywall:
+            EcranPaywall(
+                fermer: fermerPaywall,
+                restaurer: {},
+                acheter: { _ in terminer() },
+                ouvrirConditions: {},
+                ouvrirConfidentialite: {}
+            )
+        case .offre:
+            EcranOffre(fermer: terminer, prendre: terminer)
         }
     }
 
-    /// Pas de retour sur le premier écran.
-    private func retour(pour etape: EtapeOnboarding) -> (() -> Void)? {
-        if etape == .bienvenue {
-            return nil
+    private func avancer(depuis etape: EtapeOnboarding) {
+        if let suivante = etape.suivante {
+            chemin.append(suivante)
         }
-        return { reculer() }
     }
 
     private func reculer() {
         if !chemin.isEmpty {
             chemin.removeLast()
         }
+    }
+
+    /// Fermer le paywall sans payer montre l'offre de rattrapage, une seule fois.
+    private func fermerPaywall() {
+        if etat.offreDejaVue {
+            terminer()
+        } else {
+            etat.offreDejaVue = true
+            chemin.append(.offre)
+        }
+    }
+
+    private func terminer() {
+        etat.onboardingTermine = true
     }
 }

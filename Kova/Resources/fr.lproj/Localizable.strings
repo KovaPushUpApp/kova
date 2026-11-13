@@ -1,8 +1,17 @@
-/* Kova : textes français (langue de référence). */
+/* Kova : textes français (langue de référence).
+   %lld = un nombre entier, %@ = un texte, %% = le signe pour cent.
+   Les clés en .un et .autre sont le singulier et le pluriel d'un même texte. */
 
 /* Commun */
 "commun.continuer" = "Continuer";
 "commun.retour" = "Retour";
+"commun.fermer" = "Fermer";
+"commun.enregistrer" = "Enregistrer";
+"commun.restaurer_achats" = "Restaurer mes achats";
+"commun.min" = "min";
+"commun.minutes_court" = "%lld min";
+"commun.jours.un" = "%lld jour";
+"commun.jours.autre" = "%lld jours";
 
 /* Onglets */
 "onglet.accueil" = "Accueil";
@@ -10,30 +19,242 @@
 "onglet.planning" = "Planning";
 "onglet.reglages" = "Réglages";
 
-/* Noms des écrans (gabarits d'attente du socle) */
-"ecran.bienvenue" = "Bienvenue";
-"ecran.temps" = "Ton temps d'écran";
-"ecran.choc" = "Le constat";
-"ecran.objectif" = "Ton objectif";
-"ecran.apps" = "Tes apps à verrouiller";
-"ecran.regle" = "Ta règle";
-"ecran.auto_ecran" = "Autorisation Temps d'écran";
-"ecran.auto_camera" = "Autorisation caméra";
-"ecran.essai" = "Essai : 3 pompes";
-"ecran.paywall" = "Abonnement";
-"ecran.offre" = "Offre de rattrapage";
-"ecran.exercice" = "Choix de l'exercice";
-"ecran.placement" = "Placement du téléphone";
-"ecran.compteur" = "Séance";
-"ecran.gagne" = "Temps gagné";
-"ecran.urgence" = "Déblocage d'urgence";
+/* Titres partagés */
 "ecran.apps_reglage" = "Apps verrouillées";
-"ecran.abonnement" = "Mon abonnement";
+"ecran.paywall" = "Abonnement";
+"ecran.urgence" = "Déblocage d'urgence";
 
-/* Socle : écrans de chantier, retirés à l'étape 7 */
-"socle.ecran_provisoire" = "Écran en attente. Son contenu arrive à l'étape 2.";
-"socle.terminer_onboarding" = "Entrer dans l'app";
-"socle.retour_accueil" = "Revenir à l'accueil";
+/* Exercices */
+"exercice.pompes" = "Pompes";
+"exercice.squats" = "Squats";
+"exercice.abdos" = "Abdos";
+"exercice.fentes" = "Fentes";
+"exercice.jumping_jacks" = "Jumping jacks";
+"exercice.titre" = "Tu paies en quoi ?";
+"exercice.bouton" = "C'est parti";
+
+/* 1. Bienvenue */
+"bienvenue.titre" = "Gagne ton temps d'écran.";
+"bienvenue.texte" = "Tes apps restent verrouillées tant que tu n'as pas fait tes pompes.";
+"bienvenue.commencer" = "Commencer";
+
+/* 2. Temps */
+"temps.titre" = "Combien de temps par jour sur ton téléphone ?";
+"temps.texte" = "Sois honnête, personne ne regarde.";
+"temps.option.moins_de_2" = "Moins de 2 h";
+"temps.option.3_a_4" = "3 à 4 h";
+"temps.option.5_a_6" = "5 à 6 h";
+"temps.option.7_ou_plus" = "7 h ou plus";
+"temps.moyenne" = "la moyenne";
+
+/* 3. Choc */
+"choc.intro" = "%lld h par jour, ça fait";
+"choc.jours" = "jours";
+"choc.texte" = "par an, les yeux sur ton écran. Sur 10 ans, %@ de ta vie.";
+"choc.plus_de_ans.un" = "plus d'un an";
+"choc.plus_de_ans.autre" = "plus de %lld ans";
+"choc.mois.un" = "%lld mois";
+"choc.mois.autre" = "%lld mois";
+"choc.annee" = "Ton année";
+"choc.part" = "%lld %% sur le téléphone";
+"choc.bouton" = "Je reprends la main";
+
+/* 4. Objectif */
+"objectif.titre" = "Tu veux quoi, au fond ?";
+"objectif.texte" = "Plusieurs réponses possibles.";
+"objectif.option.moins_scroller" = "Moins scroller";
+"objectif.option.sport" = "Me remettre au sport";
+"objectif.option.concentration" = "Mieux me concentrer";
+"objectif.option.sommeil" = "Mieux dormir";
+"objectif.choisi" = "choisi";
+
+/* 5. Apps */
+"apps.titre" = "Quelles apps te volent ton temps ?";
+"apps.compte.un" = "%lld app sera verrouillée.";
+"apps.compte.autre" = "%lld apps seront verrouillées.";
+"apps.choisir" = "Choisir mes apps";
+"apps.bouton" = "Verrouiller ces apps";
+
+/* 6. Règle */
+"regle.titre" = "Fixe ta règle.";
+"regle.texte" = "Tu pourras la changer plus tard, avec un délai de 24 h.";
+"regle.texte_reglages" = "Assouplir ta règle prend effet dans 24 h. La durcir, tout de suite.";
+"regle.unite.pompes" = "pompes";
+"regle.unite.minutes" = "minutes d'écran";
+"regle.par_heure" = "Soit %lld pompes pour 1 h de scroll.";
+"regle.bouton" = "Valider ma règle";
+
+/* 7. Autorisation Temps d'écran */
+"auto_ecran.titre" = "Autorise le verrouillage";
+"auto_ecran.texte" = "L'app a besoin de l'accès Temps d'écran pour bloquer les apps que tu as choisies.";
+"auto_ecran.argument.1" = "Seules tes apps choisies sont bloquées";
+"auto_ecran.argument.2" = "Tu peux retirer l'accès à tout moment";
+"auto_ecran.argument.3" = "Aucune donnée d'usage ne sort du téléphone";
+"auto_ecran.bouton" = "Autoriser Temps d'écran";
+
+/* 8. Autorisation caméra */
+"auto_camera.titre" = "Autorise la caméra";
+"auto_camera.texte" = "Elle compte tes pompes en direct. Pas de montre, pas de triche.";
+"auto_camera.argument.1" = "La vidéo est analysée sur ton téléphone";
+"auto_camera.argument.2" = "Rien n'est enregistré ni envoyé";
+"auto_camera.argument.3" = "La caméra s'éteint dès la série finie";
+"auto_camera.bouton" = "Autoriser la caméra";
+
+/* 9. Essai */
+"essai.titre" = "Teste : fais 3 pompes.";
+"essai.bouton" = "Ça marche. Continuer";
+"camera.fictive" = "Vue caméra : détection de la posture";
+
+/* Séance (essai et compteur) */
+"seance.validee" = "Série validée.";
+"seance.en_position" = "Mets-toi en position.";
+"seance.encore" = "Encore %lld. Descends bien.";
+"seance.pour_minutes" = "Pour %lld min d'écran";
+"seance.bouton" = "Récupérer mon temps";
+
+/* 10. Paywall */
+"paywall.restaurer" = "Restaurer";
+"paywall.titre" = "Tu viens de gagner tes 3 premières pompes.";
+"paywall.texte" = "Débloque le verrouillage complet et garde le rythme.";
+"paywall.argument.apps" = "Apps verrouillées illimitées";
+"paywall.argument.exercices.un" = "%lld exercice compté par la caméra";
+"paywall.argument.exercices.autre" = "%lld exercices comptés par la caméra";
+"paywall.argument.suivi" = "Planning, stats et séries";
+"paywall.annuel.detail" = "soit 0,58 € par semaine";
+"paywall.annuel.etiquette" = "3 jours gratuits";
+"paywall.hebdo.detail" = "sans engagement";
+"paywall.hebdo.etiquette" = "par semaine";
+"paywall.bouton.essai" = "Essayer 3 jours gratuits";
+"paywall.mentions.annuel" = "3 jours gratuits, puis 29,99 € par an. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.hebdo" = "4,99 € par semaine. Annulable à tout moment dans l'App Store.";
+"formule.annuel" = "Annuel";
+"formule.hebdomadaire" = "Hebdomadaire";
+"prix.annuel" = "29,99 €";
+"prix.hebdomadaire" = "4,99 €";
+"prix.offre" = "19,99 €";
+"legal.conditions" = "Conditions";
+"legal.confidentialite" = "Confidentialité";
+
+/* 11. Offre de rattrapage */
+"offre.surtitre" = "Avant de partir";
+"offre.remise" = "-33 %";
+"offre.texte" = "Ta première année à 19,99 € au lieu de 29,99 €. Offre affichée une seule fois.";
+"offre.detail" = "soit 0,38 € par semaine";
+"offre.mentions" = "19,99 € la première année, puis 29,99 € par an. Annulable à tout moment dans l'App Store.";
+"offre.bouton" = "Prendre l'offre";
+"offre.refuser" = "Non merci";
+
+/* 12. Accueil */
+"accueil.serie.un" = "Série : %lld jour";
+"accueil.serie.autre" = "Série : %lld jours";
+"accueil.solde" = "Temps d'écran disponible";
+"accueil.aujourdhui" = "%lld pompes faites aujourd'hui";
+"accueil.bouton" = "Gagner du temps";
+"accueil.apps" = "Apps verrouillées";
+
+/* 13. Verrou, version dans l'app */
+"verrou.app.titre" = "Tes apps sont verrouillées";
+"verrou.app.texte" = "Tu as utilisé tout ton temps. Gagne-le avec tes bras.";
+"verrou.app.pompes" = "%lld pompes";
+"verrou.app.a_faire" = "à faire maintenant";
+"verrou.app.debloquees" = "débloquées";
+"verrou.app.commencer" = "Commencer les pompes";
+"verrou.app.plus_tard" = "Plus tard";
+
+/* 15. Placement */
+"placement.titre" = "Pose ton téléphone au sol.";
+"placement.texte" = "À 1 mètre de toi, écran face à toi. Ton corps doit entrer dans le cadre.";
+"placement.distance" = "environ 1 m";
+"placement.detecte" = "Corps entier détecté";
+"placement.bouton" = "Je suis en position";
+
+/* 17. Gagné */
+"gagne.valide.pompes" = "%lld pompes validées";
+"gagne.valide.squats" = "%lld squats validés";
+"gagne.valide.abdos" = "%lld abdos validés";
+"gagne.valide.fentes" = "%lld fentes validées";
+"gagne.valide.jumping_jacks" = "%lld jumping jacks validés";
+"gagne.minutes" = "+%lld\nmin";
+"gagne.texte" = "Tes apps sont ouvertes jusqu'à %@. Tu l'as mérité.";
+"gagne.aujourdhui" = "%@ aujourd'hui";
+"gagne.serie" = "de série";
+"gagne.ouvrir" = "Ouvrir maintenant";
+"gagne.garder" = "Garder mon temps pour plus tard";
+
+/* 18. Urgence */
+"urgence.titre" = "Vraie urgence ?";
+"urgence.texte" = "Tu peux ouvrir tes apps %lld minutes sans faire de pompes. À utiliser quand tu ne peux vraiment pas t'allonger par terre.";
+"urgence.restant" = "Restant cette semaine";
+"urgence.compte" = "%lld sur %lld";
+"urgence.bouton" = "Débloquer %lld minutes";
+"urgence.pompes" = "Finalement, je fais mes pompes";
+
+/* 19. Stats */
+"stats.titre" = "Ta semaine";
+"stats.total" = "répétitions cette semaine";
+"stats.seances" = "séances validées";
+"stats.progression.valeur" = "+%lld %%";
+"stats.progression" = "vs semaine dernière";
+"stats.serie" = "de série en cours";
+"stats.gagne.valeur" = "%lld h";
+"stats.gagne" = "d'écran gagnées";
+
+/* 20. Planning */
+"planning.titre" = "Planning";
+"planning.texte" = "Pendant ces plages, les apps restent verrouillées, même avec du temps en stock.";
+"planning.horaires" = "%@ à %@";
+"planning.jours.semaine" = "Du lundi au vendredi";
+"planning.jours.tous" = "Tous les jours";
+"planning.jours.weekend" = "Samedi et dimanche";
+"planning.fictif.travail" = "Travail";
+"planning.fictif.nuit" = "Nuit";
+"planning.fictif.revisions" = "Révisions";
+"planning.ajouter" = "Ajouter une plage";
+
+/* 21. Réglages */
+"reglages.titre" = "Réglages";
+"reglages.apps.un" = "%lld app";
+"reglages.apps.autre" = "%lld apps";
+"reglages.regle" = "Ma règle";
+"reglages.regle.valeur" = "%lld pompes = %lld min";
+"reglages.exercice" = "Exercice par défaut";
+"reglages.rappel" = "Rappel quotidien";
+"reglages.voix" = "Compter à voix haute";
+"reglages.abonnement" = "Abonnement";
+"reglages.aide" = "Aide et contact";
+
+/* 22. Apps verrouillées (réglages) */
+"apps_reglage.texte.un" = "%lld app verrouillée. Retirer une app prend effet dans 24 h, pour éviter de craquer.";
+"apps_reglage.texte.autre" = "%lld apps verrouillées. Retirer une app prend effet dans 24 h, pour éviter de craquer.";
+
+/* 23. Abonnement */
+"abonnement.actuelle" = "Formule actuelle";
+"abonnement.prix_annuel" = "29,99 € par an";
+"abonnement.renouvellement" = "Prochain renouvellement";
+"abonnement.essai" = "Essai gratuit";
+"abonnement.essai.termine" = "Terminé";
+"abonnement.hebdo" = "Passer en hebdomadaire";
+"abonnement.texte" = "L'abonnement se gère et s'annule dans les réglages de ton compte App Store.";
+"abonnement.gerer" = "Gérer dans l'App Store";
+
+/* Accessibilité (VoiceOver) */
+"a11y.logo" = "Logo Kova : cadenas ouvert";
+"a11y.etape" = "Étape %lld sur %lld";
+"a11y.active" = "activé";
+"a11y.desactive" = "désactivé";
+"a11y.choc" = "%lld jours par an";
+"a11y.moins_de_pompes" = "Moins de pompes";
+"a11y.plus_de_pompes" = "Plus de pompes";
+"a11y.moins_de_minutes" = "Moins de minutes";
+"a11y.plus_de_minutes" = "Plus de minutes";
+"a11y.progression" = "Progression de la série";
+"a11y.progression_valeur" = "%lld sur %lld";
+"a11y.arreter_seance" = "Arrêter la séance";
+"a11y.placement" = "Téléphone posé au sol, à environ 1 mètre de toi";
+"a11y.plage" = "Plage %@";
+"a11y.stats" = "%lld répétitions cette semaine";
+
+/* Socle : écran de chantier, retiré à l'étape 7 */
 "socle.revoir_onboarding" = "Revoir l'onboarding";
 "socle.titre" = "Contrôle du socle";
 "socle.polices" = "POLICES";

@@ -2,9 +2,9 @@ import SwiftUI
 
 /// L'app après l'onboarding : quatre onglets, et les écrans poussés par dessus.
 struct VuePrincipale: View {
-    @EnvironmentObject private var etat: EtatApp
     @State private var onglet: Onglet = .accueil
     @State private var chemin: [Destination] = []
+    @State private var paywallOuvert = false
 
     var body: some View {
         NavigationStack(path: $chemin) {
@@ -19,46 +19,80 @@ struct VuePrincipale: View {
                 ecran(destination)
             }
         }
+        .fullScreenCover(isPresented: $paywallOuvert) {
+            // L'achat et la restauration arrivent à l'étape 6.
+            EcranPaywall(
+                fermer: { paywallOuvert = false },
+                restaurer: {},
+                acheter: { _ in paywallOuvert = false },
+                ouvrirConditions: {},
+                ouvrirConfidentialite: {}
+            )
+            .preferredColorScheme(.dark)
+        }
     }
 
     @ViewBuilder
     private var contenuOnglet: some View {
-        EcranProvisoire(titre: onglet.cleTitre) {
-            switch onglet {
-            case .accueil:
-                BoutonPrincipal("ecran.exercice") { chemin.append(.exercice) }
-                BoutonSecondaire("ecran.urgence") { chemin.append(.urgence) }
-            case .stats, .planning:
-                EmptyView()
-            case .reglages:
-                BoutonSecondaire("ecran.apps_reglage") { chemin.append(.appsReglage) }
-                BoutonSecondaire("ecran.regle") { chemin.append(.regle) }
-                BoutonSecondaire("ecran.abonnement") { chemin.append(.abonnement) }
-                BoutonSecondaire("socle.titre") { chemin.append(.controleSocle) }
-                BoutonSecondaire("socle.revoir_onboarding") { etat.onboardingTermine = false }
-            }
+        switch onglet {
+        case .accueil:
+            EcranAccueil(gagnerDuTemps: { aller(.exercice) }, ouvrirVerrou: { aller(.verrou) })
+        case .stats:
+            EcranStats()
+        case .planning:
+            // L'ajout d'une plage arrive à l'étape 5.
+            EcranPlanning(ajouter: {})
+        case .reglages:
+            EcranReglages(ouvrir: aller)
         }
     }
 
     @ViewBuilder
     private func ecran(_ destination: Destination) -> some View {
-        if destination == .controleSocle {
-            ControleSocle(retour: { reculer() })
-        } else {
-            EcranProvisoire(titre: destination.cleTitre, retour: { reculer() }) {
-                if let suivante = destination.suivante {
-                    BoutonPrincipal("commun.continuer") { chemin.append(suivante) }
-                } else if destination == .gagne {
-                    BoutonPrincipal("socle.retour_accueil") { chemin.removeAll() }
-                }
-            }
+        switch destination {
+        case .verrou:
+            EcranVerrou(
+                commencer: { chemin = [.exercice] },
+                fermer: reculer,
+                urgence: { aller(.urgence) }
+            )
+        case .exercice:
+            EcranExercice(retour: reculer, commencer: { aller(.placement) })
+        case .placement:
+            EcranPlacement(retour: reculer, suivant: { aller(.compteur) })
+        case .compteur:
+            EcranCompteur(abandonner: revenirAuxOnglets, valider: { aller(.gagne) })
+        case .gagne:
+            EcranGagne(ouvrir: revenirAuxOnglets, garder: revenirAuxOnglets)
+        case .urgence:
+            EcranUrgence(
+                retour: reculer,
+                debloquer: revenirAuxOnglets,
+                faireSesPompes: { chemin = [.exercice] }
+            )
+        case .appsReglage:
+            EcranAppsReglage(retour: reculer, enregistrer: reculer)
+        case .regle:
+            EcranRegle(contexte: .reglages, retour: reculer, valider: reculer)
+        case .abonnement:
+            EcranAbonnement(retour: reculer, changerDeFormule: { paywallOuvert = true }, restaurer: {})
+        case .controleSocle:
+            ControleSocle(retour: reculer)
         }
+    }
+
+    private func aller(_ destination: Destination) {
+        chemin.append(destination)
     }
 
     private func reculer() {
         if !chemin.isEmpty {
             chemin.removeLast()
         }
+    }
+
+    private func revenirAuxOnglets() {
+        chemin.removeAll()
     }
 }
 
@@ -79,17 +113,16 @@ struct BarreOnglets: View {
 
     private func bouton(_ onglet: Onglet) -> some View {
         let actif = onglet == selection
+        let couleur = actif ? Tokens.Couleurs.texteSurAccent : Tokens.Couleurs.texteSecondaire
         return Button {
             selection = onglet
         } label: {
             VStack(spacing: Tokens.Espacements.e3) {
-                Image(systemName: onglet.symbole)
-                    .font(.system(size: Tokens.TaillesTexte.corps, weight: .semibold))
-                Text(onglet.cleTitre)
-                    .font(.kovaTexte(Tokens.TaillesTexte.legende, graisse: .demiGras, relatifA: .caption))
+                Icone(nom: onglet.icone, couleur: couleur)
+                Text(verbatim: onglet.titre)
+                    .legende(couleur, graisse: .demiGras)
                     .lineLimit(1)
             }
-            .foregroundColor(actif ? Tokens.Couleurs.texteSurAccent : Tokens.Couleurs.texteSecondaire)
             .frame(maxWidth: .infinity)
             .frame(height: Tokens.Hauteurs.onglet)
             .background(actif ? Tokens.Couleurs.accent : Color.clear)

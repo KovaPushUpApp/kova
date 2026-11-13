@@ -121,6 +121,19 @@ enum Tokens {
             static let hauteur: CGFloat = 8
             static let ecart: CGFloat = 5
         }
+        enum Illustration {
+            static let largeur: CGFloat = 170
+            static let hauteur: CGFloat = 80
+        }
+        enum Graphique {
+            static let hauteur: CGFloat = 233
+            static let barreMax: CGFloat = 144
+            static let barreVide: CGFloat = 4
+        }
+        enum BarreAnnee {
+            static let hauteur: CGFloat = 13
+            static let arrondi: CGFloat = 8
+        }
     }
     enum Animations {
         static let dureeStandard: CGFloat = 0.5
@@ -134,6 +147,7 @@ enum Tokens {
         enum Pop {
             static let duree: CGFloat = 0.6
             static let echelle: [CGFloat] = [0.6, 1.06, 1.0]
+            static let pic: CGFloat = 0.7
         }
         enum Pulsation {
             static let duree: CGFloat = 2.4
@@ -157,6 +171,8 @@ enum Tokens {
         enum ScanCamera {
             static let duree: CGFloat = 3.0
             static let boucle = true
+            static let debut: CGFloat = 0.08
+            static let fin: CGFloat = 0.88
         }
         enum CompteurChoc {
             static let pas: Int = 2
@@ -167,10 +183,27 @@ enum Tokens {
             static let intervalleMs: Int = 55
         }
         static let reduireLesAnimations = "respecter le réglage système"
+        enum Pompe {
+            static let duree: CGFloat = 1.0
+            static let boucle = true
+        }
     }
     enum Haptique {
         static let repetition = "léger"
         static let serieValidee = "fort"
+    }
+    enum Traits {
+        static let fin: CGFloat = 1
+        static let normal: CGFloat = 2
+        static let illustration: CGFloat = 3
+    }
+    enum Opacites {
+        static let voileSurAccent: CGFloat = 0.12
+        static let scan: CGFloat = 0.5
+    }
+    enum Typographie {
+        static let echelleMinimale: CGFloat = 0.5
+        static let interlettrageSurtitre: CGFloat = 0.08
     }
 }
 

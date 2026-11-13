@@ -1,8 +1,17 @@
-/* Kova: English strings. */
+/* Kova: English strings.
+   %lld = a whole number, %@ = a text, %% = the percent sign.
+   Keys ending in .un and .autre are the singular and plural of the same text. */
 
 /* Common */
 "commun.continuer" = "Continue";
 "commun.retour" = "Back";
+"commun.fermer" = "Close";
+"commun.enregistrer" = "Save";
+"commun.restaurer_achats" = "Restore purchases";
+"commun.min" = "min";
+"commun.minutes_court" = "%lld min";
+"commun.jours.un" = "%lld day";
+"commun.jours.autre" = "%lld days";
 
 /* Tabs */
 "onglet.accueil" = "Home";
@@ -10,30 +19,242 @@
 "onglet.planning" = "Schedule";
 "onglet.reglages" = "Settings";
 
-/* Screen names (foundation placeholders) */
-"ecran.bienvenue" = "Welcome";
-"ecran.temps" = "Your screen time";
-"ecran.choc" = "The facts";
-"ecran.objectif" = "Your goal";
-"ecran.apps" = "Apps to lock";
-"ecran.regle" = "Your rule";
-"ecran.auto_ecran" = "Screen Time access";
-"ecran.auto_camera" = "Camera access";
-"ecran.essai" = "Try it: 3 push-ups";
-"ecran.paywall" = "Subscription";
-"ecran.offre" = "Last chance offer";
-"ecran.exercice" = "Pick your exercise";
-"ecran.placement" = "Phone placement";
-"ecran.compteur" = "Workout";
-"ecran.gagne" = "Time earned";
-"ecran.urgence" = "Emergency unlock";
+/* Shared titles */
 "ecran.apps_reglage" = "Locked apps";
-"ecran.abonnement" = "My subscription";
+"ecran.paywall" = "Subscription";
+"ecran.urgence" = "Emergency unlock";
 
-/* Foundation: work-in-progress screens, removed in step 7 */
-"socle.ecran_provisoire" = "Placeholder screen. Its content arrives in step 2.";
-"socle.terminer_onboarding" = "Enter the app";
-"socle.retour_accueil" = "Back to home";
+/* Exercises */
+"exercice.pompes" = "Push-ups";
+"exercice.squats" = "Squats";
+"exercice.abdos" = "Sit-ups";
+"exercice.fentes" = "Lunges";
+"exercice.jumping_jacks" = "Jumping jacks";
+"exercice.titre" = "How will you pay?";
+"exercice.bouton" = "Let's go";
+
+/* 1. Welcome */
+"bienvenue.titre" = "Earn your screen time.";
+"bienvenue.texte" = "Your apps stay locked until you do your push-ups.";
+"bienvenue.commencer" = "Get started";
+
+/* 2. Time */
+"temps.titre" = "How long are you on your phone each day?";
+"temps.texte" = "Be honest, nobody's watching.";
+"temps.option.moins_de_2" = "Under 2 h";
+"temps.option.3_a_4" = "3 to 4 h";
+"temps.option.5_a_6" = "5 to 6 h";
+"temps.option.7_ou_plus" = "7 h or more";
+"temps.moyenne" = "the average";
+
+/* 3. Shock */
+"choc.intro" = "%lld h a day adds up to";
+"choc.jours" = "days";
+"choc.texte" = "a year, eyes on your screen. Over 10 years, that's %@ of your life.";
+"choc.plus_de_ans.un" = "more than a year";
+"choc.plus_de_ans.autre" = "more than %lld years";
+"choc.mois.un" = "%lld month";
+"choc.mois.autre" = "%lld months";
+"choc.annee" = "Your year";
+"choc.part" = "%lld%% on your phone";
+"choc.bouton" = "I'm taking it back";
+
+/* 4. Goal */
+"objectif.titre" = "What do you really want?";
+"objectif.texte" = "Pick as many as you like.";
+"objectif.option.moins_scroller" = "Scroll less";
+"objectif.option.sport" = "Get back in shape";
+"objectif.option.concentration" = "Focus better";
+"objectif.option.sommeil" = "Sleep better";
+"objectif.choisi" = "selected";
+
+/* 5. Apps */
+"apps.titre" = "Which apps steal your time?";
+"apps.compte.un" = "%lld app will be locked.";
+"apps.compte.autre" = "%lld apps will be locked.";
+"apps.choisir" = "Choose my apps";
+"apps.bouton" = "Lock these apps";
+
+/* 6. Rule */
+"regle.titre" = "Set your rule.";
+"regle.texte" = "You can change it later, with a 24 h delay.";
+"regle.texte_reglages" = "Making your rule easier takes effect in 24 h. Making it harder is instant.";
+"regle.unite.pompes" = "push-ups";
+"regle.unite.minutes" = "minutes of screen";
+"regle.par_heure" = "That's %lld push-ups for 1 h of scrolling.";
+"regle.bouton" = "Confirm my rule";
+
+/* 7. Screen Time access */
+"auto_ecran.titre" = "Allow locking";
+"auto_ecran.texte" = "The app needs Screen Time access to block the apps you picked.";
+"auto_ecran.argument.1" = "Only the apps you picked are blocked";
+"auto_ecran.argument.2" = "You can remove access at any time";
+"auto_ecran.argument.3" = "No usage data leaves your phone";
+"auto_ecran.bouton" = "Allow Screen Time";
+
+/* 8. Camera access */
+"auto_camera.titre" = "Allow the camera";
+"auto_camera.texte" = "It counts your push-ups live. No watch, no cheating.";
+"auto_camera.argument.1" = "Video is analyzed on your phone";
+"auto_camera.argument.2" = "Nothing is recorded or sent";
+"auto_camera.argument.3" = "The camera turns off when the set is done";
+"auto_camera.bouton" = "Allow the camera";
+
+/* 9. Trial */
+"essai.titre" = "Try it: do 3 push-ups.";
+"essai.bouton" = "It works. Continue";
+"camera.fictive" = "Camera view: posture detection";
+
+/* Workout (trial and counter) */
+"seance.validee" = "Set complete.";
+"seance.en_position" = "Get into position.";
+"seance.encore" = "%lld to go. Go all the way down.";
+"seance.pour_minutes" = "For %lld min of screen";
+"seance.bouton" = "Claim my time";
+
+/* 10. Paywall */
+"paywall.restaurer" = "Restore";
+"paywall.titre" = "You just earned your first 3 push-ups.";
+"paywall.texte" = "Unlock full locking and keep the momentum.";
+"paywall.argument.apps" = "Unlimited locked apps";
+"paywall.argument.exercices.un" = "%lld exercise counted by the camera";
+"paywall.argument.exercices.autre" = "%lld exercises counted by the camera";
+"paywall.argument.suivi" = "Schedule, stats and streaks";
+"paywall.annuel.detail" = "that's €0.58 a week";
+"paywall.annuel.etiquette" = "3 days free";
+"paywall.hebdo.detail" = "no commitment";
+"paywall.hebdo.etiquette" = "per week";
+"paywall.bouton.essai" = "Try 3 days free";
+"paywall.mentions.annuel" = "3 days free, then €29.99 a year. Cancel anytime in the App Store.";
+"paywall.mentions.hebdo" = "€4.99 a week. Cancel anytime in the App Store.";
+"formule.annuel" = "Yearly";
+"formule.hebdomadaire" = "Weekly";
+"prix.annuel" = "€29.99";
+"prix.hebdomadaire" = "€4.99";
+"prix.offre" = "€19.99";
+"legal.conditions" = "Terms";
+"legal.confidentialite" = "Privacy";
+
+/* 11. Last chance offer */
+"offre.surtitre" = "Before you go";
+"offre.remise" = "-33%";
+"offre.texte" = "Your first year for €19.99 instead of €29.99. This offer shows only once.";
+"offre.detail" = "that's €0.38 a week";
+"offre.mentions" = "€19.99 for the first year, then €29.99 a year. Cancel anytime in the App Store.";
+"offre.bouton" = "Take the offer";
+"offre.refuser" = "No thanks";
+
+/* 12. Home */
+"accueil.serie.un" = "Streak: %lld day";
+"accueil.serie.autre" = "Streak: %lld days";
+"accueil.solde" = "Screen time available";
+"accueil.aujourdhui" = "%lld push-ups done today";
+"accueil.bouton" = "Earn time";
+"accueil.apps" = "Locked apps";
+
+/* 13. Lock, in-app version */
+"verrou.app.titre" = "Your apps are locked";
+"verrou.app.texte" = "You've used all your time. Earn it with your arms.";
+"verrou.app.pompes" = "%lld push-ups";
+"verrou.app.a_faire" = "to do now";
+"verrou.app.debloquees" = "unlocked";
+"verrou.app.commencer" = "Start push-ups";
+"verrou.app.plus_tard" = "Later";
+
+/* 15. Placement */
+"placement.titre" = "Put your phone on the floor.";
+"placement.texte" = "1 meter away, screen facing you. Your whole body must fit in the frame.";
+"placement.distance" = "about 1 m";
+"placement.detecte" = "Whole body detected";
+"placement.bouton" = "I'm in position";
+
+/* 17. Earned */
+"gagne.valide.pompes" = "%lld push-ups done";
+"gagne.valide.squats" = "%lld squats done";
+"gagne.valide.abdos" = "%lld sit-ups done";
+"gagne.valide.fentes" = "%lld lunges done";
+"gagne.valide.jumping_jacks" = "%lld jumping jacks done";
+"gagne.minutes" = "+%lld\nmin";
+"gagne.texte" = "Your apps are open until %@. You earned it.";
+"gagne.aujourdhui" = "%@ today";
+"gagne.serie" = "streak";
+"gagne.ouvrir" = "Open now";
+"gagne.garder" = "Save my time for later";
+
+/* 18. Emergency */
+"urgence.titre" = "Real emergency?";
+"urgence.texte" = "You can open your apps for %lld minutes without push-ups. Use it when you really can't get down on the floor.";
+"urgence.restant" = "Left this week";
+"urgence.compte" = "%lld of %lld";
+"urgence.bouton" = "Unlock %lld minutes";
+"urgence.pompes" = "Actually, I'll do my push-ups";
+
+/* 19. Stats */
+"stats.titre" = "Your week";
+"stats.total" = "reps this week";
+"stats.seances" = "workouts completed";
+"stats.progression.valeur" = "+%lld%%";
+"stats.progression" = "vs last week";
+"stats.serie" = "current streak";
+"stats.gagne.valeur" = "%lld h";
+"stats.gagne" = "of screen earned";
+
+/* 20. Schedule */
+"planning.titre" = "Schedule";
+"planning.texte" = "During these slots, your apps stay locked, even with time saved up.";
+"planning.horaires" = "%@ to %@";
+"planning.jours.semaine" = "Monday to Friday";
+"planning.jours.tous" = "Every day";
+"planning.jours.weekend" = "Saturday and Sunday";
+"planning.fictif.travail" = "Work";
+"planning.fictif.nuit" = "Night";
+"planning.fictif.revisions" = "Study";
+"planning.ajouter" = "Add a slot";
+
+/* 21. Settings */
+"reglages.titre" = "Settings";
+"reglages.apps.un" = "%lld app";
+"reglages.apps.autre" = "%lld apps";
+"reglages.regle" = "My rule";
+"reglages.regle.valeur" = "%lld push-ups = %lld min";
+"reglages.exercice" = "Default exercise";
+"reglages.rappel" = "Daily reminder";
+"reglages.voix" = "Count out loud";
+"reglages.abonnement" = "Subscription";
+"reglages.aide" = "Help and contact";
+
+/* 22. Locked apps (settings) */
+"apps_reglage.texte.un" = "%lld app locked. Removing an app takes effect in 24 h, so you don't cave.";
+"apps_reglage.texte.autre" = "%lld apps locked. Removing an app takes effect in 24 h, so you don't cave.";
+
+/* 23. Subscription */
+"abonnement.actuelle" = "Current plan";
+"abonnement.prix_annuel" = "€29.99 a year";
+"abonnement.renouvellement" = "Next renewal";
+"abonnement.essai" = "Free trial";
+"abonnement.essai.termine" = "Ended";
+"abonnement.hebdo" = "Switch to weekly";
+"abonnement.texte" = "Manage or cancel your subscription in your App Store account settings.";
+"abonnement.gerer" = "Manage in the App Store";
+
+/* Accessibility (VoiceOver) */
+"a11y.logo" = "Kova logo: open padlock";
+"a11y.etape" = "Step %lld of %lld";
+"a11y.active" = "on";
+"a11y.desactive" = "off";
+"a11y.choc" = "%lld days a year";
+"a11y.moins_de_pompes" = "Fewer push-ups";
+"a11y.plus_de_pompes" = "More push-ups";
+"a11y.moins_de_minutes" = "Fewer minutes";
+"a11y.plus_de_minutes" = "More minutes";
+"a11y.progression" = "Set progress";
+"a11y.progression_valeur" = "%lld of %lld";
+"a11y.arreter_seance" = "Stop the workout";
+"a11y.placement" = "Phone on the floor, about 1 meter away from you";
+"a11y.plage" = "%@ slot";
+"a11y.stats" = "%lld reps this week";
+
+/* Foundation: work-in-progress screen, removed in step 7 */
 "socle.revoir_onboarding" = "Replay onboarding";
 "socle.titre" = "Foundation check";
 "socle.polices" = "FONTS";

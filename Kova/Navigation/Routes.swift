@@ -1,27 +1,14 @@
-import SwiftUI
+import Foundation
 
 /// Les écrans de l'onboarding, dans l'ordre du brief (section 7).
 enum EtapeOnboarding: Int, CaseIterable, Hashable {
     case bienvenue, temps, choc, objectif, apps, regle, autoEcran, autoCamera, essai, paywall, offre
 
+    /// Étapes comptées par la barre d'avancement : de Temps à Essai.
+    static let nombreEtapes = 8
+
     var suivante: EtapeOnboarding? {
         EtapeOnboarding(rawValue: rawValue + 1)
-    }
-
-    var cleTitre: LocalizedStringKey {
-        switch self {
-        case .bienvenue: return "ecran.bienvenue"
-        case .temps: return "ecran.temps"
-        case .choc: return "ecran.choc"
-        case .objectif: return "ecran.objectif"
-        case .apps: return "ecran.apps"
-        case .regle: return "ecran.regle"
-        case .autoEcran: return "ecran.auto_ecran"
-        case .autoCamera: return "ecran.auto_camera"
-        case .essai: return "ecran.essai"
-        case .paywall: return "ecran.paywall"
-        case .offre: return "ecran.offre"
-        }
     }
 }
 
@@ -29,51 +16,28 @@ enum EtapeOnboarding: Int, CaseIterable, Hashable {
 enum Onglet: Int, CaseIterable, Hashable {
     case accueil, stats, planning, reglages
 
-    var cleTitre: LocalizedStringKey {
+    var titre: String {
         switch self {
-        case .accueil: return "onglet.accueil"
-        case .stats: return "onglet.stats"
-        case .planning: return "onglet.planning"
-        case .reglages: return "onglet.reglages"
+        case .accueil: return L.t("onglet.accueil")
+        case .stats: return L.t("onglet.stats")
+        case .planning: return L.t("onglet.planning")
+        case .reglages: return L.t("onglet.reglages")
         }
     }
 
-    /// Pictogrammes provisoires. Les tracés des maquettes arrivent à l'étape 2.
-    var symbole: String {
+    var icone: Icone.Nom {
         switch self {
-        case .accueil: return "house"
-        case .stats: return "chart.bar"
-        case .planning: return "calendar"
-        case .reglages: return "gearshape"
+        case .accueil: return .maison
+        case .stats: return .stats
+        case .planning: return .calendrier
+        case .reglages: return .reglages
         }
     }
 }
 
 /// Les écrans poussés par dessus les onglets (ils masquent la barre du bas).
 enum Destination: Hashable {
-    case exercice, placement, compteur, gagne, urgence, appsReglage, regle, abonnement, controleSocle
-
-    var cleTitre: LocalizedStringKey {
-        switch self {
-        case .exercice: return "ecran.exercice"
-        case .placement: return "ecran.placement"
-        case .compteur: return "ecran.compteur"
-        case .gagne: return "ecran.gagne"
-        case .urgence: return "ecran.urgence"
-        case .appsReglage: return "ecran.apps_reglage"
-        case .regle: return "ecran.regle"
-        case .abonnement: return "ecran.abonnement"
-        case .controleSocle: return "socle.titre"
-        }
-    }
-
-    /// Enchaînement de la séance : exercice, placement, compteur, gagné.
-    var suivante: Destination? {
-        switch self {
-        case .exercice: return .placement
-        case .placement: return .compteur
-        case .compteur: return .gagne
-        default: return nil
-        }
-    }
+    case verrou, exercice, placement, compteur, gagne, urgence
+    case appsReglage, regle, abonnement
+    case controleSocle
 }
