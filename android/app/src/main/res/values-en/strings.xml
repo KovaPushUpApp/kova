@@ -10,7 +10,7 @@
     <string name="a11y_logo">Kova logo: open padlock</string>
     <string name="a11y_moins_de_minutes">Fewer minutes</string>
     <string name="a11y_moins_de_pompes">Fewer push-ups</string>
-    <string name="a11y_placement">Phone on the floor, about 1 meter away from you</string>
+    <string name="a11y_placement">Phone standing upright on the floor, about 1 meter away from you</string>
     <string name="a11y_plage">%1$s slot</string>
     <string name="a11y_plus_de_minutes">More minutes</string>
     <string name="a11y_plus_de_pompes">More push-ups</string>
@@ -48,6 +48,7 @@
     <string name="apps_compte_autre">%1$d apps will be locked.</string>
     <string name="apps_compte_un">%1$d app will be locked.</string>
     <string name="apps_recherche">Search for an app</string>
+    <string name="apps_recherche_vide">No app matches \"%1$s\".</string>
     <string name="apps_titre">Which apps steal your time?</string>
     <string name="apps_reglage_texte_autre">%1$d apps locked. Removing an app takes effect in 24 h, so you don\'t cave.</string>
     <string name="apps_reglage_texte_un">%1$d app locked. Removing an app takes effect in 24 h, so you don\'t cave.</string>
@@ -72,6 +73,8 @@
     <string name="bienvenue_commencer">Get started</string>
     <string name="bienvenue_texte">Your apps stay locked until you do your push-ups.</string>
     <string name="bienvenue_titre">Earn your screen time.</string>
+    <string name="bulle_temps">%1$d:%2$02d</string>
+    <string name="bulle_titre">Locking again in</string>
     <string name="camera_fictive">Camera view: posture detection</string>
     <string name="camera_hors_cadre">Get back in the frame</string>
     <string name="camera_indisponible">No usable camera on this device.</string>
@@ -102,6 +105,7 @@
     <string name="ecran_paywall">Subscription</string>
     <string name="ecran_urgence">Emergency unlock</string>
     <string name="essai_bouton">It works. Continue</string>
+    <string name="essai_conseil">Phone upright at 90°, 1 meter away from you.</string>
     <string name="essai_passer">Continue without trying</string>
     <string name="essai_titre">Try it: do 3 push-ups.</string>
     <string name="exercice_abdos">Sit-ups</string>
@@ -132,6 +136,9 @@
     <string name="limite_abonnement">See the subscription</string>
     <string name="limite_texte">Without a subscription, you can lock one app. Keep the one that takes most of your time.</string>
     <string name="limite_titre">One app without a subscription</string>
+    <string name="notif_canal">Screen time in progress</string>
+    <string name="notif_texte">Until %1$s. They lock again after that.</string>
+    <string name="notif_titre">Your apps are open</string>
     <string name="objectif_choisi">selected</string>
     <string name="objectif_option_concentration">Focus better</string>
     <string name="objectif_option_moins_scroller">Scroll less</string>
@@ -170,8 +177,8 @@
     <string name="placement_bouton">I\'m in position</string>
     <string name="placement_detecte">Whole body detected</string>
     <string name="placement_distance">about 1 m</string>
-    <string name="placement_texte">1 meter away, screen facing you. Your whole body must fit in the frame.</string>
-    <string name="placement_titre">Put your phone on the floor.</string>
+    <string name="placement_texte">On the floor, straight up at 90°, propped against a wall or an object. Screen facing you, 1 meter away. Your whole body must fit in the frame.</string>
+    <string name="placement_titre">Stand your phone upright.</string>
     <string name="planning_ajouter">Add a slot</string>
     <string name="planning_editeur_bouton">Add this slot</string>
     <string name="planning_editeur_debut">Start</string>
@@ -266,9 +273,16 @@
     <string name="verrou_app_commencer">Start push-ups</string>
     <string name="verrou_app_debloquees">unlocked</string>
     <string name="verrou_app_fermer_nom">Close %1$s</string>
+    <string name="verrou_app_gagner_plus">Earn more time</string>
+    <string name="verrou_app_plage">Strict slot \"%1$s\" until %2$s. Your apps stay locked, even with time saved up.</string>
     <string name="verrou_app_plus_tard">Later</string>
     <string name="verrou_app_pompes">%1$d push-ups</string>
+    <string name="verrou_app_serie">streak</string>
+    <string name="verrou_app_stock">You have %1$d min saved. Use them now or earn more.</string>
+    <string name="verrou_app_stock_legende">saved</string>
     <string name="verrou_app_texte">You\'ve used all your time. Earn it with your arms.</string>
     <string name="verrou_app_titre">Your apps are locked</string>
     <string name="verrou_app_titre_nom">%1$s is locked</string>
+    <string name="verrou_app_urgences">emergency unlocks this week</string>
+    <string name="verrou_app_utiliser">Use my %1$d min</string>
 </resources>

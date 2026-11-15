@@ -51,6 +51,10 @@ fun dateEtHeure(instant: Long, etat: EtatApp): String =
     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
         .format(Instant.ofEpochMilli(instant).atZone(etat.zone))
 
+/** "18:00" pour une heure de plage donnée en minutes depuis minuit. */
+fun heureDePlage(minutes: Int): String =
+    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(java.time.LocalTime.of(minutes / 60 % 24, minutes % 60))
+
 /** L'heure qu'il est, rafraîchie chaque seconde, pour les comptes à rebours. */
 @Composable
 fun horloge(): Long {

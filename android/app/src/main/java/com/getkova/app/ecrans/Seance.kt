@@ -1,6 +1,28 @@
 package com.getkova.app.ecrans
 
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.ImageBitmap
+import com.getkova.app.jeu.plageEnCours
+import java.time.ZoneId
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import com.getkova.app.BuildConfig
+import com.getkova.app.comptage.Articulation
+import com.getkova.app.comptage.Diagnostic
+import com.getkova.app.comptage.Point
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -80,24 +101,63 @@ import com.getkova.app.jeu.urgencesRestantes
 import com.getkova.app.nom
 import kotlinx.coroutines.delay
 
+/** Les segments du squelette : bras, tronc et jambes. */
+private val segments = listOf(
+    Articulation.EPAULE_GAUCHE to Articulation.EPAULE_DROITE,
+    Articulation.HANCHE_GAUCHE to Articulation.HANCHE_DROITE,
+    Articulation.EPAULE_GAUCHE to Articulation.COUDE_GAUCHE,
+    Articulation.COUDE_GAUCHE to Articulation.POIGNET_GAUCHE,
+    Articulation.EPAULE_DROITE to Articulation.COUDE_DROIT,
+    Articulation.COUDE_DROIT to Articulation.POIGNET_DROIT,
+    Articulation.EPAULE_GAUCHE to Articulation.HANCHE_GAUCHE,
+    Articulation.EPAULE_DROITE to Articulation.HANCHE_DROITE,
+    Articulation.HANCHE_GAUCHE to Articulation.GENOU_GAUCHE,
+    Articulation.GENOU_GAUCHE to Articulation.CHEVILLE_GAUCHE,
+    Articulation.HANCHE_DROITE to Articulation.GENOU_DROIT,
+    Articulation.GENOU_DROIT to Articulation.CHEVILLE_DROITE,
+)
+
 /**
- * Le cadre caméra de l'essai et de la séance : aperçu en direct, ligne de scan,
- * et message quand le corps sort du cadre. Sans caméra (refus, comptage simulé),
- * il montre la silhouette de la maquette.
+ * Le squelette détecté, dessiné par dessus l'aperçu de la caméra. Il montre ce
+ * que Kova voit : si le squelette te suit, le comptage peut marcher.
+ * L'aperçu remplit le cadre en rognant l'image et la caméra avant est en miroir :
+ * les positions sont converties de la même façon.
  */
 @Composable
-fun VueCamera(camera: CameraSeance, hauteur: Float, simule: Boolean) {
-    val forme = RoundedCornerShape(Tokens.Arrondis.grand.dp)
+private fun Squelette(camera: CameraSeance, modifier: Modifier = Modifier) {
+    val pose = camera.squelette
+    val rapport = camera.rapportImage
+    Canvas(modifier.clearAndSetSemantics { }) {
+        if (pose.isEmpty() || rapport <= 0f) return@Canvas
+        // Une unité de la pose vaut la hauteur de l'image. L'image remplit le cadre.
+        val echelle = maxOf(size.width / rapport, size.height)
+        val decalageX = (size.width - rapport * echelle) / 2
+        val decalageY = (size.height - echelle) / 2
+        fun place(point: Point) = Offset(
+            decalageX + (rapport - point.x.toFloat()) * echelle,
+            decalageY + point.y.toFloat() * echelle,
+        )
+        val trait = Tokens.Traits.illustration.dp.toPx()
+        for ((debut, fin) in segments) {
+            val a = pose[debut] ?: continue
+            val b = pose[fin] ?: continue
+            drawLine(Tokens.Couleurs.accent, place(a), place(b), strokeWidth = trait, cap = StrokeCap.Round)
+        }
+        for (point in pose.values) {
+            drawCircle(Tokens.Couleurs.texte, trait, place(point))
+        }
+    }
+}
+
+/**
+ * Le retour caméra : aperçu en direct, squelette par dessus et ligne de scan.
+ * Sans caméra (refus, comptage simulé), il montre la silhouette de la maquette.
+ */
+@Composable
+fun VueCamera(camera: CameraSeance, simule: Boolean, modifier: Modifier = Modifier) {
     val enDirect = camera.etat == CameraSeance.Etat.ACTIVE && !simule
     val scan = positionDuScan()
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(hauteur.dp)
-            .clip(forme)
-            .background(Tokens.Couleurs.carte)
-            .pointilles(),
-    ) {
+    Box(modifier.background(Tokens.Couleurs.carte)) {
         if (enDirect) {
             AndroidView(
                 factory = { contexte ->
@@ -110,6 +170,7 @@ fun VueCamera(camera: CameraSeance, hauteur: Float, simule: Boolean) {
                 update = { vue -> camera.attacherApercu(vue) },
             )
             DisposableEffect(Unit) { onDispose { camera.attacherApercu(null) } }
+            Squelette(camera, Modifier.fillMaxSize())
         } else {
             val message = when (camera.etat) {
                 CameraSeance.Etat.REFUSEE -> t(R.string.camera_refusee)
@@ -126,29 +187,120 @@ fun VueCamera(camera: CameraSeance, hauteur: Float, simule: Boolean) {
             }
         }
         if (scan != null) {
-            Box(
-                Modifier
-                    .offset(y = (hauteur * scan).dp)
-                    .fillMaxWidth()
-                    .height(Tokens.Traits.normal.dp)
-                    .alpha(Tokens.Opacites.scan)
-                    .background(Tokens.Couleurs.accent),
-            )
-        }
-        if (enDirect && !camera.corpsVisible) {
-            Corps(
-                t(R.string.camera_hors_cadre),
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = Tokens.Espacements.e13.dp)
-                    .clip(RoundedCornerShape(Tokens.Arrondis.moyen.dp))
-                    .background(Tokens.Couleurs.accent)
-                    .padding(horizontal = Tokens.Espacements.e13.dp, vertical = Tokens.Espacements.e8.dp),
-                couleur = Tokens.Couleurs.texteSurAccent,
-                graisse = Graisse.DEMI_GRAS,
-            )
+            // La ligne de scan suit le bas d'une boîte dont la hauteur varie.
+            Box(Modifier.fillMaxWidth().fillMaxHeight(scan), contentAlignment = Alignment.BottomCenter) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(Tokens.Traits.normal.dp)
+                        .alpha(Tokens.Opacites.scan)
+                        .background(Tokens.Couleurs.accent),
+                )
+            }
         }
     }
+}
+
+/**
+ * Gabarit des écrans de comptage : le retour caméra remplit tout l'écran, pour
+ * bien se voir. L'en-tête est en haut, le compteur et le bouton en bas, sur un
+ * voile sombre qui les garde lisibles. Écart voulu avec la maquette, où la
+ * caméra n'occupe que 38 % de la hauteur.
+ */
+@Composable
+private fun EcranCamera(
+    camera: CameraSeance,
+    simule: Boolean,
+    haut: @Composable RowScope.() -> Unit,
+    bas: @Composable ColumnScope.() -> Unit,
+) {
+    val enDirect = camera.etat == CameraSeance.Etat.ACTIVE && !simule
+    val cotes = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+    Box(Modifier.fillMaxSize().background(Tokens.Couleurs.fond)) {
+        VueCamera(camera, simule, Modifier.fillMaxSize())
+        Row(
+            Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                .padding(horizontal = Tokens.Ecran.margeCotes.dp, vertical = Tokens.Espacements.e8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp),
+            content = haut,
+        )
+        if (enDirect && !camera.corpsVisible) {
+            Etiquette(t(R.string.camera_hors_cadre), Modifier.align(Alignment.Center), accent = true)
+        }
+        Column(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.3f to Tokens.Couleurs.fond.copy(alpha = Tokens.Opacites.voileCamera),
+                        1f to Tokens.Couleurs.fond,
+                    ),
+                )
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).union(cotes))
+                .padding(horizontal = Tokens.Ecran.margeCotes.dp)
+                .padding(top = Tokens.Espacements.e55.dp, bottom = Tokens.Espacements.e8.dp),
+            verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = bas,
+        )
+    }
+}
+
+/** Petite étiquette lisible par dessus l'image de la caméra. */
+@Composable
+private fun Etiquette(texte: String, modifier: Modifier = Modifier, accent: Boolean = false) {
+    Corps(
+        texte,
+        modifier
+            .clip(RoundedCornerShape(Tokens.Arrondis.moyen.dp))
+            .background(if (accent) Tokens.Couleurs.accent else Tokens.Couleurs.fond.copy(alpha = Tokens.Opacites.voileCamera))
+            .padding(horizontal = Tokens.Espacements.e13.dp, vertical = Tokens.Espacements.e8.dp),
+        couleur = if (accent) Tokens.Couleurs.texteSurAccent else Tokens.Couleurs.texte,
+        graisse = Graisse.DEMI_GRAS,
+    )
+}
+
+/**
+ * Version de test : l'angle mesuré en direct et le sort de la dernière pompe,
+ * pour régler les seuils du comptage. Absent de la version publiée.
+ */
+@Composable
+private fun AngleMesure(camera: CameraSeance) {
+    if (!BuildConfig.DEBUG) return
+    val angle = camera.angle
+    val dernier = camera.diagnostic
+    val texte = buildString {
+        append(if (angle != null) angle.toInt().toString() + "°" else "–")
+        if (dernier != null) {
+            append("\n")
+            append(
+                when (dernier.raison) {
+                    Diagnostic.Raison.COMPTEE -> "OK"
+                    Diagnostic.Raison.PAS_ASSEZ_BAS -> "pas assez bas"
+                    Diagnostic.Raison.CORPS_IMMOBILE -> "corps immobile"
+                    Diagnostic.Raison.APPUI_DEPLACE -> "mains bougent"
+                },
+            )
+            append("\nbas " + dernier.angleBas.toInt() + "°")
+            append("\ncorps " + (dernier.deplacement * 100).toInt())
+            append("\nmains " + (dernier.glissement * 100).toInt())
+        }
+    }
+    Legende(
+        texte,
+        Modifier
+            .clip(RoundedCornerShape(Tokens.Arrondis.petit.dp))
+            .background(Tokens.Couleurs.fond.copy(alpha = Tokens.Opacites.voileCamera))
+            .padding(horizontal = Tokens.Espacements.e8.dp, vertical = Tokens.Espacements.e5.dp),
+        couleur = Tokens.Couleurs.accent,
+        graisse = Graisse.DEMI_GRAS,
+    )
 }
 
 /** Compteur géant "3/10" de l'essai et de la séance, avec le message d'encouragement. */
@@ -173,7 +325,10 @@ fun CompteurGeant(faites: Int, total: Int, tailleTotal: Float, corpsVisible: Boo
     }
 }
 
-/** Écran 9 : le moment de preuve. Trois vraies pompes comptées en direct, puis le bouton apparaît. */
+/**
+ * Écran 9 : le moment de preuve. Trois vraies pompes comptées en direct, puis le
+ * bouton apparaît. L'essai est facultatif : on peut le passer à tout moment.
+ */
 @Composable
 fun EcranEssai(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suivant: () -> Unit) {
     val total = 3
@@ -186,69 +341,92 @@ fun EcranEssai(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suivant:
         onDispose { camera.arreter() }
     }
     val refusee = camera.etat == CameraSeance.Etat.REFUSEE || camera.etat == CameraSeance.Etat.INDISPONIBLE
-    EcranKova(
-        espacement = Tokens.Espacements.e13,
-        bas = {
-            when {
-                camera.repetitions >= total ->
-                    BoutonPrincipal(t(R.string.essai_bouton), Modifier.entree(), action = suivant)
-                refusee -> {
-                    // Sans caméra, l'essai est impossible : on ne bloque pas l'onboarding.
-                    BoutonPrincipal(t(R.string.camera_ouvrir_reglages)) { ouvrirFicheDeLApp(contexte) }
-                    BoutonSecondaire(t(R.string.essai_passer), action = suivant)
-                }
-                else -> Spacer(Modifier.height(Tokens.Hauteurs.boutonPrincipal.dp))
-            }
+    EcranCamera(
+        camera, etat.comptageSimule,
+        haut = {
+            Box(Modifier.weight(1f)) { com.getkova.app.design.EnTeteEtapes(8, NOMBRE_ETAPES, retour) }
+            AngleMesure(camera)
         },
     ) {
-        com.getkova.app.design.EnTeteEtapes(8, NOMBRE_ETAPES, retour)
-        Titre(
-            t(R.string.essai_titre),
-            Modifier.padding(top = Tokens.Espacements.e13.dp).entree(1),
-            taille = Tokens.TaillesTexte.titreCarte,
-        )
-        VueCamera(camera, Tokens.Composants.VueCamera.hauteurEssai, etat.comptageSimule)
+        Titre(t(R.string.essai_titre), taille = Tokens.TaillesTexte.titreCarte, centre = true)
+        if (camera.repetitions == 0) {
+            Legende(t(R.string.essai_conseil), couleur = Tokens.Couleurs.texte, centre = true)
+        }
         CompteurGeant(camera.repetitions, total, Tokens.TaillesTexte.titreEcran, camera.corpsVisible)
+        when {
+            camera.repetitions >= total ->
+                BoutonPrincipal(t(R.string.essai_bouton), Modifier.entree(), action = suivant)
+            refusee -> {
+                BoutonPrincipal(t(R.string.camera_ouvrir_reglages)) { ouvrirFicheDeLApp(contexte) }
+                BoutonSecondaire(t(R.string.essai_passer), couleur = Tokens.Couleurs.texte, action = suivant)
+            }
+            else -> BoutonSecondaire(t(R.string.essai_passer), couleur = Tokens.Couleurs.texte, action = suivant)
+        }
     }
 }
 
 /**
  * Écran 13 : l'app verrouillée. Sur Android, Kova affiche lui-même cet écran par
- * dessus l'app bloquée : il reprend la maquette, nom de l'app compris.
+ * dessus l'app bloquée. Il part de la maquette et l'enrichit : icône de l'app,
+ * temps en stock utilisable tout de suite, série, urgences restantes, et la
+ * plage stricte en cours quand il y en a une.
  */
 @Composable
 fun EcranVerrou(
     nomDeLApp: String?,
-    repetitions: Int,
-    minutes: Int,
+    icone: ImageBitmap?,
+    jeu: EtatJeu,
+    maintenant: Long,
+    zone: ZoneId,
     commencer: () -> Unit,
+    utiliserLeStock: () -> Unit,
     fermer: () -> Unit,
     urgence: () -> Unit,
 ) {
+    val plage = jeu.plageEnCours(maintenant, zone)
+    val stock = jeu.soldeMinutes
+    val peutOuvrir = stock > 0 && plage == null
+    val urgences = jeu.urgencesRestantes(maintenant, zone)
+    val urgencePossible = jeu.urgenceActivee && urgences > 0
+    val serie = jeu.serie(maintenant, zone)
+    val texte = when {
+        plage != null -> f(R.string.verrou_app_plage, plage.nom, heureDePlage(plage.fin))
+        peutOuvrir -> f(R.string.verrou_app_stock, stock)
+        else -> t(R.string.verrou_app_texte)
+    }
     EcranKova(
         bas = {
-            BoutonPrincipal(t(R.string.verrou_app_commencer), Modifier.entree(6), action = commencer)
+            if (peutOuvrir) {
+                BoutonPrincipal(f(R.string.verrou_app_utiliser, stock), Modifier.entree(6), pulse = true, action = utiliserLeStock)
+                BoutonSecondaire(t(R.string.verrou_app_gagner_plus), couleur = Tokens.Couleurs.texte, action = commencer)
+            } else {
+                BoutonPrincipal(t(R.string.verrou_app_commencer), Modifier.entree(6), pulse = true, action = commencer)
+            }
             BoutonSecondaire(
                 if (nomDeLApp != null) f(R.string.verrou_app_fermer_nom, nomDeLApp) else t(R.string.verrou_app_plus_tard),
                 action = fermer,
             )
-            BoutonSecondaire(t(R.string.ecran_urgence), action = urgence)
+            if (urgencePossible) {
+                BoutonSecondaire(t(R.string.ecran_urgence), action = urgence)
+            }
         },
     ) {
-        IconeAnneau(Icone.CADENAS)
+        if (icone != null) IconeDeLAppBloquee(icone) else IconeAnneau(Icone.CADENAS)
         Centre(Modifier.padding(top = Tokens.Espacements.e13.dp).entree(2)) {
             Titre(
                 if (nomDeLApp != null) f(R.string.verrou_app_titre_nom, nomDeLApp) else t(R.string.verrou_app_titre),
                 centre = true,
             )
         }
-        Centre(Modifier.entree(3)) { Paragraphe(t(R.string.verrou_app_texte), centre = true) }
+        Centre(Modifier.entree(3)) {
+            Paragraphe(texte, couleur = if (plage != null) Tokens.Couleurs.accent else Tokens.Couleurs.texteSecondaire, centre = true)
+        }
         Row(
             Modifier.padding(top = Tokens.Espacements.e13.dp).entree(4).fillMaxWidth().carte(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e3.dp)) {
-                Titre(f(R.string.verrou_app_pompes, repetitions), taille = Tokens.TaillesTexte.titreCarte, lignesMax = 1)
+                Titre(f(R.string.verrou_app_pompes, jeu.regle.repetitions), taille = Tokens.TaillesTexte.titreCarte, lignesMax = 1)
                 Legende(t(R.string.verrou_app_a_faire))
             }
             Pictogramme(Icone.FLECHE, Modifier.padding(horizontal = Tokens.Espacements.e8.dp), couleur = Tokens.Couleurs.texteSecondaire)
@@ -258,10 +436,62 @@ fun EcranVerrou(
                 verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e3.dp),
             ) {
                 Titre(
-                    f(R.string.commun_minutes_court, minutes),
+                    f(R.string.commun_minutes_court, jeu.regle.minutes),
                     taille = Tokens.TaillesTexte.titreCarte, couleur = Tokens.Couleurs.accent, lignesMax = 1,
                 )
                 Legende(t(R.string.verrou_app_debloquees))
+            }
+        }
+        // Trois repères d'un coup d'œil : le temps en stock, la série, les urgences.
+        Row(Modifier.entree(5), horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
+            val marge = Tokens.Espacements.e13
+            RepereDeVerrou(f(R.string.commun_minutes_court, stock), t(R.string.verrou_app_stock_legende), Modifier.weight(1f), marge)
+            RepereDeVerrou(
+                n(R.string.commun_jours_un, R.string.commun_jours_autre, serie), t(R.string.verrou_app_serie),
+                Modifier.weight(1f), marge,
+            )
+            RepereDeVerrou(
+                f(R.string.urgence_compte, urgences, EtatJeu.URGENCES_PAR_SEMAINE), t(R.string.verrou_app_urgences),
+                Modifier.weight(1f), marge,
+            )
+        }
+    }
+}
+
+/** Petit repère de l'écran de blocage : une valeur et sa légende. */
+@Composable
+private fun RepereDeVerrou(valeur: String, libelle: String, modifier: Modifier, marge: Float) {
+    Column(modifier.carte(marge = marge), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e3.dp)) {
+        Titre(valeur, taille = Tokens.TaillesTexte.corpsFort, lignesMax = 1)
+        Legende(libelle)
+    }
+}
+
+/** L'icône de l'app bloquée, avec l'anneau qui s'élargit et un cadenas en pastille. */
+@Composable
+private fun IconeDeLAppBloquee(icone: ImageBitmap) {
+    val taille = Tokens.Composants.Logo.taille
+    Box(Modifier.fillMaxWidth().padding(top = Tokens.Espacements.e55.dp), contentAlignment = Alignment.Center) {
+        Anneau(Modifier.size(taille.dp))
+        Box(Modifier.size(taille.dp)) {
+            Image(
+                icone,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(Tokens.Arrondis.grand.dp)),
+            )
+            Box(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = Tokens.Espacements.e8.dp, y = Tokens.Espacements.e8.dp)
+                    .size(Tokens.Espacements.e34.dp)
+                    .clip(CircleShape)
+                    .background(Tokens.Couleurs.fond)
+                    .padding(Tokens.Espacements.e3.dp)
+                    .clip(CircleShape)
+                    .background(Tokens.Couleurs.accent),
+                contentAlignment = Alignment.Center,
+            ) {
+                Pictogramme(Icone.CADENAS, taille = Tokens.Espacements.e13 + Tokens.Espacements.e3, couleur = Tokens.Couleurs.texteSurAccent)
             }
         }
     }
@@ -368,10 +598,9 @@ fun EcranPlacement(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suiv
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
                 Box(Modifier.size(Tokens.Espacements.e55.dp), contentAlignment = Alignment.Center) {
                     Anneau(Modifier.size(Tokens.Espacements.e55.dp))
-                    // Inclinaison du téléphone dessiné, reprise de la maquette.
+                    // Le téléphone est dessiné bien droit : il se pose debout, à 90°.
                     Box(
                         Modifier
-                            .rotate(-12f)
                             .size(Tokens.Espacements.e34.dp, Tokens.Espacements.e55.dp)
                             .border(Tokens.Traits.illustration.dp, Tokens.Couleurs.accent, RoundedCornerShape(Tokens.Arrondis.petit.dp)),
                     )
@@ -414,25 +643,23 @@ fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, v
         camera.demarrer(proprietaire, etat.exercice, total, etat.comptageSimule)
         onDispose { vue.keepScreenOn = false }
     }
-    val segments = Tokens.Composants.BarreProgression.segments
-    EcranKova(
-        espacement = Tokens.Espacements.e13,
-        bas = {
-            if (faites >= total) {
-                BoutonPrincipal(t(R.string.seance_bouton), Modifier.entree(), action = valider)
-            } else {
-                Spacer(Modifier.height(Tokens.Hauteurs.boutonPrincipal.dp))
-            }
-        },
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    val segmentsTotal = Tokens.Composants.BarreProgression.segments
+    EcranCamera(
+        camera, etat.comptageSimule,
+        haut = {
             BoutonFermer(t(R.string.a11y_arreter_seance), action = abandonner)
             Spacer(Modifier.weight(1f))
-            Legende(f(R.string.seance_pour_minutes, etat.regle.minutes), graisse = Graisse.MOYEN)
-        }
-        VueCamera(camera, Tokens.Composants.VueCamera.hauteurSeance, etat.comptageSimule)
+            AngleMesure(camera)
+            Etiquette(f(R.string.seance_pour_minutes, etat.regle.minutes))
+        },
+    ) {
         CompteurGeant(faites, total, Tokens.TaillesTexte.titreAccueil, camera.corpsVisible)
-        BarreSegments(if (total > 0) faites * segments / total else 0, segments)
+        BarreSegments(if (total > 0) faites * segmentsTotal / total else 0, segmentsTotal)
+        if (faites >= total) {
+            BoutonPrincipal(t(R.string.seance_bouton), Modifier.entree(), action = valider)
+        } else {
+            Spacer(Modifier.height(Tokens.Hauteurs.boutonPrincipal.dp))
+        }
     }
 }
 

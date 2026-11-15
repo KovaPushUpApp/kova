@@ -66,6 +66,7 @@ import com.getkova.app.ecrans.EcranUrgence
 import com.getkova.app.ecrans.EcranVerrou
 import com.getkova.app.ecrans.Onglet
 import com.getkova.app.ecrans.ouvrirFicheDeLApp
+import com.getkova.app.verrou.Minuteur
 import com.getkova.app.verrou.ServiceVerrou
 
 class MainActivity : ComponentActivity() {
@@ -146,6 +147,17 @@ private fun ParcoursOnboarding(etat: EtatApp) {
         if (!etat.abonne && etat.jeu.apps.size > 1) aller(Etape.LIMITE) else etat.terminerOnboarding()
     }
 
+    // Version de test : toucher le bouton du paywall donne tout de suite accès à tout.
+    // Version publiée : le vrai achat Google Play, pas encore branché.
+    fun acheter() {
+        if (BuildConfig.DEBUG) {
+            etat.definirOption("abonnementSimule", true)
+            etat.terminerOnboarding()
+        } else {
+            messageAchat = true
+        }
+    }
+
     BackHandler(enabled = chemin.size > 1) { reculer() }
     // Au retour des réglages du téléphone, on regarde si le service a été activé.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -214,10 +226,10 @@ private fun ParcoursOnboarding(etat: EtatApp) {
                     aller(Etape.OFFRE)
                 }
             },
-            acheter = { messageAchat = true },
+            acheter = { acheter() },
             restaurer = { messageAchat = true },
         )
-        Etape.OFFRE -> EcranOffre(fermer = ::terminer, prendre = { messageAchat = true })
+        Etape.OFFRE -> EcranOffre(fermer = ::terminer, prendre = ::acheter)
         Etape.LIMITE -> EcranLimiteGratuite(etat, voirAbonnement = { aller(Etape.PAYWALL) }, terminer = ::terminer)
     }
     if (messageAchat) {
@@ -289,6 +301,19 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     val demandeCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         aller(Destination.PLACEMENT)
     }
+    // La notification du temps restant demande une autorisation sur Android 13 et plus.
+    // On la demande une seule fois, à la première entrée dans l'app.
+    val demandeNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        etat.rafraichir()
+    }
+    LaunchedEffect(Unit) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            !Minuteur.autorise(contexte) && !etat.notificationsDemandees
+        ) {
+            etat.definirOption("notificationsDemandees", true)
+            demandeNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     BackHandler(enabled = paywall || chemin.isNotEmpty()) {
         when {
             paywall -> paywall = false
@@ -299,7 +324,20 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     }
 
     if (paywall) {
-        EcranPaywall(etat, fermer = { paywall = false }, acheter = { messageAchat = true }, restaurer = { messageAchat = true })
+        EcranPaywall(
+            etat,
+            fermer = { paywall = false },
+            acheter = {
+                // Version de test : accès immédiat. Version publiée : achat Google Play, pas encore branché.
+                if (BuildConfig.DEBUG) {
+                    etat.definirOption("abonnementSimule", true)
+                    paywall = false
+                } else {
+                    messageAchat = true
+                }
+            },
+            restaurer = { messageAchat = true },
+        )
     } else when (chemin.lastOrNull()) {
         null -> Column(Modifier.fillMaxSize()) {
             Box(Modifier.weight(1f)) {
@@ -331,9 +369,15 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
         }
         Destination.VERROU -> EcranVerrou(
             nomDeLApp = null,
-            repetitions = etat.regle.repetitions,
-            minutes = etat.regle.minutes,
+            icone = null,
+            jeu = etat.jeu,
+            maintenant = remember { System.currentTimeMillis() },
+            zone = etat.zone,
             commencer = { chemin = listOf(Destination.EXERCICE) },
+            utiliserLeStock = {
+                etat.ouvrirFenetre()
+                revenirAuxOnglets()
+            },
             fermer = ::reculer,
             urgence = { aller(Destination.URGENCE) },
         )

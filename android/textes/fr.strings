@@ -16,6 +16,7 @@
 
 /* Choix des apps : sur Android, Kova peut afficher sa propre liste. */
 "apps.recherche" = "Rechercher une app";
+"apps.recherche_vide" = "Aucune app ne correspond à « %@ ».";
 "limite.texte" = "Sans abonnement, tu peux verrouiller une seule app. Garde celle qui te prend le plus de temps.";
 
 /* Écran de verrou : sur Android, Kova connaît le nom de l'app bloquée. */
@@ -35,3 +36,22 @@
 
 /* Chantier (version de test seulement). */
 "chantier.comptage" = "Compter sans caméra (1 par seconde)";
+
+/* Conseil de placement sous la caméra. */
+"essai.conseil" = "Téléphone debout à 90°, à 1 mètre de toi.";
+
+/* Écran de blocage. */
+"verrou.app.stock" = "Tu as %lld min en stock. Utilise-les maintenant ou gagnes-en plus.";
+"verrou.app.utiliser" = "Utiliser mes %lld min";
+"verrou.app.gagner_plus" = "Gagner plus de temps";
+"verrou.app.plage" = "Plage stricte « %@ » jusqu'à %@. Tes apps restent verrouillées, même avec du temps en stock.";
+"verrou.app.serie" = "de série";
+"verrou.app.urgences" = "urgences cette semaine";
+"verrou.app.stock_legende" = "en stock";
+
+/* Notification du temps restant, et minuteur de la dernière minute. */
+"notif.canal" = "Temps d'écran en cours";
+"notif.titre" = "Tes apps sont ouvertes";
+"notif.texte" = "Jusqu'à %@. Elles se reverrouillent ensuite.";
+"bulle.titre" = "Reverrouillage dans";
+"bulle.temps" = "%lld:%02lld";

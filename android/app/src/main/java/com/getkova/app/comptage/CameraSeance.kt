@@ -52,6 +52,22 @@ class CameraSeance(contexte: Context) {
     var corpsVisible by mutableStateOf(false)
         private set
 
+    /** Le squelette détecté sur la dernière image, pour le dessiner par dessus l'aperçu. */
+    var squelette by mutableStateOf<Pose>(emptyMap())
+        private set
+
+    /** Largeur de l'image divisée par sa hauteur, une fois redressée. */
+    var rapportImage by mutableStateOf(0.75f)
+        private set
+
+    /** Dernier angle mesuré (coude ou genou). Affiché dans la version de test. */
+    var angle by mutableStateOf<Double?>(null)
+        private set
+
+    /** Ce qui est arrivé à la dernière répétition. Affiché dans la version de test. */
+    var diagnostic by mutableStateOf<Diagnostic?>(null)
+        private set
+
     /** Appelé à chaque répétition comptée, avec le total. */
     var surRepetition: ((Int) -> Unit)? = null
 
@@ -86,6 +102,9 @@ class CameraSeance(contexte: Context) {
         compteur = CompteurRepetitions(exercice)
         repetitions = 0
         corpsVisible = false
+        squelette = emptyMap()
+        angle = null
+        diagnostic = null
         if (simule) {
             etat = Etat.ACTIVE
             corpsVisible = true
@@ -110,6 +129,7 @@ class CameraSeance(contexte: Context) {
         principal.removeCallbacks(simulation)
         etat = Etat.ARRETEE
         corpsVisible = false
+        squelette = emptyMap()
         fournisseur?.unbindAll()
     }
 
@@ -154,6 +174,7 @@ class CameraSeance(contexte: Context) {
         val rotation = image.imageInfo.rotationDegrees
         // Hauteur de l'image une fois redressée : elle sert d'unité pour les positions.
         val hauteur = (if (rotation % 180 == 0) image.height else image.width).coerceAtLeast(1).toDouble()
+        val largeur = (if (rotation % 180 == 0) image.width else image.height).toDouble()
         detecteur.process(InputImage.fromMediaImage(media, rotation))
             .addOnSuccessListener { resultat ->
                 val points = mutableMapOf<Articulation, Point>()
@@ -164,7 +185,11 @@ class CameraSeance(contexte: Context) {
                     }
                 }
                 if (numero == serie && etat == Etat.ACTIVE) {
+                    squelette = points
+                    rapportImage = (largeur / hauteur).toFloat()
                     val comptee = compteur.traiter(points.ifEmpty { null })
+                    angle = compteur.angle
+                    diagnostic = compteur.diagnostic
                     publier(compteur.compte, compteur.corpsVisible, comptee, numero)
                 }
             }

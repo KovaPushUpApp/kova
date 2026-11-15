@@ -171,7 +171,7 @@ object Tokens {
         }
         const val reduireLesAnimations = "respecter le réglage système"
         object Pompe {
-            const val duree = 1.0f
+            const val duree = 1.6f
             const val boucle = true
         }
     }
@@ -187,6 +187,7 @@ object Tokens {
     object Opacites {
         const val voileSurAccent = 0.12f
         const val scan = 0.5f
+        const val voileCamera = 0.85f
     }
     object Typographie {
         const val echelleMinimale = 0.5f

@@ -19,6 +19,7 @@ import com.getkova.app.jeu.ouvrirFenetre
 import com.getkova.app.jeu.proposerRegle
 import com.getkova.app.jeu.utiliserUrgence
 import com.getkova.app.jeu.validerSeance
+import com.getkova.app.verrou.Minuteur
 import kotlinx.serialization.json.Json
 import java.time.ZoneId
 
@@ -123,6 +124,10 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     var comptageSimule by mutableStateOf(reglages.getBoolean("comptageSimule", false))
         private set
 
+    /** Vrai une fois l'autorisation de notifier demandée : on ne la redemande pas. */
+    var notificationsDemandees by mutableStateOf(reglages.getBoolean("notificationsDemandees", false))
+        private set
+
     /** Exercice de la séance en cours. */
     var exercice by mutableStateOf(jeu.exerciceParDefaut)
 
@@ -138,6 +143,8 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
             Depot.ecrire(contexte, etat)
             jeu = etat
         }
+        // La notification du temps restant suit l'état : affichée pendant une fenêtre, retirée sinon.
+        Minuteur.mettreAJour(contexte, etat, instant, zone)
         return resultat
     }
 
@@ -171,6 +178,7 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
             "offreDejaVue" -> offreDejaVue = valeur
             "abonnementSimule" -> abonne = valeur
             "comptageSimule" -> comptageSimule = valeur
+            "notificationsDemandees" -> notificationsDemandees = valeur
         }
         reglages.edit().putBoolean(cle, valeur).apply()
     }

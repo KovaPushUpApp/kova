@@ -79,6 +79,7 @@ import com.getkova.app.jeu.serie
 import com.getkova.app.nom
 import com.getkova.app.verrou.AppInstallee
 import com.getkova.app.verrou.AppsInstallees
+import java.text.Normalizer
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -155,11 +156,51 @@ fun ListeApps(selection: Set<String>, basculer: (String) -> Unit) {
     val contexte = LocalContext.current
     var apps by remember { mutableStateOf<List<AppInstallee>?>(null) }
     val initiale = remember { selection }
+    var recherche by remember { mutableStateOf("") }
     LaunchedEffect(Unit) { apps = AppsInstallees.charger(contexte) }
     Column(verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
-        apps?.sortedBy { it.paquet !in initiale }?.forEach { app ->
+        ChampTexte(recherche, t(R.string.apps_recherche)) { recherche = it }
+        val cherche = sansAccents(recherche.trim())
+        val visibles = apps
+            ?.filter { cherche.isEmpty() || sansAccents(it.nom).contains(cherche) }
+            ?.sortedBy { it.paquet !in initiale }
+        visibles?.forEach { app ->
             LigneApp(app, app.paquet in selection) { basculer(app.paquet) }
         }
+        if (visibles != null && visibles.isEmpty()) {
+            Centre(Modifier.padding(vertical = Tokens.Espacements.e21.dp)) {
+                Paragraphe(f(R.string.apps_recherche_vide, recherche.trim()), centre = true)
+            }
+        }
+    }
+}
+
+/** Minuscules et sans accents, pour que "telephone" trouve "Téléphone". */
+private fun sansAccents(texte: String): String =
+    Normalizer.normalize(texte.lowercase(), Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+
+/** Champ de saisie aux couleurs de Kova : carte arrondie, texte d'aide quand il est vide. */
+@Composable
+fun ChampTexte(valeur: String, aide: String, longueurMax: Int = 40, changer: (String) -> Unit) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = Tokens.Hauteurs.option.dp)
+            .carte(marge = Tokens.Espacements.e13)
+            .semantics { contentDescription = aide },
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        if (valeur.isEmpty()) {
+            Corps(aide, couleur = Tokens.Couleurs.texteSecondaire)
+        }
+        BasicTextField(
+            value = valeur,
+            onValueChange = { changer(it.take(longueurMax)) },
+            singleLine = true,
+            textStyle = TextStyle(color = Tokens.Couleurs.texte, fontFamily = Polices.texte, fontSize = Tokens.TaillesTexte.corps.sp),
+            cursorBrush = SolidColor(Tokens.Couleurs.accent),
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -433,9 +474,6 @@ fun EcranReserve(titre: String, texte: String, voir: () -> Unit) {
 
 // --- Planning ---------------------------------------------------------------
 
-private fun heureDePlage(minutes: Int): String =
-    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(LocalTime.of(minutes / 60 % 24, minutes % 60))
-
 @Composable
 private fun libelleDesJours(jours: Set<Int>): String = when (jours) {
     Plage.tousLesJours -> t(R.string.planning_jours_tous)
@@ -508,22 +546,7 @@ fun EcranEditeurPlage(annuler: () -> Unit, ajouter: (Plage) -> Unit) {
             Titre(t(R.string.planning_ajouter), Modifier.weight(1f), taille = Tokens.TaillesTexte.titreCarte)
             BoutonFermer(action = annuler)
         }
-        Box(
-            Modifier.fillMaxWidth().heightIn(min = Tokens.Hauteurs.option.dp).carte(marge = Tokens.Espacements.e13),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            if (nom.isEmpty()) {
-                Corps(t(R.string.planning_editeur_nom), couleur = Tokens.Couleurs.texteSecondaire)
-            }
-            BasicTextField(
-                value = nom,
-                onValueChange = { nom = it.take(30) },
-                singleLine = true,
-                textStyle = TextStyle(color = Tokens.Couleurs.texte, fontFamily = Polices.texte, fontSize = Tokens.TaillesTexte.corps.sp),
-                cursorBrush = SolidColor(Tokens.Couleurs.accent),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        ChampTexte(nom, t(R.string.planning_editeur_nom), longueurMax = 30) { nom = it }
         GroupeReglages {
             LigneHeure(t(R.string.planning_editeur_debut), debut) { debut = (debut + it * pas + journee) % journee }
             LigneHeure(t(R.string.planning_editeur_fin), fin) { fin = (fin + it * pas + journee) % journee }

@@ -15,6 +15,7 @@
 
 /* App choice: on Android, Kova can show its own list. */
 "apps.recherche" = "Search for an app";
+"apps.recherche_vide" = "No app matches \"%@\".";
 "limite.texte" = "Without a subscription, you can lock one app. Keep the one that takes most of your time.";
 
 /* Lock screen: on Android, Kova knows the blocked app's name. */
@@ -34,3 +35,22 @@
 
 /* Chantier (version de test seulement). */
 "chantier.comptage" = "Count without camera (1 per second)";
+
+/* Placement tip under the camera. */
+"essai.conseil" = "Phone upright at 90°, 1 meter away from you.";
+
+/* Lock screen. */
+"verrou.app.stock" = "You have %lld min saved. Use them now or earn more.";
+"verrou.app.utiliser" = "Use my %lld min";
+"verrou.app.gagner_plus" = "Earn more time";
+"verrou.app.plage" = "Strict slot \"%@\" until %@. Your apps stay locked, even with time saved up.";
+"verrou.app.serie" = "streak";
+"verrou.app.urgences" = "emergency unlocks this week";
+"verrou.app.stock_legende" = "saved";
+
+/* Remaining time notification, and last-minute timer. */
+"notif.canal" = "Screen time in progress";
+"notif.titre" = "Your apps are open";
+"notif.texte" = "Until %@. They lock again after that.";
+"bulle.titre" = "Locking again in";
+"bulle.temps" = "%lld:%02lld";

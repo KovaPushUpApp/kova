@@ -2,6 +2,7 @@ package com.getkova.app
 
 import com.getkova.app.comptage.Articulation
 import com.getkova.app.comptage.CompteurRepetitions
+import com.getkova.app.comptage.Diagnostic
 import com.getkova.app.comptage.Geometrie
 import com.getkova.app.comptage.Point
 import com.getkova.app.comptage.Pose
@@ -58,6 +59,26 @@ class CompteurRepetitionsTest {
     @Test
     fun dixPompesCorrectesSontCompteesDix() {
         assertEquals(10, compter(Exercice.POMPES, dixRepetitions(haut, bas)).compte)
+    }
+
+    @Test
+    fun dixPompesRapidesSontCompteesDix() {
+        // Peu d'images par pompe, sans pause : le lissage ne doit pas écraser le mouvement.
+        val pas = 4
+        val rapide = (0..pas).map { melange(haut, bas, it.toDouble() / pas) } +
+            (1..pas).map { melange(haut, bas, 1 - it.toDouble() / pas) }
+        val images = List(5) { melange(haut, bas, 0.0) } + (1..10).flatMap { rapide } + List(3) { melange(haut, bas, 0.0) }
+        assertEquals(10, compter(Exercice.POMPES, images).compte)
+    }
+
+    @Test
+    fun lePourquoiDUnRefusEstConnu() {
+        // Une descente franche mais incomplète : le coude s'arrête vers 116°.
+        val demi = compter(Exercice.POMPES, dixRepetitions(haut, bas, amplitude = 0.6))
+        assertEquals(0, demi.compte)
+        assertEquals(Diagnostic.Raison.PAS_ASSEZ_BAS, demi.diagnostic?.raison)
+        val correcte = compter(Exercice.POMPES, dixRepetitions(haut, bas))
+        assertEquals(Diagnostic.Raison.COMPTEE, correcte.diagnostic?.raison)
     }
 
     @Test

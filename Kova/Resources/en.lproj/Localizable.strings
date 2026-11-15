@@ -162,8 +162,8 @@
 "verrou.app.plus_tard" = "Later";
 
 /* 15. Placement */
-"placement.titre" = "Put your phone on the floor.";
-"placement.texte" = "1 meter away, screen facing you. Your whole body must fit in the frame.";
+"placement.titre" = "Stand your phone upright.";
+"placement.texte" = "On the floor, straight up at 90°, propped against a wall or an object. Screen facing you, 1 meter away. Your whole body must fit in the frame.";
 "placement.distance" = "about 1 m";
 "placement.detecte" = "Whole body detected";
 "placement.bouton" = "I'm in position";
@@ -243,7 +243,7 @@
 "a11y.progression" = "Set progress";
 "a11y.progression_valeur" = "%lld of %lld";
 "a11y.arreter_seance" = "Stop the workout";
-"a11y.placement" = "Phone on the floor, about 1 meter away from you";
+"a11y.placement" = "Phone standing upright on the floor, about 1 meter away from you";
 "a11y.plage" = "%@ slot";
 "a11y.stats" = "%lld reps this week";
 

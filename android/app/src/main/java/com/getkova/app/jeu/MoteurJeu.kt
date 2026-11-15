@@ -100,8 +100,11 @@ fun EtatJeu.validerSeance(exercice: Exercice, maintenant: Long): EtatJeu {
 
 // --- Planning -----------------------------------------------------------------
 
-fun EtatJeu.plageActive(maintenant: Long, zone: ZoneId): Boolean =
-    plages.any { it.enVigueur(maintenant) && it.contient(maintenant, zone) }
+/** La plage stricte en cours, s'il y en a une. */
+fun EtatJeu.plageEnCours(maintenant: Long, zone: ZoneId): Plage? =
+    plages.firstOrNull { it.enVigueur(maintenant) && it.contient(maintenant, zone) }
+
+fun EtatJeu.plageActive(maintenant: Long, zone: ZoneId): Boolean = plageEnCours(maintenant, zone) != null
 
 /** Activer est immédiat, désactiver prend effet dans 24 h (règle 7). */
 fun EtatJeu.basculerPlage(id: String, maintenant: Long): EtatJeu = copy(plages = plages.map { plage ->

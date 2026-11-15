@@ -159,14 +159,19 @@ fun LogoKova(modifier: Modifier = Modifier) {
     }
 }
 
-/** Silhouette en pompe des maquettes. Grille de 150 x 70. */
+/**
+ * Silhouette qui fait une pompe, vue de profil. Elle remplace le bonhomme en
+ * bâtons des maquettes : le corps reste droit et pivote sur les pieds, la main
+ * reste au sol et le coude plie vraiment, comme dans une vraie pompe.
+ * Dessinée sur une grille de 200 x 100.
+ */
 @Composable
 fun FigurePompe(modifier: Modifier = Modifier, animee: Boolean = true) {
     val descente = if (animee && !reduireLesAnimations()) {
         val transition = rememberInfiniteTransition(label = "pompe")
         val valeur by transition.animateFloat(
             initialValue = 0f,
-            targetValue = 12f,
+            targetValue = 1f,
             animationSpec = infiniteRepeatable(
                 tween(Mouvement.ms(Tokens.Animations.Pompe.duree) / 2, easing = FastOutSlowInEasing),
                 RepeatMode.Reverse,
@@ -178,21 +183,48 @@ fun FigurePompe(modifier: Modifier = Modifier, animee: Boolean = true) {
         0f
     }
     Canvas(modifier.size(Tokens.Composants.Illustration.largeur.dp, Tokens.Composants.Illustration.hauteur.dp)) {
-        val trait = Stroke(Tokens.Traits.illustration, cap = StrokeCap.Round, join = StrokeJoin.Round)
-        scale(size.width / 150f, size.height / 70f, pivot = Offset.Zero) {
-            translate(top = descente) {
-                drawCircle(Tokens.Couleurs.accent, 8f, Offset(126f, 18f), style = trait)
-                drawPath(Path().apply { ligne(116f to 24f, 60f to 40f, 14f to 54f) }, Tokens.Couleurs.accent, style = trait)
+        val echelle = minOf(size.width / 200f, size.height / 100f)
+        translate((size.width - 200f * echelle) / 2, (size.height - 100f * echelle) / 2) {
+            scale(echelle, echelle, pivot = Offset.Zero) {
+                val sol = 88f
+                val main = Offset(152f, sol - 3f)
+                val cheville = Offset(26f, sol - 7f)
+                // L'épaule descend vers la main : haute bras tendus, basse en bas de la pompe.
+                val epaule = Offset(150f, 43f + 27f * descente)
+                val hanche = Offset(
+                    cheville.x + (epaule.x - cheville.x) * 0.52f,
+                    cheville.y + (epaule.y - cheville.y) * 0.52f,
+                )
+                // Le coude : deux segments de même longueur entre l'épaule et la main, pliés vers l'arrière.
+                val segment = 23f
+                val ecart = (main - epaule).getDistance().coerceIn(1f, segment * 2)
+                val milieu = Offset((epaule.x + main.x) / 2, (epaule.y + main.y) / 2)
+                val saillie = kotlin.math.sqrt((segment * segment - ecart * ecart / 4).coerceAtLeast(0f))
+                val direction = (main - epaule) / ecart
+                // Perpendiculaire au bras, du côté des pieds.
+                val coude = Offset(milieu.x - direction.y * saillie, milieu.y + direction.x * saillie)
+                // La tête prolonge le corps, un peu relevée.
+                val axe = (epaule - cheville) / (epaule - cheville).getDistance()
+                val tete = Offset(epaule.x + axe.x * 17f, epaule.y + axe.y * 17f - 5f)
+
+                val corps = Stroke(11f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+                val bras = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+
+                // Le sol, puis une ombre qui s'élargit quand le corps descend.
+                drawLine(Tokens.Couleurs.pointille, Offset(8f, sol), Offset(192f, sol), 3f, StrokeCap.Round)
+                drawOval(
+                    Tokens.Couleurs.fond.copy(alpha = 0.35f + 0.25f * descente),
+                    topLeft = Offset(40f - 6f * descente, sol - 3f),
+                    size = Size(110f + 12f * descente, 6f),
+                )
+                // Jambes et tronc d'un seul trait, pied posé sur la pointe.
+                drawPath(Path().apply { ligne(cheville.x to cheville.y, hanche.x to hanche.y, epaule.x to epaule.y) }, Tokens.Couleurs.accent, style = corps)
+                drawLine(Tokens.Couleurs.accent, cheville, Offset(cheville.x - 8f, sol - 2f), 8f, StrokeCap.Round)
+                // Le bras passe devant le corps, dans une teinte plus claire pour le détacher.
+                drawPath(Path().apply { ligne(epaule.x to epaule.y, coude.x to coude.y, main.x to main.y) }, Tokens.Couleurs.texte, style = bras)
+                drawLine(Tokens.Couleurs.texte, main, Offset(main.x + 9f, sol - 2f), 7f, StrokeCap.Round)
+                drawCircle(Tokens.Couleurs.accent, 11f, tete)
             }
-            drawPath(
-                Path().apply {
-                    ligne(104f to 28f, 98f to 56f)
-                    ligne(60f to 40f, 52f to 58f)
-                },
-                Tokens.Couleurs.accent,
-                style = trait,
-            )
-            drawPath(Path().apply { ligne(4f to 62f, 146f to 62f) }, Tokens.Couleurs.pointille, style = trait)
         }
     }
 }

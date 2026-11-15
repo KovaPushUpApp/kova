@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- La caméra compte les répétitions. L'image est analysée sur le téléphone,
-         jamais enregistrée ni envoyée. L'app n'a pas la permission Internet. -->
+         jamais enregistrée ni envoyée. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Pour la notification qui affiche le temps restant. Elle est créée sur le téléphone. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Kova n'a aucun accès à Internet. La bibliothèque de détection de posture
+         demande cette permission pour envoyer des statistiques d'usage : on la lui
+         retire. La détection tourne entièrement sur le téléphone. À revoir le jour
+         où les achats seront branchés, qui auront besoin du réseau. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
 
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
@@ -13,6 +22,10 @@
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
         </intent>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />

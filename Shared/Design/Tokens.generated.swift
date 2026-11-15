@@ -184,7 +184,7 @@ enum Tokens {
         }
         static let reduireLesAnimations = "respecter le réglage système"
         enum Pompe {
-            static let duree: CGFloat = 1.0
+            static let duree: CGFloat = 1.6
             static let boucle = true
         }
     }
@@ -200,6 +200,7 @@ enum Tokens {
     enum Opacites {
         static let voileSurAccent: CGFloat = 0.12
         static let scan: CGFloat = 0.5
+        static let voileCamera: CGFloat = 0.85
     }
     enum Typographie {
         static let echelleMinimale: CGFloat = 0.5

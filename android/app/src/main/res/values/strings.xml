@@ -10,7 +10,7 @@
     <string name="a11y_logo">Logo Kova : cadenas ouvert</string>
     <string name="a11y_moins_de_minutes">Moins de minutes</string>
     <string name="a11y_moins_de_pompes">Moins de pompes</string>
-    <string name="a11y_placement">Téléphone posé au sol, à environ 1 mètre de toi</string>
+    <string name="a11y_placement">Téléphone posé debout au sol, à environ 1 mètre de toi</string>
     <string name="a11y_plage">Plage %1$s</string>
     <string name="a11y_plus_de_minutes">Plus de minutes</string>
     <string name="a11y_plus_de_pompes">Plus de pompes</string>
@@ -48,6 +48,7 @@
     <string name="apps_compte_autre">%1$d apps seront verrouillées.</string>
     <string name="apps_compte_un">%1$d app sera verrouillée.</string>
     <string name="apps_recherche">Rechercher une app</string>
+    <string name="apps_recherche_vide">Aucune app ne correspond à « %1$s ».</string>
     <string name="apps_titre">Quelles apps te volent ton temps ?</string>
     <string name="apps_reglage_texte_autre">%1$d apps verrouillées. Retirer une app prend effet dans 24 h, pour éviter de craquer.</string>
     <string name="apps_reglage_texte_un">%1$d app verrouillée. Retirer une app prend effet dans 24 h, pour éviter de craquer.</string>
@@ -72,6 +73,8 @@
     <string name="bienvenue_commencer">Commencer</string>
     <string name="bienvenue_texte">Tes apps restent verrouillées tant que tu n\'as pas fait tes pompes.</string>
     <string name="bienvenue_titre">Gagne ton temps d\'écran.</string>
+    <string name="bulle_temps">%1$d:%2$02d</string>
+    <string name="bulle_titre">Reverrouillage dans</string>
     <string name="camera_fictive">Vue caméra : détection de la posture</string>
     <string name="camera_hors_cadre">Reviens dans le cadre</string>
     <string name="camera_indisponible">Aucune caméra utilisable sur cet appareil.</string>
@@ -102,6 +105,7 @@
     <string name="ecran_paywall">Abonnement</string>
     <string name="ecran_urgence">Déblocage d\'urgence</string>
     <string name="essai_bouton">Ça marche. Continuer</string>
+    <string name="essai_conseil">Téléphone debout à 90°, à 1 mètre de toi.</string>
     <string name="essai_passer">Continuer sans essayer</string>
     <string name="essai_titre">Teste : fais 3 pompes.</string>
     <string name="exercice_abdos">Abdos</string>
@@ -132,6 +136,9 @@
     <string name="limite_abonnement">Voir l\'abonnement</string>
     <string name="limite_texte">Sans abonnement, tu peux verrouiller une seule app. Garde celle qui te prend le plus de temps.</string>
     <string name="limite_titre">Une seule app sans abonnement</string>
+    <string name="notif_canal">Temps d\'écran en cours</string>
+    <string name="notif_texte">Jusqu\'à %1$s. Elles se reverrouillent ensuite.</string>
+    <string name="notif_titre">Tes apps sont ouvertes</string>
     <string name="objectif_choisi">choisi</string>
     <string name="objectif_option_concentration">Mieux me concentrer</string>
     <string name="objectif_option_moins_scroller">Moins scroller</string>
@@ -170,8 +177,8 @@
     <string name="placement_bouton">Je suis en position</string>
     <string name="placement_detecte">Corps entier détecté</string>
     <string name="placement_distance">environ 1 m</string>
-    <string name="placement_texte">À 1 mètre de toi, écran face à toi. Ton corps doit entrer dans le cadre.</string>
-    <string name="placement_titre">Pose ton téléphone au sol.</string>
+    <string name="placement_texte">Au sol, bien droit à 90°, calé contre un mur ou un objet. Écran face à toi, à 1 mètre. Ton corps doit entrer dans le cadre.</string>
+    <string name="placement_titre">Pose ton téléphone debout.</string>
     <string name="planning_ajouter">Ajouter une plage</string>
     <string name="planning_editeur_bouton">Ajouter cette plage</string>
     <string name="planning_editeur_debut">Début</string>
@@ -266,9 +273,16 @@
     <string name="verrou_app_commencer">Commencer les pompes</string>
     <string name="verrou_app_debloquees">débloquées</string>
     <string name="verrou_app_fermer_nom">Fermer %1$s</string>
+    <string name="verrou_app_gagner_plus">Gagner plus de temps</string>
+    <string name="verrou_app_plage">Plage stricte « %1$s » jusqu\'à %2$s. Tes apps restent verrouillées, même avec du temps en stock.</string>
     <string name="verrou_app_plus_tard">Plus tard</string>
     <string name="verrou_app_pompes">%1$d pompes</string>
+    <string name="verrou_app_serie">de série</string>
+    <string name="verrou_app_stock">Tu as %1$d min en stock. Utilise-les maintenant ou gagnes-en plus.</string>
+    <string name="verrou_app_stock_legende">en stock</string>
     <string name="verrou_app_texte">Tu as utilisé tout ton temps. Gagne-le avec tes bras.</string>
     <string name="verrou_app_titre">Tes apps sont verrouillées</string>
     <string name="verrou_app_titre_nom">%1$s est verrouillée</string>
+    <string name="verrou_app_urgences">urgences cette semaine</string>
+    <string name="verrou_app_utiliser">Utiliser mes %1$d min</string>
 </resources>

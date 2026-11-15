@@ -162,8 +162,8 @@
 "verrou.app.plus_tard" = "Plus tard";
 
 /* 15. Placement */
-"placement.titre" = "Pose ton téléphone au sol.";
-"placement.texte" = "À 1 mètre de toi, écran face à toi. Ton corps doit entrer dans le cadre.";
+"placement.titre" = "Pose ton téléphone debout.";
+"placement.texte" = "Au sol, bien droit à 90°, calé contre un mur ou un objet. Écran face à toi, à 1 mètre. Ton corps doit entrer dans le cadre.";
 "placement.distance" = "environ 1 m";
 "placement.detecte" = "Corps entier détecté";
 "placement.bouton" = "Je suis en position";
@@ -243,7 +243,7 @@
 "a11y.progression" = "Progression de la série";
 "a11y.progression_valeur" = "%lld sur %lld";
 "a11y.arreter_seance" = "Arrêter la séance";
-"a11y.placement" = "Téléphone posé au sol, à environ 1 mètre de toi";
+"a11y.placement" = "Téléphone posé debout au sol, à environ 1 mètre de toi";
 "a11y.plage" = "Plage %@";
 "a11y.stats" = "%lld répétitions cette semaine";
 

@@ -31,6 +31,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    packaging {
+        // Bibliothèques natives compressées dans l'APK : il est nettement plus léger à transmettre.
+        jniLibs { useLegacyPackaging = true }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true

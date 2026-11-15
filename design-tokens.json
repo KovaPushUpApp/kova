@@ -189,7 +189,7 @@
     },
     "reduireLesAnimations": "respecter le réglage système",
     "pompe": {
-      "duree": 1.0,
+      "duree": 1.6,
       "boucle": true
     }
   },
@@ -204,7 +204,8 @@
   },
   "opacites": {
     "voileSurAccent": 0.12,
-    "scan": 0.5
+    "scan": 0.5,
+    "voileCamera": 0.85
   },
   "typographie": {
     "echelleMinimale": 0.5,

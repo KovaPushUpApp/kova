@@ -6,6 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.res.ResourcesCompat
+import com.getkova.app.R
+import com.getkova.app.design.Tokens
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,7 +25,14 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
+import com.getkova.app.jeu.EtatJeu
+import com.getkova.app.jeu.ouvrirFenetre
 import androidx.compose.ui.graphics.asImageBitmap
 import com.getkova.app.Depot
 import com.getkova.app.MainActivity
@@ -63,6 +81,10 @@ object AppsInstallees {
         }
     }
 
+    /** L'app correspondant à ce paquet, avec son nom et son icône. */
+    suspend fun trouver(contexte: Context, paquet: String): AppInstallee? =
+        charger(contexte).firstOrNull { it.paquet == paquet }
+
     fun nom(contexte: Context, paquet: String): String? = runCatching {
         val gestionnaire = contexte.packageManager
         gestionnaire.getApplicationLabel(gestionnaire.getApplicationInfo(paquet, 0)).toString()
@@ -85,11 +107,39 @@ class ServiceVerrou : AccessibilityService() {
     private var paquetAuPremierPlan: String? = null
     private val reverifier = Runnable { controler(paquetAuPremierPlan) }
 
+    /** Le minuteur de la dernière minute, posé par dessus l'app, et l'instant où il s'arrête. */
+    private var bulle: View? = null
+    private var texteDeLaBulle: TextView? = null
+    private var finDeLaBulle = 0L
+    private val montrerLaBulle = Runnable { afficherLaBulle() }
+    private val battre = object : Runnable {
+        override fun run() {
+            val reste = finDeLaBulle - System.currentTimeMillis()
+            if (reste <= 0 || bulle == null) {
+                retirerLaBulle()
+                return
+            }
+            // Arrondi vers le haut : on lit "1:00" puis "0:59", jamais "0:00" avant la fin.
+            val secondes = ((reste + 999) / 1000).toInt()
+            texteDeLaBulle?.text = getString(R.string.bulle_temps, secondes / 60, secondes % 60)
+            principal.postDelayed(this, reste % 1000 + 20)
+        }
+    }
+
     override fun onAccessibilityEvent(evenement: AccessibilityEvent?) {
         if (evenement?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val paquet = evenement.packageName?.toString() ?: return
         // Le clavier et l'interface du système passent au premier plan sans qu'on change d'app.
-        if (paquet == packageName || paquet in paquetsIgnores) return
+        if (paquet == packageName) {
+            // Un écran de Kova passe au premier plan : le minuteur n'a plus lieu d'être.
+            // Le minuteur lui-même est une fenêtre de Kova, mais pas un écran : on l'ignore,
+            // sinon il se retirerait tout seul et annulerait le reverrouillage.
+            if (evenement.className?.toString().orEmpty().startsWith(packageName)) oublier()
+            return
+        }
+        // Le clavier, les boîtes du système et les fenêtres flottantes passent au premier
+        // plan sans qu'on ait changé d'app : ils ne doivent rien annuler.
+        if (paquet in paquetsIgnores || !estUneApp(paquet)) return
         paquetAuPremierPlan = paquet
         controler(paquet)
     }
@@ -97,13 +147,31 @@ class ServiceVerrou : AccessibilityService() {
     override fun onInterrupt() {}
 
     override fun onDestroy() {
-        principal.removeCallbacks(reverifier)
+        oublier()
         super.onDestroy()
     }
 
-    /** Bloque l'app si elle est verrouillée. Sinon, prévoit de revérifier à la fin de la fenêtre. */
-    private fun controler(paquet: String?) {
+    private val vraiesApps = mutableMapOf<String, Boolean>()
+
+    /** Vrai pour une app qu'on ouvre depuis le lanceur, ou pour l'écran d'accueil du téléphone. */
+    private fun estUneApp(paquet: String): Boolean = vraiesApps.getOrPut(paquet) {
+        val accueil = packageManager.resolveActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)
+        packageManager.getLaunchIntentForPackage(paquet) != null || accueil?.activityInfo?.packageName == paquet
+    }
+
+    /** Annule ce qui était prévu et retire le minuteur. */
+    private fun oublier() {
         principal.removeCallbacks(reverifier)
+        principal.removeCallbacks(montrerLaBulle)
+        retirerLaBulle()
+    }
+
+    /**
+     * Bloque l'app si elle est verrouillée. Si elle est ouverte pendant une
+     * fenêtre, prévoit le minuteur de la dernière minute, puis le reverrouillage.
+     */
+    private fun controler(paquet: String?) {
+        oublier()
         paquet ?: return
         val maintenant = System.currentTimeMillis()
         val zone = ZoneId.systemDefault()
@@ -118,12 +186,77 @@ class ServiceVerrou : AccessibilityService() {
         } else {
             // L'app est ouverte pendant une fenêtre : on la reverrouille à la fin, même si Kova est fermée.
             val fin = etat.finDOuverture(maintenant, zone) ?: return
+            finDeLaBulle = fin
+            principal.postDelayed(montrerLaBulle, (fin - maintenant - DERNIERE_MINUTE).coerceAtLeast(0))
             principal.postDelayed(reverifier, (fin - maintenant).coerceAtLeast(0) + MARGE)
         }
     }
 
+    /**
+     * Pose le gros minuteur en haut de l'écran, par dessus l'app en cours. Il ne
+     * capte aucun appui : on continue d'utiliser l'app normalement dessous.
+     */
+    private fun afficherLaBulle() {
+        if (bulle != null || finDeLaBulle <= System.currentTimeMillis()) return
+        val densite = resources.displayMetrics.density
+        fun dp(valeur: Float) = (valeur * densite).toInt()
+        val sombre = Tokens.Couleurs.texteSurAccent.toArgb()
+
+        val titre = TextView(this).apply {
+            text = getString(R.string.bulle_titre)
+            setTextColor(sombre)
+            textSize = Tokens.TaillesTexte.legende
+            typeface = ResourcesCompat.getFont(this@ServiceVerrou, R.font.inter_semibold)
+            gravity = Gravity.CENTER
+        }
+        val temps = TextView(this).apply {
+            setTextColor(sombre)
+            textSize = Tokens.TaillesTexte.chiffre
+            typeface = ResourcesCompat.getFont(this@ServiceVerrou, R.font.space_grotesk_bold)
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+        }
+        val boite = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            background = GradientDrawable().apply {
+                setColor(Tokens.Couleurs.accent.toArgb())
+                cornerRadius = Tokens.Arrondis.grand * densite
+            }
+            setPadding(dp(Tokens.Espacements.e34), dp(Tokens.Espacements.e13), dp(Tokens.Espacements.e34), dp(Tokens.Espacements.e13))
+            elevation = Tokens.Espacements.e8 * densite
+            addView(titre)
+            addView(temps)
+        }
+        val place = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            y = dp(Tokens.Espacements.e55)
+        }
+        val ajoutee = runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).addView(boite, place) }.isSuccess
+        if (!ajoutee) return
+        bulle = boite
+        texteDeLaBulle = temps
+        battre.run()
+    }
+
+    private fun retirerLaBulle() {
+        principal.removeCallbacks(battre)
+        bulle?.let { vue -> runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).removeView(vue) } }
+        bulle = null
+        texteDeLaBulle = null
+    }
+
     companion object {
         private const val MARGE = 500L
+
+        /** Le minuteur s'affiche quand il reste une minute. */
+        private const val DERNIERE_MINUTE = 60_000L
         private val paquetsIgnores = setOf("com.android.systemui", "android")
 
         /** Vrai si l'utilisateur a activé le service dans les réglages d'accessibilité. */
@@ -144,23 +277,61 @@ class ServiceVerrou : AccessibilityService() {
 
 /** L'écran de verrou, affiché par dessus une app bloquée. Il reprend la maquette "Verrou". */
 class VerrouActivity : ComponentActivity() {
+    /** Paquet de l'app bloquée affichée. */
+    private var paquet by mutableStateOf<String?>(null)
+
+    /** L'état du jeu et l'heure, relus à chaque affichage : cet écran est réutilisé d'un blocage à l'autre. */
+    private var etatDuJeu by mutableStateOf(EtatJeu())
+    private var instant by mutableStateOf(0L)
+
+    override fun onResume() {
+        super.onResume()
+        instant = System.currentTimeMillis()
+        etatDuJeu = Depot.lire(this).mettreAJour(instant)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         barresSombres()
-        val paquet = intent.getStringExtra(PAQUET)
-        val regle = Depot.lire(this).mettreAJour(System.currentTimeMillis()).regle
+        paquet = intent.getStringExtra(PAQUET)
         setContent {
             // Le bouton retour ne doit pas ramener dans l'app bloquée.
             BackHandler { quitterVersLAccueil() }
+            val bloque = paquet
+            val maintenant = instant
+            val jeu = etatDuJeu
+            val app by produceState<AppInstallee?>(null, bloque) {
+                value = bloque?.let { AppsInstallees.trouver(this@VerrouActivity, it) }
+            }
             EcranVerrou(
-                nomDeLApp = paquet?.let { AppsInstallees.nom(this, it) },
-                repetitions = regle.repetitions,
-                minutes = regle.minutes,
+                nomDeLApp = app?.nom ?: bloque?.let { AppsInstallees.nom(this, it) },
+                icone = app?.icone,
+                jeu = jeu,
+                maintenant = maintenant,
+                zone = ZoneId.systemDefault(),
                 commencer = { ouvrirKova(MainActivity.ACTION_SEANCE) },
+                utiliserLeStock = { utiliserLeStock() },
                 fermer = { quitterVersLAccueil() },
                 urgence = { ouvrirKova(MainActivity.ACTION_URGENCE) },
             )
         }
+    }
+
+    /** Une autre app bloquée vient de s'ouvrir : l'écran change d'app. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        paquet = intent.getStringExtra(PAQUET)
+    }
+
+    /** Ouvre une fenêtre avec tout le temps en stock, puis retourne dans l'app qui était bloquée. */
+    private fun utiliserLeStock() {
+        val maintenant = System.currentTimeMillis()
+        val (etat, fin) = Depot.lire(this).mettreAJour(maintenant).ouvrirFenetre(maintenant, ZoneId.systemDefault())
+        if (fin == null) return
+        Depot.ecrire(this, etat)
+        Minuteur.mettreAJour(this, etat, maintenant, ZoneId.systemDefault())
+        paquet?.let { packageManager.getLaunchIntentForPackage(it) }?.let { startActivity(it) }
+        finish()
     }
 
     private fun ouvrirKova(action: String) {
