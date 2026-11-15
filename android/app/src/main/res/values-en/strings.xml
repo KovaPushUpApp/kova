@@ -174,6 +174,7 @@
     <string name="paywall_restaurer">Restore</string>
     <string name="paywall_texte">Unlock full locking and keep the momentum.</string>
     <string name="paywall_titre">You just earned your first 3 push-ups.</string>
+    <string name="paywall_titre_simple">Unlock all of Kova.</string>
     <string name="placement_bouton">I\'m in position</string>
     <string name="placement_detecte">Whole body detected</string>
     <string name="placement_distance">about 1 m</string>

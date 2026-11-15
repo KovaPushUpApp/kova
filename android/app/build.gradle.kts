@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,14 +7,33 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// La clé de signature de la version publiée. Le fichier keystore.properties et la
+// clé elle-même ne sont jamais enregistrés dans Git : sans eux, la version de
+// publication se construit quand même, mais non signée.
+val signature = Properties().apply {
+    val fichier = rootProject.file("keystore.properties")
+    if (fichier.exists()) fichier.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.getkova.app"
     compileSdk = 36
 
+    signingConfigs {
+        if (signature.containsKey("fichier")) {
+            create("publication") {
+                storeFile = rootProject.file(signature.getProperty("fichier"))
+                storePassword = signature.getProperty("motDePasse")
+                keyAlias = signature.getProperty("alias")
+                keyPassword = signature.getProperty("motDePasse")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.getkova.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -22,7 +43,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Retire le code et les ressources inutilisés : l'app est plus légère.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("publication")
         }
     }
 
@@ -34,6 +59,14 @@ android {
     packaging {
         // Bibliothèques natives compressées dans l'APK : il est nettement plus léger à transmettre.
         jniLibs { useLegacyPackaging = true }
+    }
+
+    lint {
+        // Les textes sont partagés avec iOS : ceux que seule l'app iOS utilise restent
+        // dans le fichier, et la réduction des ressources les ignore.
+        disable += "UnusedResources"
+        // Chemin du SDK écrit par Android Studio sur ce poste, hors du dépôt.
+        disable += "PropertyEscape"
     }
 
     buildFeatures {

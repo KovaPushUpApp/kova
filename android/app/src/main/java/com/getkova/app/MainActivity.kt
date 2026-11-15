@@ -44,6 +44,7 @@ import com.getkova.app.ecrans.EcranApps
 import com.getkova.app.ecrans.EcranAppsReglage
 import com.getkova.app.ecrans.EcranAutorisation
 import com.getkova.app.ecrans.EcranBienvenue
+import com.getkova.app.ecrans.REPETITIONS_ESSAI
 import com.getkova.app.ecrans.EcranChantier
 import com.getkova.app.ecrans.EcranChoc
 import com.getkova.app.ecrans.EcranCompteur
@@ -86,6 +87,10 @@ class MainActivity : ComponentActivity() {
         if (BuildConfig.DEBUG && intent?.hasExtra(EXTRA_FENETRE_SECONDES) == true) {
             // Version de test seulement : ouvre une fenêtre très courte, pour vérifier le reverrouillage.
             etat.ouvrirFenetreDeTest(intent.getIntExtra(EXTRA_FENETRE_SECONDES, 0))
+        }
+        if (BuildConfig.DEBUG && intent?.getBooleanExtra("rappel", false) == true) {
+            // Version de test seulement : affiche le rappel quotidien sans attendre 18 h.
+            com.getkova.app.verrou.Rappel.afficherSiUtile(this)
         }
         setContent {
             Box(Modifier.fillMaxSize().background(Tokens.Couleurs.fond)) {
@@ -134,6 +139,7 @@ private fun ParcoursOnboarding(etat: EtatApp) {
     var serviceActif by remember { mutableStateOf(ServiceVerrou.actif(contexte)) }
     var serviceDemande by rememberSaveable { mutableStateOf(false) }
     var cameraRefusee by rememberSaveable { mutableStateOf(false) }
+    var essaiReussi by rememberSaveable { mutableStateOf(false) }
     var messageAchat by remember { mutableStateOf(false) }
 
     fun aller(suivante: Etape) {
@@ -214,9 +220,14 @@ private fun ParcoursOnboarding(etat: EtatApp) {
             boutonSecondaire = if (cameraRefusee) t(R.string.camera_ouvrir_reglages) else null,
             actionSecondaire = { ouvrirFicheDeLApp(contexte) },
         )
-        Etape.ESSAI -> EcranEssai(etat, camera, ::reculer) { aller(Etape.PAYWALL) }
+        Etape.ESSAI -> EcranEssai(etat, camera, ::reculer) {
+            // L'essai est facultatif : on ne félicite que s'il a vraiment été fait.
+            essaiReussi = camera.repetitions >= REPETITIONS_ESSAI
+            aller(Etape.PAYWALL)
+        }
         Etape.PAYWALL -> EcranPaywall(
             etat,
+            essaiReussi = essaiReussi,
             fermer = {
                 // Fermer le paywall sans payer montre l'offre de rattrapage, une seule fois.
                 if (etat.offreDejaVue) {
@@ -346,7 +357,7 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
                         EcranAccueil(etat, { aller(Destination.EXERCICE) }, { aller(Destination.VERROU) })
                     } else {
                         // Le service a été coupé dans les réglages : sans lui, rien n'est verrouillé.
-                        EcranReserve(t(R.string.auto_ecran_titre), t(R.string.auto_ecran_refus)) {
+                        EcranReserve(t(R.string.auto_ecran_titre), t(R.string.auto_ecran_refus), t(R.string.auto_ecran_bouton)) {
                             ServiceVerrou.ouvrirLesReglages(contexte)
                         }
                     }

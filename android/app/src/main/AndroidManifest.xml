@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Pour la notification qui affiche le temps restant. Elle est créée sur le téléphone. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Pour reprogrammer le rappel quotidien après un redémarrage du téléphone. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Kova n'a aucun accès à Internet. La bibliothèque de détection de posture
          demande cette permission pour envoyer des statistiques d'usage : on la lui
@@ -34,6 +36,7 @@
 
     <application
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/sauvegarde"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/nom_app"
         android:supportsRtl="true"
@@ -73,6 +76,15 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/service_verrou" />
         </service>
+
+        <!-- Le rappel quotidien, et sa reprogrammation au redémarrage. -->
+        <receiver
+            android:name=".verrou.RecepteurRappel"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

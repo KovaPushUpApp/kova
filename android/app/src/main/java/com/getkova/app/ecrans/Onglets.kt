@@ -1,5 +1,10 @@
 package com.getkova.app.ecrans
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.getkova.app.verrou.Minuteur
+import com.getkova.app.verrou.Rappel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -463,12 +468,12 @@ fun EcranStats(etat: EtatApp) {
 
 /** Onglet réservé à l'abonnement : un titre, une phrase et l'accès au paywall. */
 @Composable
-fun EcranReserve(titre: String, texte: String, voir: () -> Unit) {
+fun EcranReserve(titre: String, texte: String, bouton: String = t(R.string.abonnement_voir), voir: () -> Unit) {
     EcranKova(espacement = Tokens.Espacements.e13) {
         Titre(titre)
         IconeAnneau(Icone.CADENAS, avecAnneau = false)
         Centre(Modifier.entree(2)) { Paragraphe(texte, centre = true) }
-        BoutonPrincipal(t(R.string.abonnement_voir), Modifier.padding(top = Tokens.Espacements.e13.dp).entree(3), action = voir)
+        BoutonPrincipal(bouton, Modifier.padding(top = Tokens.Espacements.e13.dp).entree(3), action = voir)
     }
 }
 
@@ -606,6 +611,16 @@ enum class Destination {
 fun EcranReglages(etat: EtatApp, ouvrir: (Destination) -> Unit) {
     val ouvrirLien = ouvreurDeLiens()
     val texteRegle = f(R.string.reglages_regle_valeur, etat.regle.repetitions, etat.regle.minutes)
+    val contexte = LocalContext.current
+    fun reglerRappel(actif: Boolean) {
+        etat.definirOption(Rappel.CLE, actif)
+        Rappel.programmer(contexte, actif)
+    }
+    // Le rappel est une notification : sur Android 13 et plus, il faut l'autorisation.
+    val demandeNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { accordee ->
+        reglerRappel(accordee)
+        if (!accordee) ouvrirFicheDeLApp(contexte)
+    }
     EcranKova(espacement = Tokens.Espacements.e13) {
         Titre(t(R.string.reglages_titre))
         Box(Modifier.entree(1)) {
@@ -633,6 +648,15 @@ fun EcranReglages(etat: EtatApp, ouvrir: (Destination) -> Unit) {
                 LigneReglage(t(R.string.reglages_voix)) {
                     Interrupteur(etat.compterAVoixHaute, t(R.string.reglages_voix)) {
                         etat.definirOption("compterAVoixHaute", !etat.compterAVoixHaute)
+                    }
+                }
+                LigneReglage(t(R.string.reglages_rappel)) {
+                    Interrupteur(etat.rappelQuotidien, t(R.string.reglages_rappel)) {
+                        when {
+                            etat.rappelQuotidien -> reglerRappel(false)
+                            Minuteur.autorise(contexte) -> reglerRappel(true)
+                            else -> demandeNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
                     }
                 }
             }

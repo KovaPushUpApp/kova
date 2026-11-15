@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -185,46 +187,99 @@ fun FigurePompe(modifier: Modifier = Modifier, animee: Boolean = true) {
     Canvas(modifier.size(Tokens.Composants.Illustration.largeur.dp, Tokens.Composants.Illustration.hauteur.dp)) {
         val echelle = minOf(size.width / 200f, size.height / 100f)
         translate((size.width - 200f * echelle) / 2, (size.height - 100f * echelle) / 2) {
-            scale(echelle, echelle, pivot = Offset.Zero) {
-                val sol = 88f
-                val main = Offset(152f, sol - 3f)
-                val cheville = Offset(26f, sol - 7f)
-                // L'épaule descend vers la main : haute bras tendus, basse en bas de la pompe.
-                val epaule = Offset(150f, 43f + 27f * descente)
-                val hanche = Offset(
-                    cheville.x + (epaule.x - cheville.x) * 0.52f,
-                    cheville.y + (epaule.y - cheville.y) * 0.52f,
-                )
-                // Le coude : deux segments de même longueur entre l'épaule et la main, pliés vers l'arrière.
-                val segment = 23f
-                val ecart = (main - epaule).getDistance().coerceIn(1f, segment * 2)
-                val milieu = Offset((epaule.x + main.x) / 2, (epaule.y + main.y) / 2)
-                val saillie = kotlin.math.sqrt((segment * segment - ecart * ecart / 4).coerceAtLeast(0f))
-                val direction = (main - epaule) / ecart
-                // Perpendiculaire au bras, du côté des pieds.
-                val coude = Offset(milieu.x - direction.y * saillie, milieu.y + direction.x * saillie)
-                // La tête prolonge le corps, un peu relevée.
-                val axe = (epaule - cheville) / (epaule - cheville).getDistance()
-                val tete = Offset(epaule.x + axe.x * 17f, epaule.y + axe.y * 17f - 5f)
+            scale(echelle, echelle, pivot = Offset.Zero) { silhouette(descente, avecSol = true) }
+        }
+    }
+}
 
-                val corps = Stroke(11f, cap = StrokeCap.Round, join = StrokeJoin.Round)
-                val bras = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+/** La silhouette sur sa grille de 200 x 100, pieds à gauche, tête à droite, sol à 88. */
+private fun DrawScope.silhouette(descente: Float, avecSol: Boolean) {
+    val sol = 88f
+    val main = Offset(152f, sol - 3f)
+    val cheville = Offset(26f, sol - 7f)
+    // L'épaule descend vers la main : haute bras tendus, basse en bas de la pompe.
+    val epaule = Offset(150f, 43f + 27f * descente)
+    val hanche = Offset(
+        cheville.x + (epaule.x - cheville.x) * 0.52f,
+        cheville.y + (epaule.y - cheville.y) * 0.52f,
+    )
+    // Le coude : deux segments de même longueur entre l'épaule et la main, pliés vers l'arrière.
+    val segment = 23f
+    val ecart = (main - epaule).getDistance().coerceIn(1f, segment * 2)
+    val milieu = Offset((epaule.x + main.x) / 2, (epaule.y + main.y) / 2)
+    val saillie = kotlin.math.sqrt((segment * segment - ecart * ecart / 4).coerceAtLeast(0f))
+    val direction = (main - epaule) / ecart
+    // Perpendiculaire au bras, du côté des pieds.
+    val coude = Offset(milieu.x - direction.y * saillie, milieu.y + direction.x * saillie)
+    // La tête prolonge le corps, un peu relevée.
+    val axe = (epaule - cheville) / (epaule - cheville).getDistance()
+    val tete = Offset(epaule.x + axe.x * 17f, epaule.y + axe.y * 17f - 5f)
 
-                // Le sol, puis une ombre qui s'élargit quand le corps descend.
-                drawLine(Tokens.Couleurs.pointille, Offset(8f, sol), Offset(192f, sol), 3f, StrokeCap.Round)
-                drawOval(
-                    Tokens.Couleurs.fond.copy(alpha = 0.35f + 0.25f * descente),
-                    topLeft = Offset(40f - 6f * descente, sol - 3f),
-                    size = Size(110f + 12f * descente, 6f),
-                )
-                // Jambes et tronc d'un seul trait, pied posé sur la pointe.
-                drawPath(Path().apply { ligne(cheville.x to cheville.y, hanche.x to hanche.y, epaule.x to epaule.y) }, Tokens.Couleurs.accent, style = corps)
-                drawLine(Tokens.Couleurs.accent, cheville, Offset(cheville.x - 8f, sol - 2f), 8f, StrokeCap.Round)
-                // Le bras passe devant le corps, dans une teinte plus claire pour le détacher.
-                drawPath(Path().apply { ligne(epaule.x to epaule.y, coude.x to coude.y, main.x to main.y) }, Tokens.Couleurs.texte, style = bras)
-                drawLine(Tokens.Couleurs.texte, main, Offset(main.x + 9f, sol - 2f), 7f, StrokeCap.Round)
-                drawCircle(Tokens.Couleurs.accent, 11f, tete)
+    val corps = Stroke(11f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+    val bras = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+
+    if (avecSol) {
+        // Le sol, puis une ombre qui s'élargit quand le corps descend.
+        drawLine(Tokens.Couleurs.pointille, Offset(8f, sol), Offset(192f, sol), 3f, StrokeCap.Round)
+        drawOval(
+            Tokens.Couleurs.fond.copy(alpha = 0.35f + 0.25f * descente),
+            topLeft = Offset(40f - 6f * descente, sol - 3f),
+            size = Size(110f + 12f * descente, 6f),
+        )
+    }
+    // Jambes et tronc d'un seul trait, pied posé sur la pointe.
+    drawPath(Path().apply { ligne(cheville.x to cheville.y, hanche.x to hanche.y, epaule.x to epaule.y) }, Tokens.Couleurs.accent, style = corps)
+    drawLine(Tokens.Couleurs.accent, cheville, Offset(cheville.x - 8f, sol - 2f), 8f, StrokeCap.Round)
+    // Le bras passe devant le corps, dans une teinte plus claire pour le détacher.
+    drawPath(Path().apply { ligne(epaule.x to epaule.y, coude.x to coude.y, main.x to main.y) }, Tokens.Couleurs.texte, style = bras)
+    drawLine(Tokens.Couleurs.texte, main, Offset(main.x + 9f, sol - 2f), 7f, StrokeCap.Round)
+    drawCircle(Tokens.Couleurs.accent, 11f, tete)
+}
+
+/** Part de la largeur de [IllustrationPlacement] sous laquelle centrer la légende de distance. */
+const val PLACEMENT_PART_DISTANCE = 2f * 87f / 300f
+
+/**
+ * Schéma de mise en place, vu de côté : le téléphone debout au sol, calé contre
+ * un objet, et la personne en position de pompe, la tête vers le téléphone.
+ * Le voile montre ce que voit la caméra, la flèche la distance entre les deux.
+ * Dessiné sur une grille de 300 x 120.
+ */
+@Composable
+fun IllustrationPlacement(modifier: Modifier = Modifier) {
+    Canvas(modifier.aspectRatio(300f / 120f)) {
+        val echelle = size.width / 300f
+        scale(echelle, echelle, pivot = Offset.Zero) {
+            val sol = 98f
+            val accent = Tokens.Couleurs.accent
+            val discret = Tokens.Couleurs.pointille
+            // Ce que voit la caméra : un cône qui part du haut du téléphone et couvre tout le corps.
+            drawPath(
+                Path().apply {
+                    ligne(41f to 52f, 296f to 4f, 296f to sol, 62f to sol)
+                    close()
+                },
+                accent.copy(alpha = Tokens.Opacites.voileSurAccent),
+            )
+            drawLine(discret, Offset(6f, sol), Offset(296f, sol), 3f, StrokeCap.Round)
+            // L'objet qui cale le téléphone.
+            drawRoundRect(discret, Offset(8f, 58f), Size(20f, 40f - 1.5f), CornerRadius(4f))
+            // Le téléphone, bien droit : debout, à 90°.
+            drawRoundRect(Tokens.Couleurs.carte, Offset(30f, 44f), Size(12f, sol - 44f - 1.5f), CornerRadius(4f))
+            drawRoundRect(accent, Offset(30f, 44f), Size(12f, sol - 44f - 1.5f), CornerRadius(4f), style = Stroke(3f))
+            drawCircle(accent, 2.5f, Offset(41f, 52f))
+            // La personne, retournée pour faire face au téléphone.
+            translate(116f, sol - 88f * 0.9f) {
+                scale(-0.9f, 0.9f, pivot = Offset.Zero) {
+                    translate(-200f, 0f) { silhouette(0f, avecSol = false) }
+                }
             }
+            // La distance entre le téléphone et la tête.
+            val cote = sol + 13f
+            val trait = Stroke(2f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+            drawLine(discret, Offset(46f, cote), Offset(128f, cote), 2f, StrokeCap.Round)
+            drawPath(Path().apply { ligne(52f to cote - 5f, 46f to cote, 52f to cote + 5f) }, discret, style = trait)
+            drawPath(Path().apply { ligne(122f to cote - 5f, 128f to cote, 122f to cote + 5f) }, discret, style = trait)
         }
     }
 }

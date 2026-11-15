@@ -310,7 +310,14 @@ private fun BoutonPas(signe: String, libelle: String, action: () -> Unit) {
 
 /** Écran 10 : le paywall (brief, section 4). Bouton fermer et "Restaurer" visibles tout de suite. */
 @Composable
-fun EcranPaywall(etat: EtatApp, fermer: () -> Unit, acheter: (annuel: Boolean) -> Unit, restaurer: () -> Unit) {
+fun EcranPaywall(
+    etat: EtatApp,
+    fermer: () -> Unit,
+    acheter: (annuel: Boolean) -> Unit,
+    restaurer: () -> Unit,
+    /** Vrai juste après un essai réussi : le titre félicite. Sinon il reste neutre. */
+    essaiReussi: Boolean = false,
+) {
     var annuel by remember { mutableStateOf(true) }
     val prixAnnuel = t(R.string.prix_annuel)
     val prixHebdo = t(R.string.prix_hebdomadaire)
@@ -340,7 +347,7 @@ fun EcranPaywall(etat: EtatApp, fermer: () -> Unit, acheter: (annuel: Boolean) -
                 Legende(t(R.string.paywall_restaurer), graisse = Graisse.MOYEN)
             }
         }
-        Titre(t(R.string.paywall_titre), Modifier.padding(top = Tokens.Espacements.e8.dp).entree(1))
+        Titre(t(if (essaiReussi) R.string.paywall_titre else R.string.paywall_titre_simple), Modifier.padding(top = Tokens.Espacements.e8.dp).entree(1))
         Paragraphe(t(R.string.paywall_texte), Modifier.entree(2))
         Column(Modifier.entree(3), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
             LigneCoche(t(R.string.paywall_argument_apps))

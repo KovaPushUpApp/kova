@@ -1,5 +1,6 @@
 package com.getkova.app.ecrans
 
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.CircleShape
@@ -71,6 +72,8 @@ import com.getkova.app.design.Chiffre
 import com.getkova.app.design.Corps
 import com.getkova.app.design.EcranKova
 import com.getkova.app.design.FigurePompe
+import com.getkova.app.design.IllustrationPlacement
+import com.getkova.app.design.PLACEMENT_PART_DISTANCE
 import com.getkova.app.design.Graisse
 import com.getkova.app.design.Icone
 import com.getkova.app.design.IconeAnneau
@@ -325,13 +328,16 @@ fun CompteurGeant(faites: Int, total: Int, tailleTotal: Float, corpsVisible: Boo
     }
 }
 
+/** Nombre de pompes de l'essai de l'onboarding. */
+const val REPETITIONS_ESSAI = 3
+
 /**
  * Écran 9 : le moment de preuve. Trois vraies pompes comptées en direct, puis le
  * bouton apparaît. L'essai est facultatif : on peut le passer à tout moment.
  */
 @Composable
 fun EcranEssai(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suivant: () -> Unit) {
-    val total = 3
+    val total = REPETITIONS_ESSAI
     val proprietaire = LocalLifecycleOwner.current
     val haptique = rememberHaptique()
     val contexte = LocalView.current.context
@@ -443,16 +449,16 @@ fun EcranVerrou(
             }
         }
         // Trois repères d'un coup d'œil : le temps en stock, la série, les urgences.
-        Row(Modifier.entree(5), horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
+        Row(Modifier.entree(5).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
             val marge = Tokens.Espacements.e13
-            RepereDeVerrou(f(R.string.commun_minutes_court, stock), t(R.string.verrou_app_stock_legende), Modifier.weight(1f), marge)
+            RepereDeVerrou(f(R.string.commun_minutes_court, stock), t(R.string.verrou_app_stock_legende), Modifier.weight(1f).fillMaxHeight(), marge)
             RepereDeVerrou(
                 n(R.string.commun_jours_un, R.string.commun_jours_autre, serie), t(R.string.verrou_app_serie),
-                Modifier.weight(1f), marge,
+                Modifier.weight(1f).fillMaxHeight(), marge,
             )
             RepereDeVerrou(
                 f(R.string.urgence_compte, urgences, EtatJeu.URGENCES_PAR_SEMAINE), t(R.string.verrou_app_urgences),
-                Modifier.weight(1f), marge,
+                Modifier.weight(1f).fillMaxHeight(), marge,
             )
         }
     }
@@ -590,31 +596,16 @@ fun EcranPlacement(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suiv
                 .height(Tokens.Composants.VueCamera.hauteurEssai.dp)
                 .clip(RoundedCornerShape(Tokens.Arrondis.grand.dp))
                 .background(Tokens.Couleurs.carte)
-                .padding(bottom = Tokens.Espacements.e21.dp)
+                .padding(horizontal = Tokens.Espacements.e13.dp)
                 .clearAndSetSemantics { contentDescription = description },
-            verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp, Alignment.Bottom),
+            verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e5.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
-                Box(Modifier.size(Tokens.Espacements.e55.dp), contentAlignment = Alignment.Center) {
-                    Anneau(Modifier.size(Tokens.Espacements.e55.dp))
-                    // Le téléphone est dessiné bien droit : il se pose debout, à 90°.
-                    Box(
-                        Modifier
-                            .size(Tokens.Espacements.e34.dp, Tokens.Espacements.e55.dp)
-                            .border(Tokens.Traits.illustration.dp, Tokens.Couleurs.accent, RoundedCornerShape(Tokens.Arrondis.petit.dp)),
-                    )
-                }
-                Box(
-                    Modifier
-                        .padding(bottom = Tokens.Espacements.e8.dp)
-                        .width(Tokens.Espacements.e34.dp)
-                        .height(Tokens.Traits.normal.dp)
-                        .background(Tokens.Couleurs.pointille),
-                )
-                FigurePompe(animee = false)
+            IllustrationPlacement(Modifier.fillMaxWidth())
+            // La légende se place sous la flèche de distance du schéma.
+            Box(Modifier.fillMaxWidth()) {
+                Legende(t(R.string.placement_distance), Modifier.fillMaxWidth(PLACEMENT_PART_DISTANCE), centre = true)
             }
-            Legende(t(R.string.placement_distance))
         }
         when {
             camera.corpsVisible -> Box(Modifier.entree()) { LigneCoche(t(R.string.placement_detecte)) }

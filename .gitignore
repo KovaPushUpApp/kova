@@ -28,3 +28,4 @@ android/.kotlin/
 *.jks
 *.keystore
 livraison/
+android/keystore.properties

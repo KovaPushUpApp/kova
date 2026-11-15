@@ -55,3 +55,4 @@
 "notif.texte" = "Jusqu'à %@. Elles se reverrouillent ensuite.";
 "bulle.titre" = "Reverrouillage dans";
 "bulle.temps" = "%lld:%02lld";
+"paywall.titre.simple" = "Débloque tout Kova.";

@@ -54,3 +54,4 @@
 "notif.texte" = "Until %@. They lock again after that.";
 "bulle.titre" = "Locking again in";
 "bulle.temps" = "%lld:%02lld";
+"paywall.titre.simple" = "Unlock all of Kova.";
