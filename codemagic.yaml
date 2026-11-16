@@ -10,6 +10,30 @@
 #      Ne jamais mettre ce fichier dans le dépôt.
 
 workflows:
+  # Compile l'app et ses 3 extensions pour le simulateur, puis lance les tests.
+  # Ne demande ni compte Apple, ni signature, ni secret.
+  compilation:
+    name: Kova - Compilation et tests
+    max_build_duration: 45
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Installer XcodeGen
+        script: brew install xcodegen
+      - name: Compiler le projet complet et lancer les tests
+        script: bash scripts/ci_tests.sh
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+
+  # Le build signé pour TestFlight. À lancer à la main, une fois la clé API
+  # App Store Connect et la clé du certificat en place (voir en tête de fichier).
   socle-testflight:
     name: Kova - TestFlight (sans verrouillage)
     max_build_duration: 60
@@ -24,12 +48,6 @@ workflows:
         XCODE_PROJECT: "Kova.xcodeproj"
         XCODE_SCHEME: "Kova"
       xcode: latest
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
     scripts:
       - name: Installer XcodeGen
         script: brew install xcodegen
