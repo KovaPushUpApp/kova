@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import com.getkova.app.jeu.EtatJeu
+import com.getkova.app.Mesures
 import com.getkova.app.jeu.ouvrirFenetre
 import androidx.compose.ui.graphics.asImageBitmap
 import com.getkova.app.Depot
@@ -178,6 +179,7 @@ class ServiceVerrou : AccessibilityService() {
         val etat = Depot.lire(this).mettreAJour(maintenant)
         if (paquet !in etat.apps && paquet !in etat.appsRetirees) return
         if (etat.estBloquee(paquet, maintenant, zone)) {
+            Mesures.suivre(this, "verrou_affiche")
             startActivity(
                 Intent(this, VerrouActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)

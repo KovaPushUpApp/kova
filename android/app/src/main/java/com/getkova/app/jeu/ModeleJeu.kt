@@ -41,6 +41,15 @@ data class Regle(val repetitions: Int = 10, val minutes: Int = 15) {
     fun repetitionsDemandees(exercice: Exercice): Int =
         max(1, (exercice.tauxDeBase.toDouble() * repetitions / Exercice.POMPES.tauxDeBase).roundToInt())
 
+    /**
+     * Minutes gagnées pour une séance. Rien tant que la série de la règle n'est pas
+     * faite. Ensuite chaque répétition compte, au même rapport, arrondi à la minute en dessous.
+     */
+    fun minutesPour(exercice: Exercice, repetitions: Int): Int {
+        val serie = repetitionsDemandees(exercice)
+        return if (repetitions < serie) 0 else repetitions * minutes / serie
+    }
+
     companion object {
         const val PAS = 5
         val repetitionsPossibles = 5..100
@@ -87,6 +96,12 @@ data class EtatJeu(
     val regleEnAttente: Regle? = null,
     val regleEnAttenteLe: Long? = null,
     val soldeMinutes: Int = 0,
+    /** Mode hardcore : le temps gagné et la fenêtre ouverte s'effacent chaque jour à minuit. */
+    val hardcore: Boolean = false,
+    /** Un mode hardcore coupé reste en vigueur jusqu'à cet instant (règle 7). */
+    val hardcoreJusquA: Long? = null,
+    /** Le minuit où le temps gagné s'efface, quand le mode hardcore l'a programmé. */
+    val effacementLe: Long? = null,
     /** Fin de la fenêtre de déblocage en cours. */
     val fenetreFin: Long? = null,
     /** Fin du déblocage d'urgence en cours. */

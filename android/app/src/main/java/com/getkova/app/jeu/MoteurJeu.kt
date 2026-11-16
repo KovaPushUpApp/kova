@@ -23,6 +23,10 @@ object Semaine {
         val jour = date(instant, zone).toLocalDate()
         return debutDuJour(jour.minusDays((jour.dayOfWeek.value - 1).toLong()), zone)
     }
+
+    /** Le prochain minuit après l'instant. */
+    fun minuitSuivant(instant: Long, zone: ZoneId): Long =
+        debutDuJour(date(instant, zone).toLocalDate().plusDays(1), zone)
 }
 
 // --- Plages -----------------------------------------------------------------
@@ -52,6 +56,17 @@ fun EtatJeu.mettreAJour(maintenant: Long): EtatJeu {
     val le = regleEnAttenteLe
     if (attente != null && le != null && maintenant >= le) {
         etat = etat.copy(regle = attente, regleEnAttente = null, regleEnAttenteLe = null)
+    }
+    // Mode hardcore : à minuit, le temps gagné est perdu. La fenêtre est déjà bornée à minuit.
+    val effacement = etat.effacementLe
+    if (effacement != null && maintenant >= effacement) {
+        etat = etat.copy(
+            soldeMinutes = if (etat.hardcoreEnVigueur(effacement)) 0 else etat.soldeMinutes,
+            effacementLe = null,
+        )
+    }
+    if (etat.hardcoreJusquA?.let { it <= maintenant } == true) {
+        etat = etat.copy(hardcoreJusquA = null)
     }
     if (etat.fenetreFin?.let { it <= maintenant } == true) {
         etat = etat.copy(fenetreFin = null)
@@ -87,15 +102,50 @@ fun EtatJeu.proposerRegle(nouvelle: Regle, maintenant: Long): Pair<EtatJeu, Bool
     return copy(regle = nouvelle, regleEnAttente = null, regleEnAttenteLe = null) to false
 }
 
+// --- Mode hardcore --------------------------------------------------------------
+
+/** Vrai si le mode hardcore s'applique à cet instant : activé, ou coupé depuis moins de 24 h. */
+fun EtatJeu.hardcoreEnVigueur(instant: Long): Boolean = hardcore || (hardcoreJusquA?.let { instant < it } ?: false)
+
+/**
+ * Programme l'effacement au prochain minuit et y arrête la fenêtre ouverte.
+ * Sans effet si le mode hardcore ne s'applique plus à ce minuit-là.
+ */
+private fun EtatJeu.bornerAMinuit(maintenant: Long, zone: ZoneId): EtatJeu {
+    val minuit = Semaine.minuitSuivant(maintenant, zone)
+    if (!hardcoreEnVigueur(minuit)) return copy(effacementLe = null)
+    return copy(effacementLe = minuit, fenetreFin = fenetreFin?.coerceAtMost(minuit))
+}
+
+/**
+ * Active ou coupe le mode hardcore. Activer est immédiat, couper prend effet
+ * dans 24 h (règle 7). `immediat` sert à l'onboarding.
+ */
+fun EtatJeu.definirHardcore(actif: Boolean, maintenant: Long, zone: ZoneId, immediat: Boolean): EtatJeu = when {
+    actif -> copy(hardcore = true, hardcoreJusquA = null)
+    immediat || !hardcoreEnVigueur(maintenant) -> copy(hardcore = false, hardcoreJusquA = null)
+    hardcore -> copy(hardcore = false, hardcoreJusquA = maintenant + EtatJeu.DELAI_ASSOUPLISSEMENT)
+    else -> this
+}.bornerAMinuit(maintenant, zone)
+
 // --- Séances et solde ---------------------------------------------------------
 
-/** Une séance validée ajoute les minutes de la règle au solde (règles 3 et 9). */
-fun EtatJeu.validerSeance(exercice: Exercice, maintenant: Long): EtatJeu {
-    val seance = Seance(maintenant, exercice, regle.repetitionsDemandees(exercice), regle.minutes)
+/**
+ * Une séance validée ajoute ses minutes au solde (règles 3 et 9). On peut dépasser
+ * la série de la règle : les répétitions en plus rapportent au même rapport.
+ */
+fun EtatJeu.validerSeance(
+    exercice: Exercice,
+    maintenant: Long,
+    zone: ZoneId,
+    repetitions: Int = regle.repetitionsDemandees(exercice),
+): EtatJeu {
+    val faites = max(repetitions, regle.repetitionsDemandees(exercice))
+    val seance = Seance(maintenant, exercice, faites, regle.minutesPour(exercice, faites))
     return copy(
         seances = (seances + seance).takeLast(EtatJeu.HISTORIQUE_MAXIMUM),
         soldeMinutes = soldeMinutes + seance.minutes,
-    )
+    ).bornerAMinuit(maintenant, zone)
 }
 
 // --- Planning -----------------------------------------------------------------
@@ -165,8 +215,9 @@ fun EtatJeu.finDOuverture(maintenant: Long, zone: ZoneId): Long? {
 fun EtatJeu.ouvrirFenetre(maintenant: Long, zone: ZoneId): Pair<EtatJeu, Long?> {
     if (soldeMinutes <= 0 || plageActive(maintenant, zone)) return this to null
     val depart = if (fenetreOuverte(maintenant)) fenetreFin ?: maintenant else maintenant
-    val fin = depart + soldeMinutes * 60_000L
-    return copy(fenetreFin = fin, soldeMinutes = 0) to fin
+    // En mode hardcore, la fenêtre s'arrête à minuit : le reste est perdu.
+    val etat = copy(fenetreFin = depart + soldeMinutes * 60_000L, soldeMinutes = 0).bornerAMinuit(maintenant, zone)
+    return etat to etat.fenetreFin
 }
 
 // --- Urgence --------------------------------------------------------------------
@@ -219,23 +270,57 @@ fun EtatJeu.estBloquee(paquet: String, maintenant: Long, zone: ZoneId): Boolean 
 
 // --- Série et stats -------------------------------------------------------------
 
+/** Ce que donne le parcours de la série : les jours comptés et les jours sauvés par un joker. */
+private class Parcours(val jours: Int, val jokers: Set<LocalDate>)
+
 /**
- * Jours d'affilée avec au moins une séance validée (règle 8).
- * La série tient si la dernière séance date d'aujourd'hui ou d'hier.
+ * Remonte les jours depuis aujourd'hui. Aujourd'hui sans séance ne casse rien :
+ * la journée n'est pas finie. Ensuite un jour sans séance est pardonné par le
+ * joker, une fois par semaine (du lundi au dimanche). Un joker ne compte que s'il
+ * relie deux jours avec séance.
  */
-fun EtatJeu.serie(maintenant: Long, zone: ZoneId): Int {
-    val jours = seances.map { Semaine.date(it.date, zone).toLocalDate() }.toSet()
+private fun EtatJeu.parcourirSerie(maintenant: Long, zone: ZoneId): Parcours {
+    val faits = seances.map { Semaine.date(it.date, zone).toLocalDate() }.toSet()
+    val premier = faits.minOrNull() ?: return Parcours(0, emptySet())
     var jour = Semaine.date(maintenant, zone).toLocalDate()
-    if (jour !in jours) {
-        jour = jour.minusDays(1)
-        if (jour !in jours) return 0
-    }
+    if (jour !in faits) jour = jour.minusDays(1)
     var compte = 0
-    while (jour in jours) {
-        compte += 1
+    val jokers = mutableSetOf<LocalDate>()
+    val enAttente = mutableListOf<LocalDate>()
+    val semainesServies = mutableSetOf<LocalDate>()
+    while (jour >= premier) {
+        if (jour in faits) {
+            compte += 1
+            jokers += enAttente
+            enAttente.clear()
+        } else {
+            val lundi = jour.minusDays((jour.dayOfWeek.value - 1).toLong())
+            if (!semainesServies.add(lundi)) break
+            enAttente += jour
+        }
         jour = jour.minusDays(1)
     }
-    return compte
+    return Parcours(compte, jokers)
+}
+
+/**
+ * Jours avec au moins une séance validée, d'affilée (règle 8). La série tient si
+ * la dernière séance date d'aujourd'hui ou d'hier. Un joker par semaine pardonne
+ * un jour raté : ce jour ne compte pas, mais la série continue.
+ */
+fun EtatJeu.serie(maintenant: Long, zone: ZoneId): Int = parcourirSerie(maintenant, zone).jours
+
+/** Vrai si le joker de cette semaine a déjà sauvé la série. */
+fun EtatJeu.jokerUtilise(maintenant: Long, zone: ZoneId): Boolean {
+    val lundi = Semaine.date(Semaine.debut(maintenant, zone), zone).toLocalDate()
+    return parcourirSerie(maintenant, zone).jokers.any { it >= lundi }
+}
+
+/** Vrai si la dernière séance bat le record de répétitions de son exercice. */
+fun EtatJeu.estUnRecord(): Boolean {
+    val derniere = seances.lastOrNull() ?: return false
+    val avant = seances.dropLast(1).filter { it.exercice == derniere.exercice }
+    return avant.isNotEmpty() && derniere.repetitions > avant.maxOf { it.repetitions }
 }
 
 fun EtatJeu.repetitionsDuJour(maintenant: Long, zone: ZoneId): Int {

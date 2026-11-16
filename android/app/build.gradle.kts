@@ -15,6 +15,13 @@ val signature = Properties().apply {
     if (fichier.exists()) fichier.inputStream().use { load(it) }
 }
 
+// La clé du projet PostHog (statistiques d'usage), dans mesures.properties : cle=phc_...
+// Sans ce fichier, l'app se construit quand même et n'envoie rien.
+val mesures = Properties().apply {
+    val fichier = rootProject.file("mesures.properties")
+    if (fichier.exists()) fichier.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.getkova.app"
     compileSdk = 36
@@ -36,6 +43,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+        buildConfigField("String", "CLE_MESURES", "\"" + mesures.getProperty("cle", "").trim() + "\"")
 
         // Pour un APK plus léger destiné à un vrai téléphone : ./gradlew assembleDebug -Pabi=arm64-v8a
         (project.findProperty("abi") as String?)?.let { abi -> ndk { abiFilters += abi } }

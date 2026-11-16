@@ -48,6 +48,7 @@ import com.getkova.app.ecrans.REPETITIONS_ESSAI
 import com.getkova.app.ecrans.EcranChantier
 import com.getkova.app.ecrans.EcranChoc
 import com.getkova.app.ecrans.EcranCompteur
+import com.getkova.app.ecrans.EcranMesures
 import com.getkova.app.ecrans.EcranEditeurPlage
 import com.getkova.app.ecrans.EcranEssai
 import com.getkova.app.ecrans.EcranExercice
@@ -68,6 +69,7 @@ import com.getkova.app.ecrans.EcranVerrou
 import com.getkova.app.ecrans.Onglet
 import com.getkova.app.ecrans.ouvrirFicheDeLApp
 import com.getkova.app.verrou.Minuteur
+import com.getkova.app.verrou.Rappel
 import com.getkova.app.verrou.ServiceVerrou
 
 class MainActivity : ComponentActivity() {
@@ -92,6 +94,10 @@ class MainActivity : ComponentActivity() {
             // Version de test seulement : affiche le rappel quotidien sans attendre 18 h.
             com.getkova.app.verrou.Rappel.afficherSiUtile(this)
         }
+        if (BuildConfig.DEBUG && intent?.getBooleanExtra("finEssai", false) == true) {
+            // Version de test seulement : affiche le rappel de fin d'essai sans attendre deux jours.
+            Rappel.afficherFinEssai(this)
+        }
         setContent {
             Box(Modifier.fillMaxSize().background(Tokens.Couleurs.fond)) {
                 if (etat.onboardingTermine) {
@@ -101,6 +107,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // L'app passe au second plan : on envoie les statistiques en attente, si l'utilisateur a dit oui.
+        Mesures.vider(this)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -128,6 +140,9 @@ fun ComponentActivity.barresSombres() {
  */
 private enum class Etape {
     BIENVENUE, TEMPS, CHOC, OBJECTIF, AUTO_ECRAN, APPS, REGLE, AUTO_CAMERA, ESSAI, PAYWALL, OFFRE, LIMITE,
+
+    /** La question des statistiques anonymes. Posée une fois, juste après l'accueil. */
+    MESURES,
 }
 
 @Composable
@@ -142,6 +157,8 @@ private fun ParcoursOnboarding(etat: EtatApp) {
     var essaiReussi by rememberSaveable { mutableStateOf(false) }
     var messageAchat by remember { mutableStateOf(false) }
 
+    LaunchedEffect(etape) { Mesures.suivre(contexte, "onboarding_etape_vue", "etape" to etape.name, "rang" to etape.ordinal) }
+
     fun aller(suivante: Etape) {
         if (chemin.last() != suivante) chemin = chemin + suivante
     }
@@ -155,9 +172,12 @@ private fun ParcoursOnboarding(etat: EtatApp) {
 
     // Version de test : toucher le bouton du paywall donne tout de suite accès à tout.
     // Version publiée : le vrai achat Google Play, pas encore branché.
-    fun acheter() {
+    fun acheter(essai: Boolean) {
+        Mesures.suivre(contexte, "achat_demande", "origine" to etape.name, "essai" to essai)
         if (BuildConfig.DEBUG) {
             etat.definirOption("abonnementSimule", true)
+            // Promis sur le paywall : un rappel la veille de la fin de l'essai.
+            if (essai) Rappel.programmerFinEssai(contexte)
             etat.terminerOnboarding()
         } else {
             messageAchat = true
@@ -168,15 +188,27 @@ private fun ParcoursOnboarding(etat: EtatApp) {
     // Au retour des réglages du téléphone, on regarde si le service a été activé.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         serviceActif = ServiceVerrou.actif(contexte)
+        if (chemin.last() == Etape.AUTO_ECRAN && serviceDemande) {
+            Mesures.suivre(contexte, "autorisation_resultat", "type" to "verrouillage", "accordee" to serviceActif)
+        }
         if (serviceActif && chemin.last() == Etape.AUTO_ECRAN && serviceDemande) aller(Etape.APPS)
     }
     val demandeCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { accordee ->
         cameraRefusee = !accordee
+        Mesures.suivre(contexte, "autorisation_resultat", "type" to "camera", "accordee" to accordee)
         if (accordee) aller(Etape.ESSAI)
     }
 
     when (etape) {
-        Etape.BIENVENUE -> EcranBienvenue { aller(Etape.TEMPS) }
+        Etape.BIENVENUE -> EcranBienvenue {
+            // La question n'est posée que si l'app peut envoyer quelque chose, et une seule fois.
+            aller(if (Mesures.disponible && Mesures.consentement(contexte) == null) Etape.MESURES else Etape.TEMPS)
+        }
+        Etape.MESURES -> EcranMesures { acceptees ->
+            etat.definirMesures(acceptees)
+            // La question ne reste pas dans le chemin : "retour" ne la repose pas.
+            chemin = chemin.dropLast(1) + Etape.TEMPS
+        }
         Etape.TEMPS -> EcranTemps(etat, ::reculer) { aller(Etape.CHOC) }
         Etape.CHOC -> EcranChoc(etat, ::reculer) { aller(Etape.OBJECTIF) }
         Etape.OBJECTIF -> EcranObjectif(etat, ::reculer) { aller(Etape.AUTO_ECRAN) }
@@ -223,12 +255,14 @@ private fun ParcoursOnboarding(etat: EtatApp) {
         Etape.ESSAI -> EcranEssai(etat, camera, ::reculer) {
             // L'essai est facultatif : on ne félicite que s'il a vraiment été fait.
             essaiReussi = camera.repetitions >= REPETITIONS_ESSAI
+            Mesures.suivre(contexte, "essai_termine", "repetitions" to camera.repetitions, "reussi" to essaiReussi)
             aller(Etape.PAYWALL)
         }
         Etape.PAYWALL -> EcranPaywall(
             etat,
             essaiReussi = essaiReussi,
             fermer = {
+                Mesures.suivre(contexte, "paywall_ferme", "origine" to "onboarding")
                 // Fermer le paywall sans payer montre l'offre de rattrapage, une seule fois.
                 if (etat.offreDejaVue) {
                     terminer()
@@ -237,10 +271,17 @@ private fun ParcoursOnboarding(etat: EtatApp) {
                     aller(Etape.OFFRE)
                 }
             },
-            acheter = { acheter() },
+            acheter = { annuel -> acheter(essai = annuel) },
             restaurer = { messageAchat = true },
         )
-        Etape.OFFRE -> EcranOffre(fermer = ::terminer, prendre = ::acheter)
+        Etape.OFFRE -> EcranOffre(
+            fermer = {
+                Mesures.suivre(contexte, "offre_refusee")
+                terminer()
+            },
+            // L'offre de rattrapage n'a pas d'essai gratuit.
+            prendre = { acheter(essai = false) },
+        )
         Etape.LIMITE -> EcranLimiteGratuite(etat, voirAbonnement = { aller(Etape.PAYWALL) }, terminer = ::terminer)
     }
     if (messageAchat) {
@@ -284,6 +325,8 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     fun revenirAuxOnglets() {
         chemin = emptyList()
     }
+    val ecran = if (paywall) "PAYWALL" else chemin.lastOrNull()?.name ?: onglet.name
+    LaunchedEffect(ecran) { Mesures.suivre(contexte, "ecran_vu", "ecran" to ecran, "abonne" to etat.abonne) }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         etat.rafraichir()
@@ -312,9 +355,19 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     val demandeCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         aller(Destination.PLACEMENT)
     }
+    // Le rappel quotidien est activé d'office dès que les notifications sont permises.
+    // Ensuite c'est le réglage de l'utilisateur qui décide : on n'y touche plus.
+    fun proposerLeRappel() {
+        if (Minuteur.autorise(contexte) && !Depot.reglages(contexte).contains(Rappel.CLE)) {
+            etat.definirOption(Rappel.CLE, true)
+            Rappel.programmer(contexte, true)
+        }
+    }
     // La notification du temps restant demande une autorisation sur Android 13 et plus.
     // On la demande une seule fois, à la première entrée dans l'app.
-    val demandeNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+    val demandeNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { accordee ->
+        Mesures.suivre(contexte, "autorisation_resultat", "type" to "notifications", "accordee" to accordee)
+        proposerLeRappel()
         etat.rafraichir()
     }
     LaunchedEffect(Unit) {
@@ -323,6 +376,8 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
         ) {
             etat.definirOption("notificationsDemandees", true)
             demandeNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            proposerLeRappel()
         }
     }
     BackHandler(enabled = paywall || chemin.isNotEmpty()) {
@@ -337,11 +392,16 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     if (paywall) {
         EcranPaywall(
             etat,
-            fermer = { paywall = false },
-            acheter = {
+            fermer = {
+                Mesures.suivre(contexte, "paywall_ferme", "origine" to "app")
+                paywall = false
+            },
+            acheter = { annuel ->
+                Mesures.suivre(contexte, "achat_demande", "origine" to "app", "essai" to annuel)
                 // Version de test : accès immédiat. Version publiée : achat Google Play, pas encore branché.
                 if (BuildConfig.DEBUG) {
                     etat.definirOption("abonnementSimule", true)
+                    if (annuel) Rappel.programmerFinEssai(contexte)
                     paywall = false
                 } else {
                     messageAchat = true
@@ -400,9 +460,20 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
             ouvrirPaywall = { paywall = true },
         )
         Destination.PLACEMENT -> EcranPlacement(etat, camera, ::reculer) { aller(Destination.COMPTEUR) }
-        Destination.COMPTEUR -> EcranCompteur(etat, camera, abandonner = ::revenirAuxOnglets) {
+        Destination.COMPTEUR -> EcranCompteur(
+            etat, camera,
+            abandonner = {
+                Mesures.suivre(
+                    contexte, "seance_abandonnee",
+                    "repetitions" to camera.repetitions, "serie_demandee" to etat.repetitionsDeLaSeance,
+                )
+                revenirAuxOnglets()
+            },
+        ) { repetitions ->
+            // La séance ne s'arrête plus seule : la validation éteint la caméra.
+            camera.arreter()
             // Les minutes vont au solde dès la validation (brief, règle 3).
-            etat.validerSeance()
+            etat.validerSeance(repetitions)
             aller(Destination.GAGNE)
         }
         Destination.GAGNE -> EcranGagne(

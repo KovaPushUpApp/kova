@@ -81,6 +81,8 @@ import com.getkova.app.jeu.finDOuverture
 import com.getkova.app.jeu.plageActive
 import com.getkova.app.jeu.repetitionsDuJour
 import com.getkova.app.jeu.serie
+import com.getkova.app.Mesures
+import com.getkova.app.jeu.jokerUtilise
 import com.getkova.app.nom
 import com.getkova.app.verrou.AppInstallee
 import com.getkova.app.verrou.AppsInstallees
@@ -133,7 +135,7 @@ fun BarreOnglets(selection: Onglet, choisir: (Onglet) -> Unit, modifier: Modifie
 
 /** Une app de la liste : icône, nom, interrupteur. Conforme à la maquette, sans le temps d'usage. */
 @Composable
-private fun LigneApp(app: AppInstallee, active: Boolean, basculer: (() -> Unit)?) {
+private fun LigneApp(app: AppInstallee, active: Boolean, note: String? = null, basculer: (() -> Unit)?) {
     Row(
         Modifier.fillMaxWidth().carte(marge = Tokens.Espacements.e13, arrondi = Tokens.Arrondis.moyen),
         verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +148,11 @@ private fun LigneApp(app: AppInstallee, active: Boolean, basculer: (() -> Unit)?
         } else {
             Box(taille.background(Tokens.Couleurs.ligne))
         }
-        Corps(app.nom, Modifier.weight(1f), graisse = Graisse.DEMI_GRAS)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e3.dp)) {
+            Corps(app.nom, graisse = Graisse.DEMI_GRAS)
+            // Une app retirée reste verrouillée 24 h : on le dit sur sa ligne.
+            if (note != null) Legende(note, couleur = Tokens.Couleurs.accent)
+        }
         if (basculer != null) {
             Interrupteur(active, app.nom, basculer)
         } else {
@@ -155,12 +161,15 @@ private fun LigneApp(app: AppInstallee, active: Boolean, basculer: (() -> Unit)?
     }
 }
 
-/** La liste des apps du téléphone, avec un interrupteur par app. Les apps choisies viennent en premier. */
+/**
+ * La liste des apps du téléphone, avec un interrupteur par app. Les apps choisies viennent
+ * en premier. `notes` ajoute une ligne sous le nom de certaines apps, par nom de paquet.
+ */
 @Composable
-fun ListeApps(selection: Set<String>, basculer: (String) -> Unit) {
+fun ListeApps(selection: Set<String>, notes: Map<String, String> = emptyMap(), basculer: (String) -> Unit) {
     val contexte = LocalContext.current
     var apps by remember { mutableStateOf<List<AppInstallee>?>(null) }
-    val initiale = remember { selection }
+    val initiale = remember { selection + notes.keys }
     var recherche by remember { mutableStateOf("") }
     LaunchedEffect(Unit) { apps = AppsInstallees.charger(contexte) }
     Column(verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
@@ -170,7 +179,7 @@ fun ListeApps(selection: Set<String>, basculer: (String) -> Unit) {
             ?.filter { cherche.isEmpty() || sansAccents(it.nom).contains(cherche) }
             ?.sortedBy { it.paquet !in initiale }
         visibles?.forEach { app ->
-            LigneApp(app, app.paquet in selection) { basculer(app.paquet) }
+            LigneApp(app, app.paquet in selection, notes[app.paquet]) { basculer(app.paquet) }
         }
         if (visibles != null && visibles.isEmpty()) {
             Centre(Modifier.padding(vertical = Tokens.Espacements.e21.dp)) {
@@ -211,13 +220,13 @@ fun ChampTexte(valeur: String, aide: String, longueurMax: Int = 40, changer: (St
 
 /** Les apps verrouillées, en lecture seule (accueil). */
 @Composable
-fun AppsVerrouillees(selection: Set<String>) {
+fun AppsVerrouillees(selection: Set<String>, notes: Map<String, String> = emptyMap()) {
     val contexte = LocalContext.current
     var apps by remember { mutableStateOf<List<AppInstallee>>(emptyList()) }
     LaunchedEffect(selection) { apps = AppsInstallees.charger(contexte).filter { it.paquet in selection } }
     Column(verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp)) {
         apps.forEachIndexed { rang, app ->
-            Box(Modifier.entree(4 + rang)) { LigneApp(app, active = true, basculer = null) }
+            Box(Modifier.entree(4 + rang)) { LigneApp(app, active = true, note = notes[app.paquet], basculer = null) }
         }
     }
 }
@@ -267,6 +276,11 @@ fun EcranLimiteGratuite(etat: EtatApp, voirAbonnement: () -> Unit, terminer: () 
     }
 }
 
+/** "Verrouillée jusqu'au…" pour chaque app retirée depuis moins de 24 h. */
+@Composable
+private fun notesDeSursis(etat: EtatApp): Map<String, String> =
+    etat.jeu.appsRetirees.mapValues { f(R.string.apps_reglage_sursis, dateEtHeure(it.value, etat)) }
+
 /** Écran 22 : modifier les apps verrouillées. Retirer une app prend effet 24 h plus tard. */
 @Composable
 fun EcranAppsReglage(etat: EtatApp, retour: () -> Unit, ouvrirPaywall: () -> Unit) {
@@ -283,7 +297,7 @@ fun EcranAppsReglage(etat: EtatApp, retour: () -> Unit, ouvrirPaywall: () -> Uni
             Modifier.entree(1),
         )
         Box(Modifier.entree(3)) {
-            ListeApps(etat.jeu.apps) { paquet ->
+            ListeApps(etat.jeu.apps, notesDeSursis(etat)) { paquet ->
                 val apps = etat.jeu.apps
                 val nouvelles = if (paquet in apps) apps - paquet else apps + paquet
                 if (!etat.abonne && nouvelles.size > 1) {
@@ -329,8 +343,14 @@ fun EcranAccueil(etat: EtatApp, gagnerDuTemps: () -> Unit, ouvrirVerrou: () -> U
             } else {
                 Legende(t(R.string.accueil_solde))
                 GrosChiffre(jeu.soldeMinutes)
+                if (jeu.soldeMinutes > 0 && jeu.effacementLe != null) {
+                    Legende(t(R.string.accueil_hardcore), couleur = Tokens.Couleurs.accent)
+                }
             }
             Legende(f(R.string.accueil_aujourdhui, jeu.repetitionsDuJour(maintenant, etat.zone)))
+            if (jeu.jokerUtilise(maintenant, etat.zone)) {
+                Legende(t(R.string.accueil_joker), couleur = Tokens.Couleurs.accent)
+            }
             if (fin == null && jeu.plageActive(maintenant, etat.zone)) {
                 Legende(t(R.string.accueil_plage), couleur = Tokens.Couleurs.accent)
             } else if (fin == null && jeu.soldeMinutes > 0) {
@@ -344,7 +364,8 @@ fun EcranAccueil(etat: EtatApp, gagnerDuTemps: () -> Unit, ouvrirVerrou: () -> U
                 graisse = Graisse.DEMI_GRAS,
                 interlettrage = (Tokens.Typographie.interlettrageSurtitre * Tokens.TaillesTexte.legende).sp,
             )
-            Box(Modifier.clic(action = ouvrirVerrou)) { AppsVerrouillees(jeu.apps) }
+            // Les apps retirées depuis moins de 24 h sont encore verrouillées : elles restent affichées.
+            Box(Modifier.clic(action = ouvrirVerrou)) { AppsVerrouillees(jeu.apps + jeu.appsRetirees.keys, notesDeSursis(etat)) }
         }
     }
 }
@@ -650,6 +671,13 @@ fun EcranReglages(etat: EtatApp, ouvrir: (Destination) -> Unit) {
                         etat.definirOption("compterAVoixHaute", !etat.compterAVoixHaute)
                     }
                 }
+                if (Mesures.disponible) {
+                    LigneReglage(t(R.string.reglages_mesures)) {
+                        Interrupteur(etat.mesuresAcceptees, t(R.string.reglages_mesures)) {
+                            etat.definirMesures(!etat.mesuresAcceptees)
+                        }
+                    }
+                }
                 LigneReglage(t(R.string.reglages_rappel)) {
                     Interrupteur(etat.rappelQuotidien, t(R.string.reglages_rappel)) {
                         when {
@@ -745,5 +773,14 @@ fun EcranChantier(etat: EtatApp, retour: () -> Unit) {
             LigneReglage(t(R.string.socle_version)) { Legende(BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")") }
         }
         BoutonSecondaire(t(R.string.socle_revoir_onboarding)) { etat.revoirOnboarding() }
+        // Le journal des mesures, pour vérifier pendant les essais ce qui est enregistré.
+        val contexte = LocalContext.current
+        val compteurs = remember { Mesures.compteurs(contexte) }
+        if (compteurs.isNotEmpty()) {
+            Legende(t(R.string.chantier_mesures))
+            GroupeReglages {
+                compteurs.forEach { (nom, nombre) -> LigneReglage(nom) { Legende(nombre.toString()) } }
+            }
+        }
     }
 }

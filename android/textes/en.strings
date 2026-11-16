@@ -24,7 +24,7 @@
 
 /* Subscriptions: Google Play. */
 "paywall.mentions.annuel" = "%@ a year. Cancel anytime on Google Play.";
-"paywall.mentions.annuel_essai" = "3 days free, then %@ a year. Cancel anytime on Google Play.";
+"paywall.mentions.annuel_essai" = "No payment today. 3 days free, then %@ a year. Cancel anytime on Google Play.";
 "paywall.mentions.hebdo" = "%@ a week. Cancel anytime on Google Play.";
 "offre.mentions" = "%@ for the first year, then %@ a year. Cancel anytime on Google Play.";
 "abonnement.texte" = "Manage or cancel your subscription in Google Play.";
@@ -55,3 +55,46 @@
 "bulle.titre" = "Locking again in";
 "bulle.temps" = "%lld:%02lld";
 "paywall.titre.simple" = "Unlock all of Kova.";
+
+/* Mode hardcore. */
+"regle.hardcore" = "Hardcore mode";
+"regle.hardcore.texte" = "The time you earn is wiped every day at midnight. No stockpiling.";
+"regle.hardcore.texte_reglages" = "The time you earn is wiped every day at midnight. Turning it off takes 24 h.";
+"regle.hardcore.fin" = "Hardcore mode ends on %@.";
+"accueil.hardcore" = "Wiped at midnight";
+
+/* Séance libre : on continue après la série. */
+"seance.bouton.minutes" = "Claim %lld min";
+"seance.gagnees" = "+%lld min";
+"seance.continuer" = "Set done. Keep going if you like.";
+
+/* App retirée, encore verrouillée 24 h. */
+"apps.reglage.sursis" = "Locked until %@";
+
+/* Paywall, rappels, joker, record, mesures. */
+"paywall.titre.jours" = "Take back your %lld days a year.";
+"paywall.frise.jour1.titre" = "Today";
+"paywall.frise.jour1.texte" = "Full access, nothing to pay.";
+"paywall.frise.jour2.titre" = "Day 2";
+"paywall.frise.jour2.texte" = "We remind you with a notification.";
+"paywall.frise.jour3.titre" = "Day 3";
+"paywall.frise.jour3.texte" = "%@ per year. Cancel before then.";
+"essai.rappel.canal" = "Subscription";
+"essai.rappel.titre" = "Your trial ends tomorrow";
+"essai.rappel.texte" = "Tomorrow your subscription starts: %@ per year. You can cancel before then on Google Play.";
+"rappel.serie.titre_un" = "Your %lld-day streak is on the line";
+"rappel.serie.titre_autre" = "Your %lld-day streak is on the line";
+"rappel.serie.texte" = "One set before midnight to keep it.";
+"accueil.joker" = "Streak saver used this week. Your streak holds.";
+"gagne.record" = "New record.";
+"chantier.mesures" = "Recorded events";
+
+/* Statistiques anonymes. */
+"mesures.titre" = "Help us improve Kova.";
+"mesures.texte" = "Kova can send anonymous statistics: screens viewed, sessions done, buttons tapped. They show us where things get stuck.";
+"mesures.argument.1" = "Never the camera image";
+"mesures.argument.2" = "Never the names of your apps";
+"mesures.argument.3" = "Change your mind anytime in settings";
+"mesures.accepter" = "OK";
+"mesures.refuser" = "No thanks";
+"reglages.mesures" = "Anonymous statistics";

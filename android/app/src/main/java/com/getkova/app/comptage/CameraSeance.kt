@@ -73,6 +73,7 @@ class CameraSeance(contexte: Context) {
 
     private var compteur = CompteurRepetitions(Exercice.POMPES)
     private var objectif = 0
+    private var sansFin = false
 
     /** Numéro du comptage en cours, pour écarter les images d'un comptage précédent. */
     private var serie = 0
@@ -92,12 +93,20 @@ class CameraSeance(contexte: Context) {
     /**
      * Allume la caméra et remet le compteur à zéro. La caméra s'éteint seule dès
      * que l'objectif est atteint (objectif à zéro : elle observe sans s'arrêter).
+     * `sansFin` laisse compter au-delà de l'objectif : c'est l'écran qui arrête.
      * `simule` compte une répétition par seconde sans caméra (réglage de chantier).
      */
-    fun demarrer(proprietaire: LifecycleOwner, exercice: Exercice, objectif: Int, simule: Boolean = false) {
+    fun demarrer(
+        proprietaire: LifecycleOwner,
+        exercice: Exercice,
+        objectif: Int,
+        simule: Boolean = false,
+        sansFin: Boolean = false,
+    ) {
         serie += 1
         principal.removeCallbacks(simulation)
         this.objectif = objectif
+        this.sansFin = sansFin
         this.proprietaire = proprietaire
         compteur = CompteurRepetitions(exercice)
         repetitions = 0
@@ -202,7 +211,7 @@ class CameraSeance(contexte: Context) {
         corpsVisible = visible
         repetitions = compte
         if (comptee) surRepetition?.invoke(compte)
-        if (objectif > 0 && compte >= objectif) arreter()
+        if (objectif > 0 && !sansFin && compte >= objectif) arreter()
     }
 
     private companion object {

@@ -25,7 +25,7 @@
 
 /* Abonnements : Google Play. */
 "paywall.mentions.annuel" = "%@ par an. Annulable à tout moment sur Google Play.";
-"paywall.mentions.annuel_essai" = "3 jours gratuits, puis %@ par an. Annulable à tout moment sur Google Play.";
+"paywall.mentions.annuel_essai" = "Aucun paiement aujourd'hui. 3 jours gratuits, puis %@ par an. Annulable à tout moment sur Google Play.";
 "paywall.mentions.hebdo" = "%@ par semaine. Annulable à tout moment sur Google Play.";
 "offre.mentions" = "%@ la première année, puis %@ par an. Annulable à tout moment sur Google Play.";
 "abonnement.texte" = "L'abonnement se gère et s'annule dans Google Play.";
@@ -56,3 +56,46 @@
 "bulle.titre" = "Reverrouillage dans";
 "bulle.temps" = "%lld:%02lld";
 "paywall.titre.simple" = "Débloque tout Kova.";
+
+/* Mode hardcore. */
+"regle.hardcore" = "Mode hardcore";
+"regle.hardcore.texte" = "Ton temps gagné s'efface chaque jour à minuit. Pas de stock.";
+"regle.hardcore.texte_reglages" = "Ton temps gagné s'efface chaque jour à minuit. Le couper prend 24 h.";
+"regle.hardcore.fin" = "Le mode hardcore s'arrête le %@.";
+"accueil.hardcore" = "S'efface à minuit";
+
+/* Séance libre : on continue après la série. */
+"seance.bouton.minutes" = "Récupérer %lld min";
+"seance.gagnees" = "+%lld min";
+"seance.continuer" = "Série validée. Continue si tu veux.";
+
+/* App retirée, encore verrouillée 24 h. */
+"apps.reglage.sursis" = "Verrouillée jusqu'au %@";
+
+/* Paywall, rappels, joker, record, mesures. */
+"paywall.titre.jours" = "Récupère tes %lld jours par an.";
+"paywall.frise.jour1.titre" = "Aujourd'hui";
+"paywall.frise.jour1.texte" = "Accès complet, sans payer.";
+"paywall.frise.jour2.titre" = "Jour 2";
+"paywall.frise.jour2.texte" = "On te prévient par une notification.";
+"paywall.frise.jour3.titre" = "Jour 3";
+"paywall.frise.jour3.texte" = "%@ par an. Annulable avant.";
+"essai.rappel.canal" = "Abonnement";
+"essai.rappel.titre" = "Ton essai se termine demain";
+"essai.rappel.texte" = "Demain, ton abonnement démarre : %@ par an. Tu peux annuler avant sur Google Play.";
+"rappel.serie.titre_un" = "Ta série de %lld jour est en jeu";
+"rappel.serie.titre_autre" = "Ta série de %lld jours est en jeu";
+"rappel.serie.texte" = "Une série avant minuit pour la garder.";
+"accueil.joker" = "Joker utilisé cette semaine. Ta série tient.";
+"gagne.record" = "Record battu.";
+"chantier.mesures" = "Événements enregistrés";
+
+/* Statistiques anonymes. */
+"mesures.titre" = "Aide-nous à améliorer Kova.";
+"mesures.texte" = "Kova peut envoyer des statistiques anonymes : les écrans vus, les séances faites, les boutons touchés. Elles servent à voir ce qui coince.";
+"mesures.argument.1" = "Jamais l'image de la caméra";
+"mesures.argument.2" = "Jamais le nom de tes apps";
+"mesures.argument.3" = "Tu changes d'avis quand tu veux, dans les réglages";
+"mesures.accepter" = "D'accord";
+"mesures.refuser" = "Non merci";
+"reglages.mesures" = "Statistiques anonymes";

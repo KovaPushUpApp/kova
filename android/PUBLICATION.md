@@ -39,6 +39,33 @@ finale, et celle-ci ne sert plus qu'à envoyer les mises à jour. Elle peut êtr
   les prix venus de Google Play au lieu des prix écrits dans les textes.
 - **Le comptage** rate encore des pompes sur un vrai téléphone. Seuils à régler avec des mesures réelles.
 
+## Statistiques d'usage (PostHog, région Union européenne)
+
+L'app note ce qui s'y passe (écrans vus, étapes de l'onboarding, séances, paywall) dans
+`Mesures.kt`. Tout est prêt pour l'envoi à PostHog, mais **rien ne part aujourd'hui** :
+il manque la clé du projet et l'accès Internet.
+
+Pour activer l'envoi :
+
+1. Créer un compte sur PostHog en choisissant la région **EU**, puis un projet "Kova".
+2. Mettre la clé du projet dans `android/mesures.properties` : `cle=phc_...`
+3. Dans `AndroidManifest.xml`, remplacer la ligne qui retire `INTERNET` par la permission elle-même.
+4. Dans PostHog, vérifier que la capture de l'adresse IP est désactivée (réglage du projet).
+
+Ce que fait l'app une fois la clé en place :
+
+- Elle pose la question juste après l'écran d'accueil, avec deux boutons identiques. Sans "oui", rien n'est envoyé.
+- Un refus efface l'identifiant et ce qui attendait d'être envoyé. Le choix se change dans les réglages.
+- Jamais le nom des apps verrouillées, jamais rien de la caméra. Identifiant tiré au hasard, sans fiche de personne ni localisation.
+
+À faire en même temps, avant de publier avec Internet :
+
+- **La bibliothèque de détection de posture (ML Kit) envoie ses propres statistiques à Google dès que l'app a Internet.**
+  C'est pour ça que la permission était retirée. Lire la page de Google sur les données collectées par ML Kit et la déclarer.
+- Mettre à jour la politique de confidentialité (`appstore/confidentialite.md`) : PostHog, les événements, le consentement.
+- Mettre à jour "Sécurité des données" plus bas : l'app collectera des données d'usage, facultatives.
+- Dans la déclaration du service d'accessibilité, retirer la phrase "the app has no Internet permission".
+
 ## Déclaration du service d'accessibilité
 
 Google demande, pour toute app qui utilise l'API d'accessibilité sans être un outil

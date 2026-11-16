@@ -12,12 +12,17 @@ import com.getkova.app.jeu.basculerPlage
 import com.getkova.app.jeu.bilanDeLaSemaine
 import com.getkova.app.jeu.contient
 import com.getkova.app.jeu.definirApps
+import com.getkova.app.jeu.definirHardcore
 import com.getkova.app.jeu.estBloquee
+import com.getkova.app.jeu.estUnRecord
 import com.getkova.app.jeu.finDOuverture
+import com.getkova.app.jeu.hardcoreEnVigueur
+import com.getkova.app.jeu.jokerUtilise
 import com.getkova.app.jeu.mettreAJour
 import com.getkova.app.jeu.ouvrirFenetre
 import com.getkova.app.jeu.plageActive
 import com.getkova.app.jeu.proposerRegle
+import com.getkova.app.jeu.repetitionsDuJour
 import com.getkova.app.jeu.serie
 import com.getkova.app.jeu.urgencesRestantes
 import com.getkova.app.jeu.utiliserUrgence
@@ -88,7 +93,7 @@ class MoteurJeuTest {
 
     @Test
     fun uneSeanceCrediteLeSolde() {
-        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10))
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone)
         assertEquals(15, etat.soldeMinutes)
         assertEquals(1, etat.seances.size)
         assertEquals(10, etat.seances.first().repetitions)
@@ -96,7 +101,7 @@ class MoteurJeuTest {
 
     @Test
     fun ouvrirUneFenetreUtiliseToutLeSolde() {
-        val (etat, fin) = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10)).ouvrirFenetre(date(9, 10), zone)
+        val (etat, fin) = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone).ouvrirFenetre(date(9, 10), zone)
         assertEquals(date(9, 10, 15), fin)
         assertEquals(0, etat.soldeMinutes)
         assertTrue(etat.appsOuvertes(date(9, 10, 14), zone))
@@ -113,7 +118,7 @@ class MoteurJeuTest {
     @Test
     fun unePlageStricteBloqueMemeAvecUneFenetre() {
         val (etat, _) = EtatJeu().ajouterPlage(travail)
-            .validerSeance(Exercice.POMPES, date(9, 8, 50))
+            .validerSeance(Exercice.POMPES, date(9, 8, 50), zone)
             .ouvrirFenetre(date(9, 8, 50), zone)
         assertTrue(etat.appsOuvertes(date(9, 8, 55), zone))
         assertFalse("La plage reverrouille pendant la fenêtre.", etat.appsOuvertes(date(9, 9, 1), zone))
@@ -124,7 +129,7 @@ class MoteurJeuTest {
 
     @Test
     fun pendantUnePlageOnNePeutPasOuvrirDeFenetre() {
-        val depart = EtatJeu().ajouterPlage(travail).validerSeance(Exercice.POMPES, date(9, 10))
+        val depart = EtatJeu().ajouterPlage(travail).validerSeance(Exercice.POMPES, date(9, 10), zone)
         val (etat, fin) = depart.ouvrirFenetre(date(9, 10), zone)
         assertNull(fin)
         assertEquals("Le solde reste intact.", 15, etat.soldeMinutes)
@@ -206,21 +211,61 @@ class MoteurJeuTest {
     fun laSerieCompteLesJoursDAffilee() {
         var etat = EtatJeu()
         assertEquals(0, etat.serie(date(13, 10), zone))
-        etat = etat.validerSeance(Exercice.POMPES, date(10, 10))
-            .validerSeance(Exercice.POMPES, date(11, 10))
-            .validerSeance(Exercice.POMPES, date(12, 10))
+        etat = etat.validerSeance(Exercice.POMPES, date(10, 10), zone)
+            .validerSeance(Exercice.POMPES, date(11, 10), zone)
+            .validerSeance(Exercice.POMPES, date(12, 10), zone)
         assertEquals(3, etat.serie(date(12, 20), zone))
         assertEquals("La série tient jusqu'au lendemain soir.", 3, etat.serie(date(13, 8), zone))
-        assertEquals("Un jour sans séance casse la série.", 0, etat.serie(date(14, 8), zone))
+        assertEquals("Le joker de la semaine pardonne un jour raté.", 3, etat.serie(date(14, 8), zone))
+        assertEquals("Deux jours ratés la même semaine cassent la série.", 0, etat.serie(date(15, 8), zone))
+    }
+
+    @Test
+    fun leJokerRelieDeuxJoursAvecSeance() {
+        val etat = EtatJeu()
+            .validerSeance(Exercice.POMPES, date(9, 10), zone)
+            .validerSeance(Exercice.POMPES, date(10, 10), zone)
+            .validerSeance(Exercice.POMPES, date(12, 10), zone)
+        // Le mercredi 11 est raté : il ne compte pas, mais la série continue.
+        assertEquals(3, etat.serie(date(12, 20), zone))
+        assertTrue(etat.jokerUtilise(date(12, 20), zone))
+        // La semaine suivante, le joker est de nouveau disponible.
+        assertFalse(etat.validerSeance(Exercice.POMPES, date(13, 10), zone).jokerUtilise(date(16, 9), zone))
+    }
+
+    @Test
+    fun unJokerParSemaineSeulement() {
+        val etat = EtatJeu()
+            .validerSeance(Exercice.POMPES, date(9, 10), zone)
+            .validerSeance(Exercice.POMPES, date(11, 10), zone)
+            .validerSeance(Exercice.POMPES, date(13, 10), zone)
+        // Mardi 10 et jeudi 12 ratés la même semaine : seul le jeudi est pardonné.
+        assertEquals(2, etat.serie(date(13, 20), zone))
+    }
+
+    @Test
+    fun sansSeanceAvantLeJokerNeSauveRien() {
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(11, 10), zone)
+        assertEquals(1, etat.serie(date(11, 20), zone))
+        assertFalse(etat.jokerUtilise(date(11, 20), zone))
+    }
+
+    @Test
+    fun leRecordSeComparAuxSeancesDuMemeExercice() {
+        val premiere = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone, repetitions = 20)
+        assertFalse("La première séance n'est pas un record.", premiere.estUnRecord())
+        assertFalse(premiere.validerSeance(Exercice.POMPES, date(10, 10), zone, repetitions = 20).estUnRecord())
+        assertTrue(premiere.validerSeance(Exercice.POMPES, date(10, 10), zone, repetitions = 21).estUnRecord())
+        assertFalse(premiere.validerSeance(Exercice.SQUATS, date(10, 10), zone, repetitions = 40).estUnRecord())
     }
 
     @Test
     fun leBilanDeLaSemaine() {
         val etat = EtatJeu()
-            .validerSeance(Exercice.POMPES, date(3, 10))
-            .validerSeance(Exercice.POMPES, date(9, 10))
-            .validerSeance(Exercice.SQUATS, date(9, 18))
-            .validerSeance(Exercice.POMPES, date(13, 10))
+            .validerSeance(Exercice.POMPES, date(3, 10), zone)
+            .validerSeance(Exercice.POMPES, date(9, 10), zone)
+            .validerSeance(Exercice.SQUATS, date(9, 18), zone)
+            .validerSeance(Exercice.POMPES, date(13, 10), zone)
         val bilan = etat.bilanDeLaSemaine(date(13, 12), zone)
         assertEquals(listOf(25, 0, 0, 0, 10, 0, 0), bilan.repetitionsParJour)
         assertEquals(4, bilan.rangAujourdHui)
@@ -232,7 +277,7 @@ class MoteurJeuTest {
     @Test
     fun lEtatSurvitALEnregistrement() {
         val etat = EtatJeu()
-            .validerSeance(Exercice.POMPES, date(9, 10))
+            .validerSeance(Exercice.POMPES, date(9, 10), zone)
             .ajouterPlage(Plage("nuit", "Nuit", 23 * 60, 7 * 60))
             .definirApps(setOf("a"), date(9, 10), immediat = true)
             .proposerRegle(Regle(5, 15), date(9, 10)).first
@@ -240,5 +285,116 @@ class MoteurJeuTest {
         assertEquals(etat, json.decodeFromString<EtatJeu>(json.encodeToString(EtatJeu.serializer(), etat)))
         // Un enregistrement ancien, sans les champs récents, garde ses valeurs.
         assertEquals(7, json.decodeFromString<EtatJeu>("""{"soldeMinutes":7,"champInconnu":1}""").soldeMinutes)
+    }
+
+    // --- Mode hardcore ---
+
+    private fun hardcore(instant: Long) = EtatJeu().definirHardcore(true, instant, zone, immediat = false)
+
+    @Test
+    fun sansHardcoreLeSoldeResteLeLendemain() {
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone).mettreAJour(date(10, 8))
+        assertEquals(15, etat.soldeMinutes)
+        assertNull(etat.effacementLe)
+    }
+
+    @Test
+    fun enHardcoreLeSoldeSEffaceAMinuit() {
+        val etat = hardcore(date(9, 9)).validerSeance(Exercice.POMPES, date(9, 10), zone)
+        assertEquals(date(10, 0), etat.effacementLe)
+        assertEquals(15, etat.mettreAJour(date(9, 23, 59)).soldeMinutes)
+        val lendemain = etat.mettreAJour(date(10, 0))
+        assertEquals(0, lendemain.soldeMinutes)
+        assertNull(lendemain.effacementLe)
+        // Les séances restent : la série et les stats ne sont pas touchées.
+        assertEquals(1, lendemain.seances.size)
+    }
+
+    @Test
+    fun enHardcoreLaFenetreSArreteAMinuit() {
+        val (etat, fin) = hardcore(date(9, 9))
+            .validerSeance(Exercice.POMPES, date(9, 23, 50), zone)
+            .ouvrirFenetre(date(9, 23, 50), zone)
+        assertEquals(date(10, 0), fin)
+        assertEquals(date(10, 0), etat.finDOuverture(date(9, 23, 55), zone))
+        assertFalse(etat.mettreAJour(date(10, 0)).appsOuvertes(date(10, 0), zone))
+    }
+
+    @Test
+    fun activerLeHardcoreBorneLeTempsDejaGagne() {
+        val (ouvert, _) = EtatJeu(regle = Regle(10, 120))
+            .validerSeance(Exercice.POMPES, date(9, 23), zone)
+            .ouvrirFenetre(date(9, 23), zone)
+        val etat = ouvert.validerSeance(Exercice.POMPES, date(9, 23), zone)
+            .definirHardcore(true, date(9, 23, 10), zone, immediat = false)
+        assertEquals(date(10, 0), etat.fenetreFin)
+        assertEquals(120, etat.soldeMinutes)
+        assertEquals(0, etat.mettreAJour(date(10, 0, 1)).soldeMinutes)
+    }
+
+    @Test
+    fun couperLeHardcorePrend24Heures() {
+        val coupe = hardcore(date(9, 9)).definirHardcore(false, date(9, 20), zone, immediat = false)
+        assertFalse(coupe.hardcore)
+        assertTrue(coupe.hardcoreEnVigueur(date(10, 19, 59)))
+        assertFalse(coupe.hardcoreEnVigueur(date(10, 20)))
+        // Le minuit qui tombe dans le délai efface encore.
+        val soir = coupe.validerSeance(Exercice.POMPES, date(9, 21), zone)
+        assertEquals(0, soir.mettreAJour(date(10, 0)).soldeMinutes)
+        // Le minuit suivant est après le délai : le temps gagné reste.
+        val lendemain = coupe.mettreAJour(date(10, 9)).validerSeance(Exercice.POMPES, date(10, 10), zone)
+        assertNull(lendemain.effacementLe)
+        assertEquals(15, lendemain.mettreAJour(date(11, 9)).soldeMinutes)
+        assertNull(lendemain.mettreAJour(date(11, 9)).hardcoreJusquA)
+    }
+
+    @Test
+    fun pendantLOnboardingCouperLeHardcoreEstImmediat() {
+        val etat = hardcore(date(9, 9)).definirHardcore(false, date(9, 10), zone, immediat = true)
+        assertFalse(etat.hardcoreEnVigueur(date(9, 10)))
+        assertNull(etat.effacementLe)
+    }
+
+    @Test
+    fun reactiverLeHardcoreAnnuleLeDelai() {
+        val etat = hardcore(date(9, 9))
+            .definirHardcore(false, date(9, 20), zone, immediat = false)
+            .definirHardcore(true, date(9, 21), zone, immediat = false)
+        assertTrue(etat.hardcore)
+        assertNull(etat.hardcoreJusquA)
+    }
+
+    // --- Séance libre ---
+
+    @Test
+    fun rienTantQueLaSerieNEstPasFaite() {
+        assertEquals(0, Regle(10, 15).minutesPour(Exercice.POMPES, 9))
+        assertEquals(15, Regle(10, 15).minutesPour(Exercice.POMPES, 10))
+    }
+
+    @Test
+    fun chaqueRepetitionEnPlusRapporteAuMemeRapport() {
+        val regle = Regle(10, 15)
+        assertEquals(16, regle.minutesPour(Exercice.POMPES, 11))
+        assertEquals(21, regle.minutesPour(Exercice.POMPES, 14))
+        assertEquals(30, regle.minutesPour(Exercice.POMPES, 20))
+        // 15 squats valent 10 pompes.
+        assertEquals(15, regle.minutesPour(Exercice.SQUATS, 15))
+        assertEquals(30, regle.minutesPour(Exercice.SQUATS, 30))
+    }
+
+    @Test
+    fun laSeanceLibreAjouteLeTempsDesRepetitionsFaites() {
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone, repetitions = 24)
+        assertEquals(36, etat.soldeMinutes)
+        assertEquals(24, etat.seances.last().repetitions)
+        assertEquals(24, etat.repetitionsDuJour(date(9, 11), zone))
+    }
+
+    @Test
+    fun uneSeanceValideeVautAuMoinsLaSerie() {
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone, repetitions = 3)
+        assertEquals(15, etat.soldeMinutes)
+        assertEquals(10, etat.seances.last().repetitions)
     }
 }

@@ -14,6 +14,8 @@ import com.getkova.app.jeu.Regle
 import com.getkova.app.jeu.ajouterPlage
 import com.getkova.app.jeu.basculerPlage
 import com.getkova.app.jeu.definirApps
+import com.getkova.app.jeu.definirHardcore
+import com.getkova.app.jeu.estUnRecord
 import com.getkova.app.jeu.mettreAJour
 import com.getkova.app.jeu.ouvrirFenetre
 import com.getkova.app.jeu.proposerRegle
@@ -113,6 +115,18 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     var offreDejaVue by mutableStateOf(reglages.getBoolean("offreDejaVue", false))
         private set
 
+    /** Vrai si l'utilisateur a accepté l'envoi de statistiques anonymes. */
+    var mesuresAcceptees by mutableStateOf(Mesures.consentement(application) == true)
+        private set
+
+    fun definirMesures(acceptees: Boolean) {
+        // Le choix est noté avant d'être appliqué : un refus ne laisse partir que lui-même... et rien d'autre.
+        if (acceptees) Mesures.definirConsentement(contexte, true)
+        Mesures.suivre(contexte, "mesures_choix", "acceptees" to acceptees)
+        if (!acceptees) Mesures.definirConsentement(contexte, false)
+        mesuresAcceptees = acceptees
+    }
+
     /**
      * Abonnement. Les achats Google Play ne sont pas encore branchés : ce réglage
      * de chantier sert à essayer les fonctions réservées.
@@ -134,6 +148,10 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     val regle: Regle get() = jeu.regle
     val repetitionsDeLaSeance: Int get() = jeu.regle.repetitionsDemandees(exercice)
 
+    init {
+        Mesures.suivre(application, "app_ouverte", "onboarding_termine" to onboardingTermine)
+    }
+
     private fun maintenant() = System.currentTimeMillis()
 
     private fun <T> modifier(changement: (EtatJeu, Long) -> Pair<EtatJeu, T>): T {
@@ -154,6 +172,11 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     fun terminerOnboarding() {
         onboardingTermine = true
         reglages.edit().putBoolean("onboardingTermine", true).apply()
+        Mesures.suivre(
+            contexte, "onboarding_termine",
+            "abonne" to abonne, "apps" to jeu.apps.size, "hardcore" to jeu.hardcore,
+            "repetitions" to regle.repetitions, "minutes" to regle.minutes,
+        )
     }
 
     fun revoirOnboarding() {
@@ -181,31 +204,66 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
             "notificationsDemandees" -> notificationsDemandees = valeur
         }
         reglages.edit().putBoolean(cle, valeur).apply()
+        Mesures.suivre(contexte, "option_changee", "option" to cle, "valeur" to valeur)
     }
 
     /** Version de test seulement : fenêtre de quelques secondes, pour vérifier le reverrouillage. */
     fun ouvrirFenetreDeTest(secondes: Int) =
         modifier { etat, instant -> etat.copy(fenetreFin = instant + secondes * 1000L) to Unit }
 
-    fun validerSeance() = modifier { etat, instant -> etat.validerSeance(exercice, instant) to Unit }
-
-    /** Ouvre une fenêtre avec tout le solde. Null si rien n'a pu s'ouvrir. */
-    fun ouvrirFenetre(): Long? = modifier { etat, instant -> etat.ouvrirFenetre(instant, zone) }
-
-    fun utiliserUrgence(): Long? = modifier { etat, instant -> etat.utiliserUrgence(instant, zone) }
-
-    /** Change la règle. Renvoie vrai si le changement est différé de 24 h. */
-    fun proposerRegle(regle: Regle, immediat: Boolean): Boolean = modifier { etat, instant ->
-        if (immediat) {
-            // Pendant l'onboarding, il n'y a pas encore de règle à protéger.
-            etat.copy(regle = regle, regleEnAttente = null, regleEnAttenteLe = null) to false
-        } else {
-            etat.proposerRegle(regle, instant)
-        }
+    /** Valide la séance avec les répétitions vraiment faites, au-delà de la série si on a continué. */
+    fun validerSeance(repetitions: Int) {
+        modifier { etat, instant -> etat.validerSeance(exercice, instant, zone, repetitions) to Unit }
+        val seance = jeu.seances.lastOrNull() ?: return
+        Mesures.suivre(
+            contexte, "seance_validee",
+            "exercice" to seance.exercice.name, "repetitions" to seance.repetitions, "minutes" to seance.minutes,
+            "serie_demandee" to repetitionsDeLaSeance, "record" to jeu.estUnRecord(), "seances" to jeu.seances.size,
+        )
     }
 
-    fun definirApps(apps: Set<String>, immediat: Boolean) =
+    /** Ouvre une fenêtre avec tout le solde. Null si rien n'a pu s'ouvrir. */
+    fun ouvrirFenetre(): Long? {
+        val minutes = jeu.soldeMinutes
+        val fin = modifier { etat, instant -> etat.ouvrirFenetre(instant, zone) }
+        if (fin != null) Mesures.suivre(contexte, "fenetre_ouverte", "minutes" to minutes)
+        return fin
+    }
+
+    fun utiliserUrgence(): Long? {
+        val fin = modifier { etat, instant -> etat.utiliserUrgence(instant, zone) }
+        Mesures.suivre(contexte, "urgence_demandee", "accordee" to (fin != null))
+        return fin
+    }
+
+    /** Change la règle. Renvoie vrai si le changement est différé de 24 h. */
+    fun proposerRegle(regle: Regle, immediat: Boolean): Boolean {
+        val differe = modifier { etat, instant ->
+            if (immediat) {
+                // Pendant l'onboarding, il n'y a pas encore de règle à protéger.
+                etat.copy(regle = regle, regleEnAttente = null, regleEnAttenteLe = null) to false
+            } else {
+                etat.proposerRegle(regle, instant)
+            }
+        }
+        Mesures.suivre(
+            contexte, "regle_validee",
+            "repetitions" to regle.repetitions, "minutes" to regle.minutes, "differe" to differe, "onboarding" to immediat,
+        )
+        return differe
+    }
+
+    /** Active ou coupe le mode hardcore. Couper prend effet dans 24 h, sauf pendant l'onboarding. */
+    fun definirHardcore(actif: Boolean, immediat: Boolean) {
+        modifier { etat, instant -> etat.definirHardcore(actif, instant, zone, immediat) to Unit }
+        Mesures.suivre(contexte, "hardcore_change", "actif" to actif, "onboarding" to immediat)
+    }
+
+    fun definirApps(apps: Set<String>, immediat: Boolean) {
         modifier { etat, instant -> etat.definirApps(apps, instant, immediat) to Unit }
+        // Seulement le nombre d'apps : jamais leurs noms.
+        Mesures.suivre(contexte, "apps_modifiees", "nombre" to apps.size, "onboarding" to immediat)
+    }
 
     fun basculerPlage(id: String) = modifier { etat, instant -> etat.basculerPlage(id, instant) to Unit }
 

@@ -96,6 +96,7 @@ import com.getkova.app.design.t
 import com.getkova.app.jeu.EtatJeu
 import com.getkova.app.jeu.Exercice
 import com.getkova.app.jeu.finDOuverture
+import com.getkova.app.jeu.estUnRecord
 import com.getkova.app.jeu.ouvrirFenetre
 import com.getkova.app.jeu.plageActive
 import com.getkova.app.jeu.repetitionsDuJour
@@ -308,10 +309,16 @@ private fun AngleMesure(camera: CameraSeance) {
 
 /** Compteur géant "3/10" de l'essai et de la séance, avec le message d'encouragement. */
 @Composable
-fun CompteurGeant(faites: Int, total: Int, tailleTotal: Float, corpsVisible: Boolean) {
+fun CompteurGeant(
+    faites: Int,
+    total: Int,
+    tailleTotal: Float,
+    corpsVisible: Boolean,
+    texteValide: Int = R.string.seance_validee,
+) {
     val description = f(R.string.a11y_progression_valeur, faites, total)
     val message = when {
-        faites >= total -> t(R.string.seance_validee)
+        faites >= total -> t(texteValide)
         !corpsVisible || faites == 0 -> t(R.string.seance_en_position)
         else -> f(R.string.seance_encore, total - faites)
     }
@@ -614,11 +621,16 @@ fun EcranPlacement(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suiv
     }
 }
 
-/** Écran 16 : la séance. Le bouton de validation n'apparaît qu'à la fin. Abandonner ne donne rien. */
+/**
+ * Écran 16 : la séance. Le bouton de validation apparaît quand la série de la règle
+ * est faite. On peut continuer : chaque répétition en plus ajoute du temps, et c'est
+ * le bouton qui termine la séance. Abandonner ne donne rien.
+ */
 @Composable
-fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, valider: () -> Unit) {
+fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, valider: (Int) -> Unit) {
     val total = etat.repetitionsDeLaSeance
-    val faites = camera.repetitions.coerceAtMost(total)
+    val faites = camera.repetitions
+    val gagnees = etat.regle.minutesPour(etat.exercice, faites)
     val proprietaire = LocalLifecycleOwner.current
     val haptique = rememberHaptique()
     val voix = rememberVoix()
@@ -628,10 +640,11 @@ fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, v
         vue.keepScreenOn = true
         val aVoixHaute = etat.compterAVoixHaute
         camera.surRepetition = { compte ->
-            if (compte >= total) haptique.serieValidee() else haptique.repetition()
+            // Vibration forte à chaque série complète.
+            if (total > 0 && compte % total == 0) haptique.serieValidee() else haptique.repetition()
             if (aVoixHaute) voix.dire(compte)
         }
-        camera.demarrer(proprietaire, etat.exercice, total, etat.comptageSimule)
+        camera.demarrer(proprietaire, etat.exercice, total, etat.comptageSimule, sansFin = true)
         onDispose { vue.keepScreenOn = false }
     }
     val segmentsTotal = Tokens.Composants.BarreProgression.segments
@@ -641,13 +654,15 @@ fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, v
             BoutonFermer(t(R.string.a11y_arreter_seance), action = abandonner)
             Spacer(Modifier.weight(1f))
             AngleMesure(camera)
-            Etiquette(f(R.string.seance_pour_minutes, etat.regle.minutes))
+            Etiquette(
+                if (gagnees > 0) f(R.string.seance_gagnees, gagnees) else f(R.string.seance_pour_minutes, etat.regle.minutes),
+            )
         },
     ) {
-        CompteurGeant(faites, total, Tokens.TaillesTexte.titreAccueil, camera.corpsVisible)
-        BarreSegments(if (total > 0) faites * segmentsTotal / total else 0, segmentsTotal)
+        CompteurGeant(faites, total, Tokens.TaillesTexte.titreAccueil, camera.corpsVisible, R.string.seance_continuer)
+        BarreSegments(if (total > 0) (faites * segmentsTotal / total).coerceAtMost(segmentsTotal) else 0, segmentsTotal)
         if (faites >= total) {
-            BoutonPrincipal(t(R.string.seance_bouton), Modifier.entree(), action = valider)
+            BoutonPrincipal(f(R.string.seance_bouton_minutes, gagnees), Modifier.entree()) { valider(faites) }
         } else {
             Spacer(Modifier.height(Tokens.Hauteurs.boutonPrincipal.dp))
         }
@@ -668,7 +683,9 @@ private fun Exercice.texteValide(): Int = when (this) {
  */
 @Composable
 fun EcranGagne(etat: EtatApp, ouvrir: () -> Unit, garder: () -> Unit) {
-    val cible = etat.regle.minutes
+    // La séance qui vient d'être validée : elle peut dépasser la série de la règle.
+    val seance = remember { etat.jeu.seances.lastOrNull() }
+    val cible = seance?.minutes ?: etat.regle.minutes
     val reduire = reduireLesAnimations()
     var minutes by remember { mutableIntStateOf(if (reduire) cible else 0) }
     LaunchedEffect(cible) {
@@ -699,8 +716,9 @@ fun EcranGagne(etat: EtatApp, ouvrir: () -> Unit, garder: () -> Unit) {
             }
         },
     ) {
+        val valide = f(etat.exercice.texteValide(), seance?.repetitions ?: etat.repetitionsDeLaSeance)
         Corps(
-            f(etat.exercice.texteValide(), etat.repetitionsDeLaSeance),
+            if (etat.jeu.estUnRecord()) valide + "\n" + t(R.string.gagne_record) else valide,
             Modifier.padding(top = Tokens.Espacements.e89.dp).entree(1),
             couleur = sombre, graisse = Graisse.DEMI_GRAS,
         )

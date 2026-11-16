@@ -43,6 +43,7 @@ import com.getkova.app.design.EnTeteEtapes
 import com.getkova.app.design.Graisse
 import com.getkova.app.design.Icone
 import com.getkova.app.design.IconeAnneau
+import com.getkova.app.design.Interrupteur
 import com.getkova.app.design.Legende
 import com.getkova.app.design.LigneCoche
 import com.getkova.app.design.LogoKova
@@ -76,6 +77,29 @@ fun EcranBienvenue(commencer: () -> Unit) {
         LogoKova(Modifier.padding(top = Tokens.Espacements.e144.dp).pop())
         Titre(t(R.string.bienvenue_titre), Modifier.entree(4), taille = Tokens.TaillesTexte.titreAccueil)
         Paragraphe(t(R.string.bienvenue_texte), Modifier.entree(6))
+    }
+}
+
+/**
+ * La question des statistiques anonymes. Les deux réponses ont le même bouton,
+ * à la même taille : refuser est aussi simple qu'accepter.
+ */
+@Composable
+fun EcranMesures(repondre: (Boolean) -> Unit) {
+    EcranKova(
+        bas = {
+            BoutonPrincipal(t(R.string.mesures_accepter), Modifier.entree(5), style = StyleBouton.CONTOUR) { repondre(true) }
+            BoutonPrincipal(t(R.string.mesures_refuser), Modifier.entree(5), style = StyleBouton.CONTOUR) { repondre(false) }
+        },
+    ) {
+        IconeAnneau(Icone.STATS, avecAnneau = false)
+        Titre(t(R.string.mesures_titre), Modifier.padding(top = Tokens.Espacements.e13.dp).entree(1))
+        Paragraphe(t(R.string.mesures_texte), Modifier.entree(2))
+        Column(Modifier.entree(3), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
+            LigneCoche(t(R.string.mesures_argument_1))
+            LigneCoche(t(R.string.mesures_argument_2))
+            LigneCoche(t(R.string.mesures_argument_3))
+        }
     }
 }
 
@@ -246,11 +270,13 @@ fun EcranAutorisation(
 @Composable
 fun EcranRegle(etat: EtatApp, onboarding: Boolean, retour: () -> Unit, valider: () -> Unit) {
     var brouillon by remember { mutableStateOf(etat.jeu.regleEnAttente ?: etat.regle) }
+    var hardcore by remember { mutableStateOf(etat.jeu.hardcore) }
     EcranKova(
         bas = {
             BoutonPrincipal(t(R.string.regle_bouton), Modifier.entree(5)) {
                 // Dans les réglages, assouplir la règle prend effet 24 h plus tard.
                 etat.proposerRegle(brouillon, immediat = onboarding)
+                if (hardcore != etat.jeu.hardcore) etat.definirHardcore(hardcore, immediat = onboarding)
                 valider()
             }
         },
@@ -274,6 +300,26 @@ fun EcranRegle(etat: EtatApp, onboarding: Boolean, retour: () -> Unit, valider: 
             ) { brouillon = brouillon.changerMinutes(it) }
         }
         Centre { Legende(f(R.string.regle_par_heure, brouillon.pompesParHeure)) }
+        Row(
+            Modifier.fillMaxWidth().carte().entree(4),
+            horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e3.dp)) {
+                Titre(t(R.string.regle_hardcore), taille = Tokens.TaillesTexte.corpsFort)
+                Legende(t(if (onboarding) R.string.regle_hardcore_texte else R.string.regle_hardcore_texte_reglages))
+            }
+            Interrupteur(hardcore, t(R.string.regle_hardcore)) { hardcore = !hardcore }
+        }
+        val hardcoreJusquA = etat.jeu.hardcoreJusquA
+        if (!onboarding && !hardcore && hardcoreJusquA != null) {
+            Centre {
+                Legende(
+                    f(R.string.regle_hardcore_fin, dateEtHeure(hardcoreJusquA, etat)),
+                    couleur = Tokens.Couleurs.accent, centre = true,
+                )
+            }
+        }
         val enAttenteLe = etat.jeu.regleEnAttenteLe
         if (!onboarding && etat.jeu.regleEnAttente != null && enAttenteLe != null) {
             Centre { Legende(f(R.string.regle_en_attente, dateEtHeure(enAttenteLe, etat)), couleur = Tokens.Couleurs.accent, centre = true) }
@@ -347,7 +393,11 @@ fun EcranPaywall(
                 Legende(t(R.string.paywall_restaurer), graisse = Graisse.MOYEN)
             }
         }
-        Titre(t(if (essaiReussi) R.string.paywall_titre else R.string.paywall_titre_simple), Modifier.padding(top = Tokens.Espacements.e8.dp).entree(1))
+        // Le titre reprend le chiffre que la personne a vu au début : ses jours par an sur le téléphone.
+        Titre(
+            if (essaiReussi) t(R.string.paywall_titre) else f(R.string.paywall_titre_jours, etat.tempsParJour.joursParAn),
+            Modifier.padding(top = Tokens.Espacements.e8.dp).entree(1),
+        )
         Paragraphe(t(R.string.paywall_texte), Modifier.entree(2))
         Column(Modifier.entree(3), verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
             LigneCoche(t(R.string.paywall_argument_apps))
@@ -369,6 +419,26 @@ fun EcranPaywall(
                 prixHebdo, t(R.string.paywall_hebdo_etiquette), accent = false,
             )
         }
+        if (annuel) {
+            // Ce qui se passe pendant l'essai, jour par jour. Le rappel du jour 2 est programmé à l'achat.
+            Column(
+                Modifier.fillMaxWidth().carte().entree(5),
+                verticalArrangement = Arrangement.spacedBy(Tokens.Espacements.e8.dp),
+            ) {
+                EtapeEssai(t(R.string.paywall_frise_jour1_titre), t(R.string.paywall_frise_jour1_texte))
+                EtapeEssai(t(R.string.paywall_frise_jour2_titre), t(R.string.paywall_frise_jour2_texte))
+                EtapeEssai(t(R.string.paywall_frise_jour3_titre), f(R.string.paywall_frise_jour3_texte, prixAnnuel))
+            }
+        }
+    }
+}
+
+/** Une ligne de la frise de l'essai : le jour, puis ce qui se passe ce jour-là. */
+@Composable
+private fun EtapeEssai(jour: String, texte: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Tokens.Espacements.e13.dp)) {
+        Legende(jour, Modifier.weight(1f), couleur = Tokens.Couleurs.accent, graisse = Graisse.DEMI_GRAS)
+        Legende(texte, Modifier.weight(2f))
     }
 }
 
