@@ -73,8 +73,11 @@ struct EcranReglages: View {
                 }
             }
             .entree(rang: 3)
-            // Accès de chantier, à retirer avant la mise en ligne.
+            // Accès de chantier : seulement dans le build de test sans verrouillage
+            // (project.base.yml). Le projet complet, celui qui part en revue, ne l'a pas.
+            #if KOVA_SANS_VERROUILLAGE
             BoutonSecondaire(L.t("socle.titre")) { ouvrir(.controleSocle) }
+            #endif
         }
     }
 }

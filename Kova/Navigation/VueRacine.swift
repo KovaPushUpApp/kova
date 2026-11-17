@@ -150,7 +150,7 @@ struct ParcoursOnboarding: View {
 
     /// Fermer le paywall sans payer montre l'offre de rattrapage, une seule fois.
     private func fermerPaywall() {
-        if etat.offreDejaVue {
+        if etat.offreDejaVue || !Abonnements.offreDeRattrapageActive {
             apresRefus()
         } else {
             etat.offreDejaVue = true

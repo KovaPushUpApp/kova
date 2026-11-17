@@ -155,6 +155,13 @@ struct EcranPaywall: View {
         }
         .alerteAchat(abonnements)
         .onAppear { Analytique.envoyer(.paywallVu) }
+        .task {
+            // Les prix viennent de l'App Store. S'ils n'étaient pas arrivés au
+            // lancement (réseau lent), on les redemande à l'ouverture du paywall.
+            if abonnements.annuel == nil {
+                await abonnements.charger()
+            }
+        }
     }
 
     private func acheter() {

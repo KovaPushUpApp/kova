@@ -15,6 +15,11 @@ import RevenueCat
 final class Abonnements: ObservableObject {
     static let droit = "premium"
     static let offreDeRattrapage = "rattrapage"
+    /// Faux pour la première version : une remise affichée à la fermeture du
+    /// paywall a déjà valu des refus en revue (règle 5.6). C'est un écart voulu
+    /// avec le brief (section 4). À remettre dans une mise à jour, avec le produit
+    /// créé dans App Store Connect et les étapes pour le voir dans les notes de revue.
+    static let offreDeRattrapageActive = false
 
     @Published private(set) var estAbonne = false
     @Published private(set) var annuel: Package?

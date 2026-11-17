@@ -82,6 +82,11 @@ struct EcranEssai: View {
                 tailleTotal: Tokens.TaillesTexte.titreEcran,
                 corpsVisible: camera.corpsVisible
             )
+            Text(verbatim: L.t("sante.avertissement"))
+                .legende()
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
         } bas: {
             if camera.repetitions >= total {
                 BoutonPrincipal(L.t("essai.bouton")) {
@@ -94,7 +99,9 @@ struct EcranEssai: View {
                 BoutonPrincipal(L.t("camera.ouvrir_reglages"), action: ouvrirReglagesSysteme)
                 BoutonSecondaire(L.t("essai.passer")) { suivant(false) }
             } else {
-                Color.clear.frame(height: Tokens.Hauteurs.boutonPrincipal)
+                // On peut toujours passer : personne ne doit rester coincé ici,
+                // ni quelqu'un qui ne peut pas faire de pompes, ni la revue d'Apple.
+                BoutonSecondaire(L.t("essai.passer")) { suivant(false) }
             }
         }
         .onAppear {

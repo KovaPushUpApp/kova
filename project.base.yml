@@ -89,7 +89,7 @@ targets:
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         # Texte de secours. Les versions FR et EN sont dans InfoPlist.strings.
-        NSCameraUsageDescription: "La caméra compte tes pompes en direct. L'image est analysée sur ton téléphone. Rien n'est enregistré ni envoyé."
+        NSCameraUsageDescription: "Kova utilise la caméra pour compter tes pompes et tes squats en direct. L'image est analysée sur ton iPhone. Elle n'est jamais enregistrée ni envoyée."
         KovaGroupePartage: $(KOVA_APP_GROUP)
         KovaRevenueCatCle: $(KOVA_REVENUECAT_CLE)
         KovaTelemetryDeckID: $(KOVA_TELEMETRYDECK_ID)

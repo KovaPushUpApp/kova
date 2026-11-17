@@ -90,7 +90,7 @@
 "auto_ecran.argument.1" = "Only the apps you picked are blocked";
 "auto_ecran.argument.2" = "You can remove access at any time";
 "auto_ecran.argument.3" = "No usage data leaves your phone";
-"auto_ecran.bouton" = "Allow Screen Time";
+"auto_ecran.bouton" = "Continue";
 
 /* 8. Camera access */
 "auto_camera.titre" = "Allow the camera";
@@ -98,7 +98,7 @@
 "auto_camera.argument.1" = "Video is analyzed on your phone";
 "auto_camera.argument.2" = "Nothing is recorded or sent";
 "auto_camera.argument.3" = "The camera turns off once your session is validated";
-"auto_camera.bouton" = "Allow the camera";
+"auto_camera.bouton" = "Continue";
 
 /* 9. Trial */
 "essai.titre" = "Try it: do 3 push-ups.";
@@ -124,8 +124,8 @@
 "paywall.hebdo.detail" = "no commitment";
 "paywall.hebdo.etiquette" = "per week";
 "paywall.bouton.essai" = "Try 3 days free";
-"paywall.mentions.annuel" = "%@ a year. Cancel anytime in the App Store.";
-"paywall.mentions.hebdo" = "%@ a week. Cancel anytime in the App Store.";
+"paywall.mentions.annuel" = "Kova Premium, yearly subscription: %@ a year. Renews automatically. Cancel anytime in the App Store.";
+"paywall.mentions.hebdo" = "Kova Premium, weekly subscription: %@ a week. Renews automatically. Cancel anytime in the App Store.";
 "formule.annuel" = "Yearly";
 "formule.hebdomadaire" = "Weekly";
 "prix.annuel" = "€29.99";
@@ -137,9 +137,9 @@
 /* 11. Last chance offer */
 "offre.surtitre" = "Before you go";
 "offre.remise" = "-%lld%%";
-"offre.texte" = "Your first year for %@ instead of %@. This offer shows only once.";
+"offre.texte" = "Your first year for %@ instead of %@.";
 "offre.detail" = "for the first year";
-"offre.mentions" = "%@ for the first year, then %@ a year. Cancel anytime in the App Store.";
+"offre.mentions" = "Kova Premium, yearly subscription: %@ for the first year, then %@ a year. Renews automatically. Cancel anytime in the App Store.";
 "offre.bouton" = "Take the offer";
 "offre.refuser" = "No thanks";
 
@@ -316,7 +316,7 @@
 "formule.gratuite" = "Free";
 "paywall.annuel.par_semaine" = "that's %@ a week";
 "paywall.annuel.par_an" = "per year";
-"paywall.mentions.annuel_essai" = "No payment today. 3 days free, then %@ a year. Cancel anytime in the App Store.";
+"paywall.mentions.annuel_essai" = "Kova Premium, yearly subscription. No payment today: 3 days free, then %@ a year. Renews automatically. Cancel anytime in the App Store.";
 "abonnement.prix_hebdo" = "%@ a week";
 "abonnement.gratuit" = "1 locked app, push-ups only.";
 "abonnement.voir" = "See the subscription";
@@ -374,3 +374,6 @@
 /* Joker de série et record */
 "accueil.joker" = "Streak saver used this week. Your streak holds.";
 "gagne.record" = "New record.";
+
+/* Health notice */
+"sante.avertissement" = "Kova is not a medical device. If you feel pain or have any doubt, stop and ask a doctor.";

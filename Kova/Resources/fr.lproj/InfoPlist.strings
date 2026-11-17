@@ -1,2 +1,2 @@
 /* Textes système de l'app, en français. */
-"NSCameraUsageDescription" = "La caméra compte tes pompes en direct. L'image est analysée sur ton téléphone. Rien n'est enregistré ni envoyé.";
+"NSCameraUsageDescription" = "Kova utilise la caméra pour compter tes pompes et tes squats en direct. L'image est analysée sur ton iPhone. Elle n'est jamais enregistrée ni envoyée.";

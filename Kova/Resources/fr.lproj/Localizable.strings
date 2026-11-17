@@ -90,7 +90,7 @@
 "auto_ecran.argument.1" = "Seules tes apps choisies sont bloquées";
 "auto_ecran.argument.2" = "Tu peux retirer l'accès à tout moment";
 "auto_ecran.argument.3" = "Aucune donnée d'usage ne sort du téléphone";
-"auto_ecran.bouton" = "Autoriser Temps d'écran";
+"auto_ecran.bouton" = "Continuer";
 
 /* 8. Autorisation caméra */
 "auto_camera.titre" = "Autorise la caméra";
@@ -98,7 +98,7 @@
 "auto_camera.argument.1" = "La vidéo est analysée sur ton téléphone";
 "auto_camera.argument.2" = "Rien n'est enregistré ni envoyé";
 "auto_camera.argument.3" = "La caméra s'éteint dès que ta séance est validée";
-"auto_camera.bouton" = "Autoriser la caméra";
+"auto_camera.bouton" = "Continuer";
 
 /* 9. Essai */
 "essai.titre" = "Teste : fais 3 pompes.";
@@ -124,8 +124,8 @@
 "paywall.hebdo.detail" = "sans engagement";
 "paywall.hebdo.etiquette" = "par semaine";
 "paywall.bouton.essai" = "Essayer 3 jours gratuits";
-"paywall.mentions.annuel" = "%@ par an. Annulable à tout moment dans l'App Store.";
-"paywall.mentions.hebdo" = "%@ par semaine. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.annuel" = "Kova Premium, abonnement annuel : %@ par an. Renouvellement automatique. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.hebdo" = "Kova Premium, abonnement hebdomadaire : %@ par semaine. Renouvellement automatique. Annulable à tout moment dans l'App Store.";
 "formule.annuel" = "Annuel";
 "formule.hebdomadaire" = "Hebdomadaire";
 "prix.annuel" = "29,99 €";
@@ -137,9 +137,9 @@
 /* 11. Offre de rattrapage */
 "offre.surtitre" = "Avant de partir";
 "offre.remise" = "-%lld %%";
-"offre.texte" = "Ta première année à %@ au lieu de %@. Offre affichée une seule fois.";
+"offre.texte" = "Ta première année à %@ au lieu de %@.";
 "offre.detail" = "la première année";
-"offre.mentions" = "%@ la première année, puis %@ par an. Annulable à tout moment dans l'App Store.";
+"offre.mentions" = "Kova Premium, abonnement annuel : %@ la première année, puis %@ par an. Renouvellement automatique. Annulable à tout moment dans l'App Store.";
 "offre.bouton" = "Prendre l'offre";
 "offre.refuser" = "Non merci";
 
@@ -316,7 +316,7 @@
 "formule.gratuite" = "Gratuite";
 "paywall.annuel.par_semaine" = "soit %@ par semaine";
 "paywall.annuel.par_an" = "par an";
-"paywall.mentions.annuel_essai" = "Aucun paiement aujourd'hui. 3 jours gratuits, puis %@ par an. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.annuel_essai" = "Kova Premium, abonnement annuel. Aucun paiement aujourd'hui : 3 jours gratuits, puis %@ par an. Renouvellement automatique. Annulable à tout moment dans l'App Store.";
 "abonnement.prix_hebdo" = "%@ par semaine";
 "abonnement.gratuit" = "1 app verrouillée, pompes seulement.";
 "abonnement.voir" = "Voir l'abonnement";
@@ -374,3 +374,6 @@
 /* Joker de série et record */
 "accueil.joker" = "Joker utilisé cette semaine. Ta série tient.";
 "gagne.record" = "Record battu.";
+
+/* Avertissement santé */
+"sante.avertissement" = "Kova n'est pas un dispositif médical. En cas de douleur ou de doute, arrête et demande l'avis d'un médecin.";

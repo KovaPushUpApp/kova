@@ -59,7 +59,7 @@
     <string name="auto_camera_argument_1">La vidéo est analysée sur ton téléphone</string>
     <string name="auto_camera_argument_2">Rien n\'est enregistré ni envoyé</string>
     <string name="auto_camera_argument_3">La caméra s\'éteint dès que ta séance est validée</string>
-    <string name="auto_camera_bouton">Autoriser la caméra</string>
+    <string name="auto_camera_bouton">Continuer</string>
     <string name="auto_camera_refus">Sans la caméra, Kova ne peut pas compter tes pompes. Autorise-la dans les Réglages.</string>
     <string name="auto_camera_texte">Elle compte tes pompes en direct. Pas de montre, pas de triche.</string>
     <string name="auto_camera_titre">Autorise la caméra</string>
@@ -170,7 +170,7 @@
     <string name="offre_refuser">Non merci</string>
     <string name="offre_remise">-%1$d %%</string>
     <string name="offre_surtitre">Avant de partir</string>
-    <string name="offre_texte">Ta première année à %1$s au lieu de %2$s. Offre affichée une seule fois.</string>
+    <string name="offre_texte">Ta première année à %1$s au lieu de %2$s.</string>
     <string name="onglet_accueil">Accueil</string>
     <string name="onglet_planning">Planning</string>
     <string name="onglet_reglages">Réglages</string>
@@ -252,6 +252,7 @@
     <string name="regle_unite_minutes">minutes d\'écran</string>
     <string name="regle_unite_pompes">pompes</string>
     <string name="reserve_stats">Les stats de ta semaine sont dans l\'abonnement.</string>
+    <string name="sante_avertissement">Kova n\'est pas un dispositif médical. En cas de douleur ou de doute, arrête et demande l\'avis d\'un médecin.</string>
     <string name="seance_bouton_minutes">Récupérer %1$d min</string>
     <string name="seance_continuer">Série validée. Continue si tu veux.</string>
     <string name="seance_en_position">Mets-toi en position.</string>

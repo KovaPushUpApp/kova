@@ -24,8 +24,8 @@ Rien de ce qui suit n'est simulé dans le code.
 
 | # | Action | Détail |
 |---|---|---|
-| 8 | Créer un groupe d'abonnements et 3 produits dans App Store Connect | Annuel à 29,99 € avec essai gratuit de 3 jours. Hebdomadaire à 4,99 €. Annuel "rattrapage" à 29,99 € avec offre de lancement payée d'avance à 19,99 € la première année |
-| 9 | Créer le projet RevenueCat | Un droit nommé `premium`. Offre courante : forfaits annuel et hebdomadaire. Offre nommée `rattrapage` : le forfait annuel de rattrapage |
+| 8 | Créer le groupe « Kova Premium » et 2 produits dans App Store Connect | `com.getkova.app.annuel` : 29,99 € avec essai gratuit de 3 jours. `com.getkova.app.hebdo` : 4,99 €. L'offre de rattrapage est coupée pour la version 1.0 (risque de refus, règle 5.6) : pas de troisième produit pour l'instant |
+| 9 | Créer le projet RevenueCat | Un droit nommé `premium`. Offre courante : forfaits annuel et hebdomadaire |
 | 10 | Copier la clé publique iOS de RevenueCat dans `KOVA_REVENUECAT_CLE` (`project.base.yml`) | Sans elle, les achats sont indisponibles dans l'app |
 | 11 | Trancher la précommande "fondateur à vie" (brief, point ouvert 1) | Un code saisi dans l'app est interdit par Apple. Piste : un achat "à vie" dans l'app, offert aux fondateurs par codes d'offre Apple. À décider avant de vendre |
 

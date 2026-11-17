@@ -35,15 +35,43 @@ permettra de cocher chaque ligne.
 
 ## Soumission
 
-- [ ] Autorisation Family Controls accordée pour les 4 identifiants, profils régénérés
-- [ ] Build fait avec `project.yml` (verrouillage réel), pas `project.base.yml`
-- [ ] Écran "Contrôle du socle" retiré, et avec lui "Simuler l'abonnement"
-- [ ] Clé RevenueCat, lien de confidentialité et contact renseignés
-- [ ] Abonnements "Prêts à soumettre" et joints à la version
-- [ ] Fiche remplie depuis `appstore/fr` et `appstore/en`
-- [ ] Captures : au moins une en 1320 × 2868 et une en 1206 × 2622, sans transparence
-- [ ] Catégories : Productivité, puis Forme et santé
-- [ ] Étiquette de confidentialité remplie (`etiquette-confidentialite.md`)
-- [ ] Notes pour la revue collées (`notes-pour-la-revue.md`)
-- [ ] Aucun nom de marque tierce dans les mots-clés ni dans les captures
-- [ ] Classification par âge remplie
+Liste revue le 18 novembre 2026 d'après les règles d'Apple en vigueur (dernière mise à
+jour des consignes : 16 octobre 2026). Dans l'ordre où ça bloque.
+
+### Comptes et accords (toi)
+
+- [ ] Accord « Apps payantes » actif, banque et fiscalité remplies. Sans lui, les achats ne marchent pas pendant la revue
+- [ ] Statut « trader » (règlement DSA) déclaré et vérifié : adresse, e-mail et téléphone, affichés publiquement dans l'UE
+- [ ] Family Controls (Distribution) accordé pour les **4** identifiants : l'app et chacune des 3 extensions. Vérifier dans « Capability Requests » que chaque identifiant a sa demande, statut « Assigned »
+
+### Abonnements (App Store Connect)
+
+- [ ] Groupe « Kova Premium », avec son nom affiché en français et en anglais
+- [ ] `com.getkova.app.annuel` : 1 an, 29,99 €, essai gratuit de 3 jours
+- [ ] `com.getkova.app.hebdo` : 1 semaine, 4,99 €
+- [ ] Pour chacun : nom affiché et description en français et en anglais, capture d'écran pour la revue, statut « Prêt à soumettre »
+- [ ] Les deux abonnements joints à la version 1.0 (« Ajouter pour la revue »). Le premier abonnement d'une app part forcément avec une version
+- [ ] Pas d'offre de rattrapage dans la version 1.0 : coupée dans le code (`Abonnements.offreDeRattrapageActive`). Une remise affichée à la fermeture du paywall a déjà valu des refus (règle 5.6)
+- [ ] RevenueCat : droit `premium`, offre courante avec les forfaits annuel et hebdomadaire, clé `appl_` dans `KOVA_REVENUECAT_CLE`
+- [ ] Achat, essai et restauration testés en bac à sable sur un iPhone : les prix s'affichent, l'achat aboutit
+
+### Build
+
+- [ ] Build fait avec `project.yml` (verrouillage réel), pas `project.base.yml`. L'écran « Contrôle du socle » n'y est pas compilé
+- [ ] Construit avec Xcode 26 ou plus (exigé depuis le 28 avril 2026). Codemagic : `xcode: latest`
+- [ ] Dans TestFlight, « Build Metadata » montre l'autorisation Family Controls sur l'app et les 3 extensions
+- [ ] Testé sur un vrai iPhone : onboarding, refus de la caméra, refus de Temps d'écran, refus des notifications, verrou, séance, reverrouillage
+- [ ] Essayé sur un iPad si possible : une app iPhone peut être testée par Apple sur iPad en mode compatibilité
+
+### Fiche
+
+- [ ] Textes depuis `appstore/fr` et `appstore/en`. La description contient les liens vers les conditions et la confidentialité
+- [ ] Adresse de la politique de confidentialité et adresse d'assistance renseignées, pages en ligne
+- [ ] Captures : un jeu en 6,9 pouces (1320 × 2868 ou 1290 × 2796) et un en 6,3 pouces (1206 × 2622 ou 1179 × 2556), sans transparence. Plus de la moitié montrent l'app en usage. Aucune icône d'app tierce
+- [ ] Aucune mention d'Android ou de Google Play, aucun prix, aucun « gratuit », aucun nom de concurrent dans le nom, le sous-titre, les mots-clés et les captures
+- [ ] Catégorie principale : Productivité. Si « Forme et santé » est mise en seconde, déclarer « Non » à la question du dispositif médical réglementé
+- [ ] Classification par âge : tout le questionnaire, y compris les nouvelles questions (contrôles dans l'app, réseaux sociaux, position partagée, rencontres). « Santé ou bien-être » : oui (exercices). « Contrôle parental » : non
+- [ ] Étiquette de confidentialité remplie (`etiquette-confidentialite.md`) : historique des achats, non lié à l'identité, pas de suivi
+- [ ] Chine continentale décochée pour la version 1.0 (formalités à part)
+- [ ] Notes pour la revue collées (`notes-pour-la-revue.md`), modèle d'iPhone et version d'iOS complétés, vidéo de démonstration jointe
+- [ ] Coordonnées du contact pour la revue remplies
