@@ -11,6 +11,10 @@ import ManagedSettings
 final class GestionApps: ObservableObject {
     @Published private(set) var selection: FamilyActivitySelection
     @Published private(set) var autorise = false
+    /// Les apps retirées de la liste depuis moins de 24 h : encore verrouillées.
+    @Published private(set) var retiree = FamilyActivitySelection()
+    /// Fin du sursis des apps retirées.
+    @Published private(set) var retireeJusquA: Date?
     /// Noms fictifs, utilisés seulement dans le build sans verrouillage.
     @Published private(set) var fictives: [String] = []
 
@@ -20,6 +24,29 @@ final class GestionApps: ObservableObject {
             fictives = ["Instagram", "TikTok", "YouTube"]
             autorise = true
         }
+        relireSursis()
+    }
+
+    /// Relit les apps en sursis. Passé le délai de 24 h, il n'y en a plus.
+    func relireSursis(_ maintenant: Date = Date()) {
+        guard Verrouillage.disponible else { return }
+        let limite = GroupePartage.reglages.double(forKey: CleStockage.selectionRetireeJusquA)
+        let enSursis = limite > maintenant.timeIntervalSince1970
+        let nouvelle = enSursis ? Verrouillage.selectionRetiree(maintenant) : FamilyActivitySelection()
+        let jusquA: Date? = enSursis ? Date(timeIntervalSince1970: limite) : nil
+        // Rien n'est publié si rien n'a changé, pour ne pas redessiner les écrans.
+        if nouvelle != retiree {
+            retiree = nouvelle
+        }
+        if jusquA != retireeJusquA {
+            retireeJusquA = jusquA
+        }
+    }
+
+    /// "Verrouillée jusqu'au…", pour les apps retirées depuis moins de 24 h.
+    var noteDeSursis: String? {
+        guard Verrouillage.disponible, let limite = retireeJusquA, limite > Date() else { return nil }
+        return L.f("apps_reglage.sursis", limite.formatted(date: .abbreviated, time: .shortened))
     }
 
     /// Nombre d'éléments verrouillés : apps, catégories et sites.
@@ -81,5 +108,6 @@ final class GestionApps: ObservableObject {
         }
         Verrouillage.ecrireSelection(nouvelle)
         selection = nouvelle
+        relireSursis()
     }
 }

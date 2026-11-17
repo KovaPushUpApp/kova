@@ -17,9 +17,9 @@ C'est la première chose à faire : aucune ligne de Swift n'a encore été compi
 | # | Action | Où | Bloque |
 |---|---|---|---|
 | 1 | Compte Apple Developer actif | developer.apple.com | Tout build signé |
-| 2 | Enregistrer les 4 identifiants et l'App Group (liste en tête de `project.yml`) | Certificates, Identifiers & Profiles | Tout build signé |
-| 3 | Demander Family Controls (Distribution) pour les 4 identifiants | developer.apple.com/contact/request/family-controls-distribution | Le verrouillage réel sur TestFlight, et la mise en ligne. Délai : de 1 jour à plus d'un mois |
-| 4 | Créer la fiche Kova | App Store Connect | TestFlight |
+| 2 | **Fait le 16 novembre 2026** : les 4 identifiants et l'App Group (liste en tête de `project.yml`) | Certificates, Identifiers & Profiles | Tout build signé |
+| 3 | Family Controls (Distribution) : **demande envoyée le 16 novembre 2026**, numéro B853HD2J39. Attendre la réponse d'Apple par e-mail | developer.apple.com, onglet « Capability Requests » de l'identifiant | Le verrouillage réel sur TestFlight, et la mise en ligne. Délai : de 1 jour à plus d'un mois |
+| 4 | **Fait le 16 novembre 2026** : fiche « Kova: Bloqueur d'applications » | App Store Connect | TestFlight |
 | 5 | Créer la clé API App Store Connect et la donner à Codemagic sous le nom `codemagic` | App Store Connect, puis Codemagic | TestFlight |
 | 6 | Créer la variable `CERTIFICATE_PRIVATE_KEY` (groupe `signature`) | Codemagic | TestFlight |
 | 7 | Avoir un iPhone sous iOS 16 ou plus | | Tous les tests réels |

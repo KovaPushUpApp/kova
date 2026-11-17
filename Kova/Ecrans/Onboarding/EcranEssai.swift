@@ -1,10 +1,11 @@
 import SwiftUI
 import UIKit
 
-/// Message d'encouragement commun à l'essai et à la séance.
-func messageDeSeance(faites: Int, total: Int, corpsVisible: Bool) -> String {
+/// Message d'encouragement commun à l'essai et à la séance. `valide` est le
+/// message affiché une fois la série faite.
+func messageDeSeance(faites: Int, total: Int, corpsVisible: Bool, valide: String) -> String {
     if faites >= total {
-        return L.t("seance.validee")
+        return valide
     }
     if !corpsVisible || faites == 0 {
         return L.t("seance.en_position")
@@ -18,6 +19,8 @@ struct CompteurGeant: View {
     let total: Int
     let tailleTotal: CGFloat
     var corpsVisible = true
+    /// Message affiché une fois la série faite.
+    var messageValide = L.t("seance.validee")
 
     var body: some View {
         VStack(spacing: Tokens.Espacements.e3) {
@@ -32,7 +35,12 @@ struct CompteurGeant: View {
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: L.f("a11y.progression_valeur", faites, total)))
-            Text(verbatim: messageDeSeance(faites: faites, total: total, corpsVisible: corpsVisible))
+            Text(verbatim: messageDeSeance(
+                faites: faites,
+                total: total,
+                corpsVisible: corpsVisible,
+                valide: messageValide
+            ))
                 .corps(Tokens.Couleurs.texteSecondaire)
         }
         .frame(maxWidth: .infinity)
@@ -50,7 +58,8 @@ func ouvrirReglagesSysteme() {
 /// puis le bouton "Continuer" apparaît.
 struct EcranEssai: View {
     let retour: () -> Void
-    let suivant: () -> Void
+    /// Reçoit vrai si les 3 pompes ont été faites, faux si l'essai a été passé.
+    let suivant: (Bool) -> Void
 
     @StateObject private var camera = CameraSeance()
     private let total = 3
@@ -77,13 +86,13 @@ struct EcranEssai: View {
             if camera.repetitions >= total {
                 BoutonPrincipal(L.t("essai.bouton")) {
                     Analytique.envoyer(.essaiReussi)
-                    suivant()
+                    suivant(true)
                 }
                 .entree()
             } else if cameraRefusee {
                 // Sans caméra, l'essai est impossible : on ne bloque pas l'onboarding.
                 BoutonPrincipal(L.t("camera.ouvrir_reglages"), action: ouvrirReglagesSysteme)
-                BoutonSecondaire(L.t("essai.passer"), action: suivant)
+                BoutonSecondaire(L.t("essai.passer")) { suivant(false) }
             } else {
                 Color.clear.frame(height: Tokens.Hauteurs.boutonPrincipal)
             }

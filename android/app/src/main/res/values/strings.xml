@@ -32,6 +32,7 @@
     <string name="accueil_apps">Apps verrouillées</string>
     <string name="accueil_aujourdhui">%1$d répétitions faites aujourd\'hui</string>
     <string name="accueil_bouton">Gagner du temps</string>
+    <string name="accueil_decompte">Se décompte seulement quand tu es sur tes apps.</string>
     <string name="accueil_hardcore">S\'efface à minuit</string>
     <string name="accueil_joker">Joker utilisé cette semaine. Ta série tient.</string>
     <string name="accueil_ouvert_jusqua">Tes apps sont ouvertes jusqu\'à %1$s</string>
@@ -85,6 +86,7 @@
     <string name="camera_refusee">Kova n\'a pas accès à la caméra. Autorise-la dans les Réglages pour compter tes pompes.</string>
     <string name="chantier_comptage">Compter sans caméra (1 par seconde)</string>
     <string name="chantier_mesures">Événements enregistrés</string>
+    <string name="chantier_mesures_comptage">Afficher les mesures du comptage</string>
     <string name="choc_annee">Ton année</string>
     <string name="choc_bouton">Je reprends la main</string>
     <string name="choc_intro">%1$d h par jour, ça fait</string>
@@ -132,6 +134,7 @@
     <string name="gagne_repetitions_jour">répétitions aujourd\'hui</string>
     <string name="gagne_serie">de série</string>
     <string name="gagne_texte">Tu peux ouvrir tes apps jusqu\'à %1$s. Tu l\'as mérité.</string>
+    <string name="gagne_texte_usage">Ouvre tes apps quand tu veux. Ton temps ne se décompte que quand tu es dessus.</string>
     <string name="gagne_texte_plage">Une plage stricte est en cours. Ton temps t\'attend au solde.</string>
     <string name="gagne_valide_abdos">%1$d abdos validés</string>
     <string name="gagne_valide_fentes">%1$d fentes validées</string>

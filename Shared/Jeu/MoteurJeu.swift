@@ -24,6 +24,13 @@ enum Semaine {
         let recul = jour(date, calendrier) - 1
         return calendrier.date(byAdding: .day, value: -recul, to: jourCourant) ?? jourCourant
     }
+
+    /// Le prochain minuit après `date`.
+    static func minuitSuivant(_ date: Date, _ calendrier: Calendar) -> Date {
+        let jourCourant = calendrier.startOfDay(for: date)
+        return calendrier.date(byAdding: .day, value: 1, to: jourCourant)
+            ?? jourCourant.addingTimeInterval(24 * 3600)
+    }
 }
 
 extension Plage {
@@ -55,12 +62,23 @@ extension Plage {
 extension EtatJeu {
     // MARK: Règle
 
-    /// Applique la règle en attente si son délai est passé. À appeler avant de lire l'état.
+    /// Applique ce qui est arrivé à échéance. À appeler avant de lire l'état.
     mutating func mettreAJour(_ maintenant: Date) {
         if let attente = regleEnAttente, let le = regleEnAttenteLe, maintenant >= le {
             regle = attente
             regleEnAttente = nil
             regleEnAttenteLe = nil
+        }
+        // Mode hardcore : à minuit, le temps gagné est perdu. La fenêtre est déjà bornée à minuit.
+        if let effacement = effacementLe, maintenant >= effacement {
+            if hardcoreEnVigueur(effacement) {
+                soldeMinutes = 0
+                soldeSecondes = 0
+            }
+            effacementLe = nil
+        }
+        if let limite = hardcoreJusquA, limite <= maintenant {
+            hardcoreJusquA = nil
         }
         if let fin = fenetreFin, fin <= maintenant {
             fenetreFin = nil
@@ -95,21 +113,74 @@ extension EtatJeu {
         return false
     }
 
+    // MARK: Mode hardcore
+
+    /// Vrai si le mode hardcore s'applique à cet instant : activé, ou coupé depuis moins de 24 h.
+    func hardcoreEnVigueur(_ instant: Date) -> Bool {
+        if hardcore {
+            return true
+        }
+        if let limite = hardcoreJusquA {
+            return instant < limite
+        }
+        return false
+    }
+
+    /// Programme l'effacement au prochain minuit et y arrête la fenêtre ouverte.
+    /// Sans effet si le mode hardcore ne s'applique plus à ce minuit-là.
+    private mutating func bornerAMinuit(_ maintenant: Date, _ calendrier: Calendar) {
+        let minuit = Semaine.minuitSuivant(maintenant, calendrier)
+        guard hardcoreEnVigueur(minuit) else {
+            effacementLe = nil
+            return
+        }
+        effacementLe = minuit
+        if let fin = fenetreFin, fin > minuit {
+            fenetreFin = minuit
+        }
+    }
+
+    /// Active ou coupe le mode hardcore. Activer est immédiat, couper prend effet
+    /// dans 24 h (règle 7). `immediat` sert à l'onboarding.
+    mutating func definirHardcore(_ actif: Bool, _ maintenant: Date, _ calendrier: Calendar, immediat: Bool) {
+        if actif {
+            hardcore = true
+            hardcoreJusquA = nil
+        } else if immediat || !hardcoreEnVigueur(maintenant) {
+            hardcore = false
+            hardcoreJusquA = nil
+        } else if hardcore {
+            hardcore = false
+            hardcoreJusquA = maintenant.addingTimeInterval(EtatJeu.delaiAssouplissement)
+        }
+        bornerAMinuit(maintenant, calendrier)
+    }
+
     // MARK: Séances et solde
 
-    /// Une séance validée ajoute les minutes de la règle au solde (règles 3 et 9).
-    mutating func validerSeance(_ exercice: Exercice, _ maintenant: Date) {
+    /// Une séance validée ajoute ses minutes au solde (règles 3 et 9). On peut
+    /// dépasser la série de la règle : les répétitions en plus rapportent au même
+    /// rapport. Sans `repetitions`, la séance vaut la série de la règle.
+    mutating func validerSeance(
+        _ exercice: Exercice,
+        _ maintenant: Date,
+        _ calendrier: Calendar,
+        repetitions: Int? = nil
+    ) {
+        let serie = regle.repetitionsDemandees(pour: exercice)
+        let faites = max(repetitions ?? serie, serie)
         let seance = Seance(
             date: maintenant,
             exercice: exercice,
-            repetitions: regle.repetitionsDemandees(pour: exercice),
-            minutes: regle.minutes
+            repetitions: faites,
+            minutes: regle.minutesPour(exercice, faites)
         )
         seances.append(seance)
         if seances.count > EtatJeu.historiqueMaximum {
             seances.removeFirst(seances.count - EtatJeu.historiqueMaximum)
         }
         soldeMinutes += seance.minutes
+        bornerAMinuit(maintenant, calendrier)
     }
 
     // MARK: Planning
@@ -137,6 +208,25 @@ extension EtatJeu {
     }
 
     // MARK: Fenêtre de déblocage
+
+    /// Tout le solde, en secondes.
+    var soldeEnSecondes: Int { soldeMinutes * 60 + soldeSecondes }
+
+    /// Le solde à afficher, arrondi à la minute au-dessus : il reste "1 min"
+    /// jusqu'à la dernière seconde.
+    var minutesAffichees: Int { soldeMinutes + (soldeSecondes > 0 ? 1 : 0) }
+
+    /// Arrête la fenêtre en cours et remet au solde le temps qui n'a pas été utilisé.
+    /// Fonction pure portée d'Android. Sur iOS, rien ne l'appelle encore : le
+    /// système ne dit pas à Kova quand on quitte une app verrouillée.
+    mutating func suspendreFenetre(_ maintenant: Date) {
+        guard let fin = fenetreFin else { return }
+        fenetreFin = nil
+        guard fin > maintenant else { return }
+        let total = soldeEnSecondes + Int(fin.timeIntervalSince(maintenant))
+        soldeMinutes = total / 60
+        soldeSecondes = total % 60
+    }
 
     func fenetreOuverte(_ maintenant: Date) -> Bool {
         if let fin = fenetreFin {
@@ -201,12 +291,14 @@ extension EtatJeu {
     /// Renvoie la fin de la fenêtre, ou nil si rien n'a été ouvert.
     @discardableResult
     mutating func ouvrirFenetre(_ maintenant: Date, _ calendrier: Calendar) -> Date? {
-        guard soldeMinutes > 0, !plageActive(maintenant, calendrier) else { return nil }
+        guard soldeEnSecondes > 0, !plageActive(maintenant, calendrier) else { return nil }
         let depart = fenetreOuverte(maintenant) ? (fenetreFin ?? maintenant) : maintenant
-        let fin = depart.addingTimeInterval(TimeInterval(soldeMinutes * 60))
-        fenetreFin = fin
+        fenetreFin = depart.addingTimeInterval(TimeInterval(soldeEnSecondes))
         soldeMinutes = 0
-        return fin
+        soldeSecondes = 0
+        // En mode hardcore, la fenêtre s'arrête à minuit : le reste est perdu.
+        bornerAMinuit(maintenant, calendrier)
+        return fenetreFin
     }
 
     // MARK: Urgence
@@ -233,24 +325,58 @@ extension EtatJeu {
 
     // MARK: Série et stats
 
-    /// Jours d'affilée avec au moins une séance validée (règle 8).
-    /// La série tient si la dernière séance date d'aujourd'hui ou d'hier.
-    func serie(_ maintenant: Date, _ calendrier: Calendar) -> Int {
-        let jours = Set(seances.map { calendrier.startOfDay(for: $0.date) })
+    /// Remonte les jours depuis aujourd'hui. Aujourd'hui sans séance ne casse
+    /// rien : la journée n'est pas finie. Ensuite un jour sans séance est pardonné
+    /// par le joker, une fois par semaine (du lundi au dimanche). Un joker ne
+    /// compte que s'il relie deux jours avec séance.
+    private func parcourirSerie(_ maintenant: Date, _ calendrier: Calendar) -> ParcoursSerie {
+        let faits = Set(seances.map { calendrier.startOfDay(for: $0.date) })
+        var parcours = ParcoursSerie()
+        guard let premier = faits.min() else { return parcours }
         var jour = calendrier.startOfDay(for: maintenant)
-        if !jours.contains(jour) {
-            guard let hier = calendrier.date(byAdding: .day, value: -1, to: jour), jours.contains(hier) else {
-                return 0
-            }
+        if !faits.contains(jour) {
+            guard let hier = calendrier.date(byAdding: .day, value: -1, to: jour) else { return parcours }
             jour = hier
         }
-        var compte = 0
-        while jours.contains(jour) {
-            compte += 1
+        var enAttente: [Date] = []
+        var semainesServies = Set<Date>()
+        while jour >= premier {
+            if faits.contains(jour) {
+                parcours.jours += 1
+                parcours.jokers.formUnion(enAttente)
+                enAttente.removeAll()
+            } else {
+                let lundi = Semaine.debut(jour, calendrier)
+                if !semainesServies.insert(lundi).inserted {
+                    break
+                }
+                enAttente.append(jour)
+            }
             guard let precedent = calendrier.date(byAdding: .day, value: -1, to: jour) else { break }
             jour = precedent
         }
-        return compte
+        return parcours
+    }
+
+    /// Jours avec au moins une séance validée, d'affilée (règle 8). La série tient
+    /// si la dernière séance date d'aujourd'hui ou d'hier. Un joker par semaine
+    /// pardonne un jour raté : ce jour ne compte pas, mais la série continue.
+    func serie(_ maintenant: Date, _ calendrier: Calendar) -> Int {
+        parcourirSerie(maintenant, calendrier).jours
+    }
+
+    /// Vrai si le joker de cette semaine a déjà sauvé la série.
+    func jokerUtilise(_ maintenant: Date, _ calendrier: Calendar) -> Bool {
+        let lundi = Semaine.debut(maintenant, calendrier)
+        return parcourirSerie(maintenant, calendrier).jokers.contains { $0 >= lundi }
+    }
+
+    /// Vrai si la dernière séance bat le record de répétitions de son exercice.
+    func estUnRecord() -> Bool {
+        guard let derniere = seances.last else { return false }
+        let avant = seances.dropLast().filter { $0.exercice == derniere.exercice }
+        guard let record = avant.map({ $0.repetitions }).max() else { return false }
+        return derniere.repetitions > record
     }
 
     func repetitionsDuJour(_ maintenant: Date, _ calendrier: Calendar) -> Int {
@@ -289,6 +415,13 @@ extension EtatJeu {
             progressionPourcent: progression
         )
     }
+}
+
+/// Ce que donne le parcours de la série : les jours comptés et les jours sauvés par un joker.
+private struct ParcoursSerie {
+    var jours = 0
+    /// Début (0 h) de chaque jour pardonné.
+    var jokers: Set<Date> = []
 }
 
 /// Chiffres de l'écran Stats.

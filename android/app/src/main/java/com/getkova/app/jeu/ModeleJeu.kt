@@ -96,6 +96,8 @@ data class EtatJeu(
     val regleEnAttente: Regle? = null,
     val regleEnAttenteLe: Long? = null,
     val soldeMinutes: Int = 0,
+    /** Les secondes en plus des minutes du solde (0 à 59) : le temps se décompte à la seconde. */
+    val soldeSecondes: Int = 0,
     /** Mode hardcore : le temps gagné et la fenêtre ouverte s'effacent chaque jour à minuit. */
     val hardcore: Boolean = false,
     /** Un mode hardcore coupé reste en vigueur jusqu'à cet instant (règle 7). */

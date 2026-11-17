@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Écran 17 : la récompense, en plein fond accent. "+15 min" qui défile, deux stats,
+/// Écran 17 : la récompense, en plein fond accent. Les minutes de la séance
+/// vraiment faite défilent ("+15 min", ou plus si on a continué), deux stats,
 /// puis le choix : ouvrir maintenant ou garder son temps (brief, règle 3).
 /// Les minutes sont déjà au solde quand cet écran s'affiche.
 struct EcranGagne: View {
@@ -16,7 +17,15 @@ struct EcranGagne: View {
         in: .common
     ).autoconnect()
 
-    private var cible: Int { etat.regle.minutes }
+    /// La séance qui vient d'être validée : elle peut dépasser la série de la règle.
+    private var seance: Seance? { etat.jeu.seances.last }
+    private var cible: Int { seance?.minutes ?? etat.regle.minutes }
+
+    /// "24 pompes validées", et "Record battu." quand c'en est un.
+    private var texteValide: String {
+        let valide = etat.exercice.texteValide(seance?.repetitions ?? etat.repetitionsDeLaSeance)
+        return etat.jeu.estUnRecord() ? valide + "\n" + L.t("gagne.record") : valide
+    }
 
     /// Pendant une plage stricte, la fenêtre ne peut pas s'ouvrir (règle 5).
     private var plageEnCours: Bool {
@@ -38,7 +47,7 @@ struct EcranGagne: View {
 
     var body: some View {
         EcranKova(fond: Tokens.Couleurs.accent, espacement: Tokens.Espacements.e13) {
-            Text(verbatim: etat.exercice.texteValide(etat.repetitionsDeLaSeance))
+            Text(verbatim: texteValide)
                 .corps(Tokens.Couleurs.texteSurAccent, graisse: .demiGras)
                 .padding(.top, Tokens.Espacements.e89)
                 .entree(rang: 1)

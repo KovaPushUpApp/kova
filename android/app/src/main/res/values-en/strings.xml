@@ -32,6 +32,7 @@
     <string name="accueil_apps">Locked apps</string>
     <string name="accueil_aujourdhui">%1$d reps done today</string>
     <string name="accueil_bouton">Earn time</string>
+    <string name="accueil_decompte">Only counts down while you\'re in your apps.</string>
     <string name="accueil_hardcore">Wiped at midnight</string>
     <string name="accueil_joker">Streak saver used this week. Your streak holds.</string>
     <string name="accueil_ouvert_jusqua">Your apps are open until %1$s</string>
@@ -85,6 +86,7 @@
     <string name="camera_refusee">Kova can\'t use the camera. Allow it in Settings to count your push-ups.</string>
     <string name="chantier_comptage">Count without camera (1 per second)</string>
     <string name="chantier_mesures">Recorded events</string>
+    <string name="chantier_mesures_comptage">Show counting measurements</string>
     <string name="choc_annee">Your year</string>
     <string name="choc_bouton">I\'m taking it back</string>
     <string name="choc_intro">%1$d h a day adds up to</string>
@@ -132,6 +134,7 @@
     <string name="gagne_repetitions_jour">reps today</string>
     <string name="gagne_serie">streak</string>
     <string name="gagne_texte">You can open your apps until %1$s. You earned it.</string>
+    <string name="gagne_texte_usage">Open your apps whenever you like. Your time only counts down while you\'re in them.</string>
     <string name="gagne_texte_plage">A strict slot is in progress. Your time is saved for later.</string>
     <string name="gagne_valide_abdos">%1$d sit-ups done</string>
     <string name="gagne_valide_fentes">%1$d lunges done</string>

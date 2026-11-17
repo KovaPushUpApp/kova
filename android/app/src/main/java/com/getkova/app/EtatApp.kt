@@ -19,6 +19,7 @@ import com.getkova.app.jeu.estUnRecord
 import com.getkova.app.jeu.mettreAJour
 import com.getkova.app.jeu.ouvrirFenetre
 import com.getkova.app.jeu.proposerRegle
+import com.getkova.app.jeu.suspendreFenetre
 import com.getkova.app.jeu.utiliserUrgence
 import com.getkova.app.jeu.validerSeance
 import com.getkova.app.verrou.Minuteur
@@ -138,6 +139,10 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     var comptageSimule by mutableStateOf(reglages.getBoolean("comptageSimule", false))
         private set
 
+    /** Réglage de chantier : affiche les mesures du comptage pendant la séance. Éteint, l'écran est propre. */
+    var mesuresDuComptage by mutableStateOf(reglages.getBoolean("mesuresDuComptage", false))
+        private set
+
     /** Vrai une fois l'autorisation de notifier demandée : on ne la redemande pas. */
     var notificationsDemandees by mutableStateOf(reglages.getBoolean("notificationsDemandees", false))
         private set
@@ -167,7 +172,10 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     }
 
     /** Recalcule l'état à l'heure qu'il est (retour dans l'app, échéances passées). */
-    fun rafraichir() = modifier { etat, _ -> etat to Unit }
+    fun rafraichir() = modifier { etat, instant ->
+        // Kova est à l'écran : on n'est plus dans une app verrouillée, le temps ne se décompte plus.
+        etat.suspendreFenetre(instant) to Unit
+    }
 
     fun terminerOnboarding() {
         onboardingTermine = true
@@ -201,6 +209,7 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
             "offreDejaVue" -> offreDejaVue = valeur
             "abonnementSimule" -> abonne = valeur
             "comptageSimule" -> comptageSimule = valeur
+            "mesuresDuComptage" -> mesuresDuComptage = valeur
             "notificationsDemandees" -> notificationsDemandees = valeur
         }
         reglages.edit().putBoolean(cle, valeur).apply()

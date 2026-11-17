@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Écran 6 : la règle. Deux compteurs, répétitions et minutes.
+/// Écran 6 : la règle. Deux compteurs, répétitions et minutes, et le mode hardcore.
 /// Sert aussi depuis les réglages, sans la barre d'avancement.
 struct EcranRegle: View {
     enum Contexte {
@@ -13,6 +13,7 @@ struct EcranRegle: View {
     let valider: () -> Void
 
     @State private var brouillon: Regle = .parDefaut
+    @State private var hardcore = false
 
     var body: some View {
         EcranKova {
@@ -34,6 +35,14 @@ struct EcranRegle: View {
             Text(verbatim: L.f("regle.par_heure", brouillon.pompesParHeure))
                 .legende()
                 .frame(maxWidth: .infinity)
+            carteHardcore
+                .entree(rang: 4)
+            if contexte == .reglages, !hardcore, let fin = etat.jeu.hardcoreJusquA {
+                Text(verbatim: L.f("regle.hardcore.fin", fin.formatted(date: .abbreviated, time: .shortened)))
+                    .legende(Tokens.Couleurs.accent)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
             if contexte == .reglages, let le = etat.jeu.regleEnAttenteLe, etat.jeu.regleEnAttente != nil {
                 Text(verbatim: L.f("regle.en_attente", le.formatted(date: .abbreviated, time: .shortened)))
                     .legende(Tokens.Couleurs.accent)
@@ -44,11 +53,37 @@ struct EcranRegle: View {
             BoutonPrincipal(L.t("regle.bouton")) {
                 // Dans les réglages, assouplir la règle prend effet 24 h plus tard.
                 etat.proposerRegle(brouillon, immediat: contexte == .onboarding)
+                // Activer le mode hardcore est immédiat, le couper prend 24 h.
+                if hardcore != etat.jeu.hardcore {
+                    etat.definirHardcore(hardcore, immediat: contexte == .onboarding)
+                }
                 valider()
             }
             .entree(rang: 5)
         }
-        .onAppear { brouillon = etat.jeu.regleEnAttente ?? etat.regle }
+        .onAppear {
+            brouillon = etat.jeu.regleEnAttente ?? etat.regle
+            hardcore = etat.jeu.hardcore
+        }
+    }
+
+    /// Mode hardcore : le temps gagné s'efface chaque jour à minuit.
+    private var carteHardcore: some View {
+        HStack(spacing: Tokens.Espacements.e13) {
+            VStack(alignment: .leading, spacing: Tokens.Espacements.e3) {
+                Text(verbatim: L.t("regle.hardcore"))
+                    .font(.kovaTitre(Tokens.TaillesTexte.corpsFort, relatifA: .title3))
+                    .foregroundColor(Tokens.Couleurs.texte)
+                Text(verbatim: L.t(contexte == .onboarding ? "regle.hardcore.texte" : "regle.hardcore.texte_reglages"))
+                    .legende()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: Tokens.Espacements.e8)
+            Interrupteur(actif: hardcore, libelle: L.t("regle.hardcore")) {
+                hardcore.toggle()
+            }
+        }
+        .carte()
     }
 
     private var compteurs: some View {

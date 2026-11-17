@@ -31,7 +31,7 @@ final class EtatApp: ObservableObject {
     @Published var rappelQuotidien: Bool {
         didSet {
             reglages.set(rappelQuotidien, forKey: CleStockage.rappelQuotidien)
-            Notifications.programmerRappel(actif: rappelQuotidien)
+            programmerRappel()
         }
     }
 
@@ -124,13 +124,27 @@ final class EtatApp: ObservableObject {
         modifier(forcer: true) { _, _, _ in }
     }
 
-    func validerSeance() {
+    /// Programme les rappels des prochains jours avec la série en jeu. À refaire
+    /// quand l'état change : le texte d'une notification locale est figé d'avance.
+    func programmerRappel() {
+        Notifications.programmerRappel(actif: rappelQuotidien, jeu: jeu, calendrier: calendrier)
+    }
+
+    /// Valide la séance avec les répétitions vraiment faites, au-delà de la série
+    /// si on a continué.
+    func validerSeance(repetitions: Int) {
         let fait = exercice
-        modifier { etat, maintenant, _ in etat.validerSeance(fait, maintenant) }
+        modifier { etat, maintenant, calendrier in
+            etat.validerSeance(fait, maintenant, calendrier, repetitions: repetitions)
+        }
         Analytique.envoyer(.seanceValidee, [
             "exercice": fait.rawValue,
-            "repetitions": String(jeu.regle.repetitionsDemandees(pour: fait)),
+            "repetitions": String(jeu.seances.last?.repetitions ?? repetitions),
         ])
+        if rappelQuotidien {
+            // La journée est gagnée : le rappel de ce soir n'a plus lieu d'être.
+            programmerRappel()
+        }
     }
 
     /// Ouvre une fenêtre avec tout le solde. Nil si rien n'a pu s'ouvrir.
@@ -167,6 +181,14 @@ final class EtatApp: ObservableObject {
         }
         Analytique.envoyer(.regleModifiee, ["repetitions": String(regle.repetitions), "minutes": String(regle.minutes)])
         return differe
+    }
+
+    /// Active ou coupe le mode hardcore. Couper prend effet dans 24 h, sauf
+    /// pendant l'onboarding.
+    func definirHardcore(_ actif: Bool, immediat: Bool) {
+        modifier { etat, maintenant, calendrier in
+            etat.definirHardcore(actif, maintenant, calendrier, immediat: immediat)
+        }
     }
 
     func basculerPlage(_ id: UUID) {

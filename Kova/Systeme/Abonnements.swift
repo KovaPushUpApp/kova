@@ -95,6 +95,10 @@ final class Abonnements: ObservableObject {
             appliquer(resultat.customerInfo)
             if estAbonne {
                 Analytique.envoyer(.achat, ["formule": forfait.storeProduct.productIdentifier])
+                // L'essai gratuit vient de démarrer : rappel local la veille du premier paiement.
+                if abonnement?.periodType == .trial {
+                    Notifications.programmerFinEssai(prix: forfait.storeProduct.localizedPriceString)
+                }
             }
             return estAbonne
         } catch {

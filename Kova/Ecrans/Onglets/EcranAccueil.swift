@@ -53,13 +53,20 @@ struct EcranAccueil: View {
                 grosChiffre(minutesRestantes(fin, maintenant))
             } else {
                 Text(verbatim: L.t("accueil.solde")).legende()
-                grosChiffre(etat.jeu.soldeMinutes)
+                grosChiffre(etat.jeu.minutesAffichees)
+                if etat.jeu.soldeEnSecondes > 0 && etat.jeu.effacementLe != nil {
+                    // Mode hardcore : ce temps est perdu à minuit.
+                    Text(verbatim: L.t("accueil.hardcore")).legende(Tokens.Couleurs.accent)
+                }
             }
             Text(verbatim: L.f("accueil.aujourdhui", etat.jeu.repetitionsDuJour(maintenant, etat.calendrier)))
                 .legende()
+            if etat.jeu.jokerUtilise(maintenant, etat.calendrier) {
+                Text(verbatim: L.t("accueil.joker")).legende(Tokens.Couleurs.accent)
+            }
             if plage && fin == nil {
                 Text(verbatim: L.t("accueil.plage")).legende(Tokens.Couleurs.accent)
-            } else if fin == nil && etat.jeu.soldeMinutes > 0 {
+            } else if fin == nil && etat.jeu.soldeEnSecondes > 0 {
                 BoutonSecondaire(L.t("accueil.ouvrir"), couleur: Tokens.Couleurs.accent) {
                     etat.ouvrirFenetre()
                 }

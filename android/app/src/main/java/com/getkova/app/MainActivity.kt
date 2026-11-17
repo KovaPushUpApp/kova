@@ -476,14 +476,7 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
             etat.validerSeance(repetitions)
             aller(Destination.GAGNE)
         }
-        Destination.GAGNE -> EcranGagne(
-            etat,
-            ouvrir = {
-                etat.ouvrirFenetre()
-                revenirAuxOnglets()
-            },
-            garder = ::revenirAuxOnglets,
-        )
+        Destination.GAGNE -> EcranGagne(etat, continuer = ::revenirAuxOnglets)
         Destination.URGENCE -> EcranUrgence(
             etat, ::reculer,
             debloquer = {

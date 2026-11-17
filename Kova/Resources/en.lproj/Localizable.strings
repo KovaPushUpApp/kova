@@ -110,7 +110,6 @@
 "seance.en_position" = "Get into position.";
 "seance.encore" = "%lld to go. Go all the way down.";
 "seance.pour_minutes" = "For %lld min of screen";
-"seance.bouton" = "Claim my time";
 
 /* 10. Paywall */
 "paywall.restaurer" = "Restore";
@@ -317,7 +316,7 @@
 "formule.gratuite" = "Free";
 "paywall.annuel.par_semaine" = "that's %@ a week";
 "paywall.annuel.par_an" = "per year";
-"paywall.mentions.annuel_essai" = "3 days free, then %@ a year. Cancel anytime in the App Store.";
+"paywall.mentions.annuel_essai" = "No payment today. 3 days free, then %@ a year. Cancel anytime in the App Store.";
 "abonnement.prix_hebdo" = "%@ a week";
 "abonnement.gratuit" = "1 locked app, push-ups only.";
 "abonnement.voir" = "See the subscription";
@@ -340,3 +339,38 @@
 "socle.achats" = "Purchases";
 "socle.oui" = "on";
 "socle.non" = "off";
+
+/* Mode hardcore */
+"regle.hardcore" = "Hardcore mode";
+"regle.hardcore.texte" = "The time you earn is wiped every day at midnight. No stockpiling.";
+"regle.hardcore.texte_reglages" = "The time you earn is wiped every day at midnight. Turning it off takes 24 h.";
+"regle.hardcore.fin" = "Hardcore mode ends on %@.";
+"accueil.hardcore" = "Wiped at midnight";
+
+/* Séance libre : on continue après la série */
+"seance.bouton.minutes" = "Claim %lld min";
+"seance.gagnees" = "+%lld min";
+"seance.continuer" = "Set done. Keep going if you like.";
+
+/* App retirée, encore verrouillée 24 h */
+"apps_reglage.sursis" = "Locked until %@";
+
+/* Paywall : titre personnalisé et frise de l'essai */
+"paywall.titre.jours" = "Take back your %lld days a year.";
+"paywall.frise.jour1.titre" = "Today";
+"paywall.frise.jour1.texte" = "Full access, nothing to pay.";
+"paywall.frise.jour2.titre" = "Day 2";
+"paywall.frise.jour2.texte" = "We remind you with a notification.";
+"paywall.frise.jour3.titre" = "Day 3";
+"paywall.frise.jour3.texte" = "%@ a year. Cancel before then.";
+
+/* Rappels : fin de l'essai et série en jeu */
+"essai.rappel.titre" = "Your trial ends tomorrow";
+"essai.rappel.texte" = "Tomorrow your subscription starts: %@ a year. You can cancel before then in the App Store.";
+"rappel.serie.titre.un" = "Your %lld-day streak is on the line";
+"rappel.serie.titre.autre" = "Your %lld-day streak is on the line";
+"rappel.serie.texte" = "One set before midnight to keep it.";
+
+/* Joker de série et record */
+"accueil.joker" = "Streak saver used this week. Your streak holds.";
+"gagne.record" = "New record.";

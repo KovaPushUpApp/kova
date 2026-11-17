@@ -99,3 +99,9 @@
 "mesures.accepter" = "D'accord";
 "mesures.refuser" = "Non merci";
 "reglages.mesures" = "Statistiques anonymes";
+
+/* Le temps se décompte seulement dans les apps verrouillées. */
+"accueil.decompte" = "Se décompte seulement quand tu es sur tes apps.";
+"gagne.texte.usage" = "Ouvre tes apps quand tu veux. Ton temps ne se décompte que quand tu es dessus.";
+
+"chantier.mesures_comptage" = "Afficher les mesures du comptage";

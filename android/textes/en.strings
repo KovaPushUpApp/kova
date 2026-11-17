@@ -98,3 +98,9 @@
 "mesures.accepter" = "OK";
 "mesures.refuser" = "No thanks";
 "reglages.mesures" = "Anonymous statistics";
+
+/* Le temps se décompte seulement dans les apps verrouillées. */
+"accueil.decompte" = "Only counts down while you're in your apps.";
+"gagne.texte.usage" = "Open your apps whenever you like. Your time only counts down while you're in them.";
+
+"chantier.mesures_comptage" = "Show counting measurements";

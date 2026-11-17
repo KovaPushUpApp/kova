@@ -33,7 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import com.getkova.app.jeu.EtatJeu
 import com.getkova.app.Mesures
+import com.getkova.app.jeu.fenetreOuverte
 import com.getkova.app.jeu.ouvrirFenetre
+import com.getkova.app.jeu.suspendreFenetre
+import com.getkova.app.jeu.urgenceEnCours
 import androidx.compose.ui.graphics.asImageBitmap
 import com.getkova.app.Depot
 import com.getkova.app.MainActivity
@@ -135,7 +138,10 @@ class ServiceVerrou : AccessibilityService() {
             // Un écran de Kova passe au premier plan : le minuteur n'a plus lieu d'être.
             // Le minuteur lui-même est une fenêtre de Kova, mais pas un écran : on l'ignore,
             // sinon il se retirerait tout seul et annulerait le reverrouillage.
-            if (evenement.className?.toString().orEmpty().startsWith(packageName)) oublier()
+            if (evenement.className?.toString().orEmpty().startsWith(packageName)) {
+                oublier()
+                suspendre()
+            }
             return
         }
         // Le clavier, les boîtes du système et les fenêtres flottantes passent au premier
@@ -147,9 +153,39 @@ class ServiceVerrou : AccessibilityService() {
 
     override fun onInterrupt() {}
 
+    /** Écran éteint : le temps ne se décompte plus. Téléphone déverrouillé : on regarde où on est. */
+    private val ecran = object : android.content.BroadcastReceiver() {
+        override fun onReceive(contexte: Context, intention: Intent) {
+            if (intention.action == Intent.ACTION_SCREEN_OFF) {
+                oublier()
+                suspendre()
+            } else {
+                controler(paquetAuPremierPlan)
+            }
+        }
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        val filtre = android.content.IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_USER_PRESENT) }
+        registerReceiver(ecran, filtre)
+    }
+
     override fun onDestroy() {
         oublier()
+        runCatching { unregisterReceiver(ecran) }
+        suspendre()
         super.onDestroy()
+    }
+
+    /** On a quitté les apps verrouillées : le temps qui reste retourne au solde. */
+    private fun suspendre() {
+        val maintenant = System.currentTimeMillis()
+        val etat = Depot.lire(this).mettreAJour(maintenant)
+        if (!etat.fenetreOuverte(maintenant)) return
+        val suspendu = etat.suspendreFenetre(maintenant)
+        Depot.ecrire(this, suspendu)
+        Minuteur.mettreAJour(this, suspendu, maintenant, ZoneId.systemDefault())
     }
 
     private val vraiesApps = mutableMapOf<String, Boolean>()
@@ -176,8 +212,20 @@ class ServiceVerrou : AccessibilityService() {
         paquet ?: return
         val maintenant = System.currentTimeMillis()
         val zone = ZoneId.systemDefault()
-        val etat = Depot.lire(this).mettreAJour(maintenant)
-        if (paquet !in etat.apps && paquet !in etat.appsRetirees) return
+        var etat = Depot.lire(this).mettreAJour(maintenant)
+        if (paquet !in etat.apps && paquet !in etat.appsRetirees) {
+            suspendre()
+            return
+        }
+        // Une app verrouillée passe devant : le temps gagné se décompte à partir de maintenant.
+        if (!etat.urgenceEnCours(maintenant) && !etat.fenetreOuverte(maintenant)) {
+            val (ouvert, fin) = etat.ouvrirFenetre(maintenant, zone)
+            if (fin != null) {
+                etat = ouvert
+                Depot.ecrire(this, etat)
+                Minuteur.mettreAJour(this, etat, maintenant, zone)
+            }
+        }
         if (etat.estBloquee(paquet, maintenant, zone)) {
             Mesures.suivre(this, "verrou_affiche")
             startActivity(

@@ -43,8 +43,16 @@ struct EcranPaywall: View {
     let fermer: () -> Void
     /// Appelé quand un abonnement est actif, après un achat ou une restauration.
     let abonne: () -> Void
+    /// Vrai juste après un essai réussi : le titre félicite. Sinon il reprend
+    /// le chiffre vu au début, les jours par an passés sur le téléphone.
+    var essaiReussi = false
 
+    @EnvironmentObject private var etat: EtatApp
     @State private var formule: Formule = .annuel
+
+    private var titre: String {
+        essaiReussi ? L.t("paywall.titre") : L.f("paywall.titre.jours", etat.tempsParJour.joursParAn)
+    }
 
     private var prixAnnuel: String {
         abonnements.annuel?.storeProduct.localizedPriceString ?? L.t("prix.annuel")
@@ -89,7 +97,7 @@ struct EcranPaywall: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text(verbatim: L.t("paywall.titre"))
+            Text(verbatim: titre)
                 .titreEcran()
                 .padding(.top, Tokens.Espacements.e8)
                 .entree(rang: 1)
@@ -122,6 +130,18 @@ struct EcranPaywall: View {
             }
             .padding(.top, Tokens.Espacements.e3)
             .entree(rang: 4)
+            if avecEssai {
+                // Ce qui se passe pendant l'essai, jour par jour. Le rappel du
+                // jour 2 est programmé à l'achat.
+                VStack(alignment: .leading, spacing: Tokens.Espacements.e8) {
+                    etapeEssai(L.t("paywall.frise.jour1.titre"), L.t("paywall.frise.jour1.texte"))
+                    etapeEssai(L.t("paywall.frise.jour2.titre"), L.t("paywall.frise.jour2.texte"))
+                    etapeEssai(L.t("paywall.frise.jour3.titre"), L.f("paywall.frise.jour3.texte", prixAnnuel))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .carte()
+                .entree(rang: 5)
+            }
         } bas: {
             BoutonPrincipal(L.t(avecEssai ? "paywall.bouton.essai" : "commun.continuer"), pulse: true, action: acheter)
                 .opacity(abonnements.enCours ? Double(Tokens.Opacites.scan) : 1)
@@ -144,6 +164,20 @@ struct EcranPaywall: View {
                 abonne()
             }
         }
+    }
+
+    /// Une ligne de la frise de l'essai : le jour, puis ce qui se passe ce jour-là.
+    private func etapeEssai(_ jour: String, _ texte: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: Tokens.Espacements.e13) {
+            Text(verbatim: jour)
+                .legende(Tokens.Couleurs.accent, graisse: .demiGras)
+                .frame(width: Tokens.Espacements.e89, alignment: .leading)
+            Text(verbatim: texte)
+                .legende()
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private func restaurer() {

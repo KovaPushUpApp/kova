@@ -110,7 +110,6 @@
 "seance.en_position" = "Mets-toi en position.";
 "seance.encore" = "Encore %lld. Descends bien.";
 "seance.pour_minutes" = "Pour %lld min d'écran";
-"seance.bouton" = "Récupérer mon temps";
 
 /* 10. Paywall */
 "paywall.restaurer" = "Restaurer";
@@ -317,7 +316,7 @@
 "formule.gratuite" = "Gratuite";
 "paywall.annuel.par_semaine" = "soit %@ par semaine";
 "paywall.annuel.par_an" = "par an";
-"paywall.mentions.annuel_essai" = "3 jours gratuits, puis %@ par an. Annulable à tout moment dans l'App Store.";
+"paywall.mentions.annuel_essai" = "Aucun paiement aujourd'hui. 3 jours gratuits, puis %@ par an. Annulable à tout moment dans l'App Store.";
 "abonnement.prix_hebdo" = "%@ par semaine";
 "abonnement.gratuit" = "1 app verrouillée, pompes seulement.";
 "abonnement.voir" = "Voir l'abonnement";
@@ -340,3 +339,38 @@
 "socle.achats" = "Achats";
 "socle.oui" = "actif";
 "socle.non" = "inactif";
+
+/* Mode hardcore */
+"regle.hardcore" = "Mode hardcore";
+"regle.hardcore.texte" = "Ton temps gagné s'efface chaque jour à minuit. Pas de stock.";
+"regle.hardcore.texte_reglages" = "Ton temps gagné s'efface chaque jour à minuit. Le couper prend 24 h.";
+"regle.hardcore.fin" = "Le mode hardcore s'arrête le %@.";
+"accueil.hardcore" = "S'efface à minuit";
+
+/* Séance libre : on continue après la série */
+"seance.bouton.minutes" = "Récupérer %lld min";
+"seance.gagnees" = "+%lld min";
+"seance.continuer" = "Série validée. Continue si tu veux.";
+
+/* App retirée, encore verrouillée 24 h */
+"apps_reglage.sursis" = "Verrouillée jusqu'au %@";
+
+/* Paywall : titre personnalisé et frise de l'essai */
+"paywall.titre.jours" = "Récupère tes %lld jours par an.";
+"paywall.frise.jour1.titre" = "Aujourd'hui";
+"paywall.frise.jour1.texte" = "Accès complet, sans payer.";
+"paywall.frise.jour2.titre" = "Jour 2";
+"paywall.frise.jour2.texte" = "On te prévient par une notification.";
+"paywall.frise.jour3.titre" = "Jour 3";
+"paywall.frise.jour3.texte" = "%@ par an. Annulable avant.";
+
+/* Rappels : fin de l'essai et série en jeu */
+"essai.rappel.titre" = "Ton essai se termine demain";
+"essai.rappel.texte" = "Demain, ton abonnement démarre : %@ par an. Tu peux annuler avant dans l'App Store.";
+"rappel.serie.titre.un" = "Ta série de %lld jour est en jeu";
+"rappel.serie.titre.autre" = "Ta série de %lld jours est en jeu";
+"rappel.serie.texte" = "Une série avant minuit pour la garder.";
+
+/* Joker de série et record */
+"accueil.joker" = "Joker utilisé cette semaine. Ta série tient.";
+"gagne.record" = "Record battu.";

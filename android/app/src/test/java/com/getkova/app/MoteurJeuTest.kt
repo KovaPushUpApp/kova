@@ -24,6 +24,9 @@ import com.getkova.app.jeu.plageActive
 import com.getkova.app.jeu.proposerRegle
 import com.getkova.app.jeu.repetitionsDuJour
 import com.getkova.app.jeu.serie
+import com.getkova.app.jeu.suspendreFenetre
+import com.getkova.app.jeu.soldeEnSecondes
+import com.getkova.app.jeu.minutesAffichees
 import com.getkova.app.jeu.urgencesRestantes
 import com.getkova.app.jeu.utiliserUrgence
 import com.getkova.app.jeu.validerSeance
@@ -396,5 +399,58 @@ class MoteurJeuTest {
         val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone, repetitions = 3)
         assertEquals(15, etat.soldeMinutes)
         assertEquals(10, etat.seances.last().repetitions)
+    }
+
+    // --- Le temps ne se décompte que dans les apps verrouillées ---
+
+    @Test
+    fun quitterLAppRendLeTempsNonUtilise() {
+        val (ouvert, fin) = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone).ouvrirFenetre(date(9, 10), zone)
+        assertEquals(date(9, 10, 15), fin)
+        // 4 min 30 passées dans l'app : il reste 10 min 30.
+        val suspendu = ouvert.suspendreFenetre(date(9, 10, 4) + 30_000)
+        assertNull(suspendu.fenetreFin)
+        assertEquals(10, suspendu.soldeMinutes)
+        assertEquals(30, suspendu.soldeSecondes)
+        assertEquals(11, suspendu.minutesAffichees)
+        assertFalse(suspendu.appsOuvertes(date(9, 10, 5), zone))
+    }
+
+    @Test
+    fun rouvrirLAppRepartAvecCeQuiReste() {
+        val (ouvert, _) = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone).ouvrirFenetre(date(9, 10), zone)
+        val suspendu = ouvert.suspendreFenetre(date(9, 10, 4) + 30_000)
+        // Deux heures plus tard, le temps n'a pas bougé.
+        val (rouvert, fin) = suspendu.mettreAJour(date(9, 12)).ouvrirFenetre(date(9, 12), zone)
+        assertEquals(date(9, 12, 10) + 30_000, fin)
+        assertEquals(0, rouvert.soldeEnSecondes)
+    }
+
+    @Test
+    fun suspendreNAjouteJamaisDeTemps() {
+        val depart = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone)
+        var etat = depart
+        // Ouvrir et quitter dix fois de suite ne rapporte rien.
+        repeat(10) { tour ->
+            val instant = date(9, 10) + tour * 500L
+            etat = etat.ouvrirFenetre(instant, zone).first.suspendreFenetre(instant + 400)
+        }
+        assertTrue(etat.soldeEnSecondes <= depart.soldeEnSecondes)
+    }
+
+    @Test
+    fun suspendreSansFenetreNeChangeRien() {
+        val etat = EtatJeu().validerSeance(Exercice.POMPES, date(9, 10), zone)
+        assertEquals(etat, etat.suspendreFenetre(date(9, 11)))
+        // Une fenêtre déjà finie ne rend rien.
+        val (ouvert, _) = etat.ouvrirFenetre(date(9, 10), zone)
+        assertEquals(0, ouvert.suspendreFenetre(date(9, 11)).soldeEnSecondes)
+    }
+
+    @Test
+    fun enHardcoreLesSecondesAussiSEffacentAMinuit() {
+        val (ouvert, _) = hardcore(date(9, 9)).validerSeance(Exercice.POMPES, date(9, 10), zone).ouvrirFenetre(date(9, 10), zone)
+        val suspendu = ouvert.suspendreFenetre(date(9, 10, 4) + 30_000)
+        assertEquals(0, suspendu.mettreAJour(date(10, 0)).soldeEnSecondes)
     }
 }

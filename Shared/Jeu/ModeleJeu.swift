@@ -68,6 +68,14 @@ struct Regle: Codable, Equatable {
         let base = Double(Exercice.pompes.tauxDeBase)
         return max(1, Int((Double(exercice.tauxDeBase) * Double(repetitions) / base).rounded()))
     }
+
+    /// Minutes gagnées pour une séance. Rien tant que la série de la règle n'est
+    /// pas faite. Ensuite chaque répétition compte, au même rapport, arrondi à la
+    /// minute en dessous.
+    func minutesPour(_ exercice: Exercice, _ faites: Int) -> Int {
+        let serie = repetitionsDemandees(pour: exercice)
+        return faites < serie ? 0 : faites * minutes / serie
+    }
 }
 
 /// Une plage stricte du planning (règle 5).
@@ -113,6 +121,15 @@ struct EtatJeu: Encodable, Equatable {
     var regleEnAttenteLe: Date?
 
     var soldeMinutes = 0
+    /// Les secondes en plus des minutes du solde (0 à 59) : le reste d'une
+    /// fenêtre suspendue retourne au solde à la seconde près.
+    var soldeSecondes = 0
+    /// Mode hardcore : le temps gagné et la fenêtre ouverte s'effacent chaque jour à minuit.
+    var hardcore = false
+    /// Un mode hardcore coupé reste en vigueur jusqu'à cette date (règle 7).
+    var hardcoreJusquA: Date?
+    /// Le minuit où le temps gagné s'efface, quand le mode hardcore l'a programmé.
+    var effacementLe: Date?
     /// Fin de la fenêtre de déblocage en cours.
     var fenetreFin: Date?
     /// Fin du déblocage d'urgence en cours.
@@ -153,6 +170,10 @@ extension EtatJeu: Decodable {
         regleEnAttente = try boite.decodeIfPresent(Regle.self, forKey: .regleEnAttente)
         regleEnAttenteLe = try boite.decodeIfPresent(Date.self, forKey: .regleEnAttenteLe)
         soldeMinutes = try boite.decodeIfPresent(Int.self, forKey: .soldeMinutes) ?? soldeMinutes
+        soldeSecondes = try boite.decodeIfPresent(Int.self, forKey: .soldeSecondes) ?? soldeSecondes
+        hardcore = try boite.decodeIfPresent(Bool.self, forKey: .hardcore) ?? hardcore
+        hardcoreJusquA = try boite.decodeIfPresent(Date.self, forKey: .hardcoreJusquA)
+        effacementLe = try boite.decodeIfPresent(Date.self, forKey: .effacementLe)
         fenetreFin = try boite.decodeIfPresent(Date.self, forKey: .fenetreFin)
         urgenceFin = try boite.decodeIfPresent(Date.self, forKey: .urgenceFin)
         urgences = try boite.decodeIfPresent([Date].self, forKey: .urgences) ?? urgences

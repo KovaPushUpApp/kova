@@ -4,6 +4,7 @@ import SwiftUI
 struct VuePrincipale: View {
     @EnvironmentObject private var etat: EtatApp
     @EnvironmentObject private var abonnements: Abonnements
+    @EnvironmentObject private var apps: GestionApps
     @Environment(\.scenePhase) private var phase
 
     @State private var onglet: Onglet = .accueil
@@ -34,11 +35,16 @@ struct VuePrincipale: View {
         }
         .onAppear {
             etat.rafraichir(planning: true)
+            etat.programmerRappel()
+            apps.relireSursis()
             ouvrirLaSeanceDemandee()
         }
         .onChange(of: phase) { nouvelle in
             if nouvelle == .active {
                 etat.rafraichir()
+                // Les rappels à venir suivent la série, les apps en sursis leur échéance.
+                etat.programmerRappel()
+                apps.relireSursis()
                 Task { await abonnements.charger() }
             }
         }
@@ -107,9 +113,9 @@ struct VuePrincipale: View {
             EcranCompteur(
                 camera: camera,
                 abandonner: { revenirAuxOnglets() },
-                valider: {
+                valider: { repetitions in
                     // Les minutes vont au solde dès la validation (brief, règle 3).
-                    etat.validerSeance()
+                    etat.validerSeance(repetitions: repetitions)
                     aller(.gagne)
                 }
             )

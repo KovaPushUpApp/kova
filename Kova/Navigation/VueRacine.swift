@@ -26,6 +26,8 @@ struct ParcoursOnboarding: View {
     @State private var ecranRefuse = false
     @State private var cameraRefusee = false
     @State private var demandeEnCours = false
+    /// Vrai juste après un essai réussi : le titre du paywall félicite.
+    @State private var essaiReussi = false
 
     var body: some View {
         NavigationStack(path: $chemin) {
@@ -65,9 +67,12 @@ struct ParcoursOnboarding: View {
         case .autoCamera:
             EcranAutorisation.camera(refuse: cameraRefusee, retour: reculer, autoriser: demanderCamera)
         case .essai:
-            EcranEssai(retour: reculer, suivant: { aller(.paywall) })
+            EcranEssai(retour: reculer, suivant: { reussi in
+                essaiReussi = reussi
+                aller(.paywall)
+            })
         case .paywall:
-            EcranPaywall(fermer: fermerPaywall, abonne: terminer)
+            EcranPaywall(fermer: fermerPaywall, abonne: terminer, essaiReussi: essaiReussi)
         case .offre:
             EcranOffre(fermer: apresRefus, abonne: terminer)
         case .limite:

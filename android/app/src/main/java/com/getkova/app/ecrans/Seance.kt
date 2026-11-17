@@ -275,8 +275,8 @@ private fun Etiquette(texte: String, modifier: Modifier = Modifier, accent: Bool
  * pour régler les seuils du comptage. Absent de la version publiée.
  */
 @Composable
-private fun AngleMesure(camera: CameraSeance) {
-    if (!BuildConfig.DEBUG) return
+private fun AngleMesure(camera: CameraSeance, visible: Boolean) {
+    if (!BuildConfig.DEBUG || !visible) return
     val angle = camera.angle
     val dernier = camera.diagnostic
     val texte = buildString {
@@ -358,7 +358,7 @@ fun EcranEssai(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suivant:
         camera, etat.comptageSimule,
         haut = {
             Box(Modifier.weight(1f)) { com.getkova.app.design.EnTeteEtapes(8, NOMBRE_ETAPES, retour) }
-            AngleMesure(camera)
+            AngleMesure(camera, etat.mesuresDuComptage)
         },
     ) {
         Titre(t(R.string.essai_titre), taille = Tokens.TaillesTexte.titreCarte, centre = true)
@@ -653,7 +653,7 @@ fun EcranCompteur(etat: EtatApp, camera: CameraSeance, abandonner: () -> Unit, v
         haut = {
             BoutonFermer(t(R.string.a11y_arreter_seance), action = abandonner)
             Spacer(Modifier.weight(1f))
-            AngleMesure(camera)
+            AngleMesure(camera, etat.mesuresDuComptage)
             Etiquette(
                 if (gagnees > 0) f(R.string.seance_gagnees, gagnees) else f(R.string.seance_pour_minutes, etat.regle.minutes),
             )
@@ -678,11 +678,12 @@ private fun Exercice.texteValide(): Int = when (this) {
 }
 
 /**
- * Écran 17 : la récompense, en plein fond accent. "+15 min" qui défile, deux stats,
- * puis le choix : ouvrir maintenant ou garder son temps. Les minutes sont déjà au solde.
+ * Écran 17 : la récompense, en plein fond accent. "+15 min" qui défile, deux stats.
+ * Les minutes sont déjà au solde. Il n'y a rien à ouvrir : le temps se décompte
+ * tout seul, seulement pendant qu'on utilise une app verrouillée.
  */
 @Composable
-fun EcranGagne(etat: EtatApp, ouvrir: () -> Unit, garder: () -> Unit) {
+fun EcranGagne(etat: EtatApp, continuer: () -> Unit) {
     // La séance qui vient d'être validée : elle peut dépasser la série de la règle.
     val seance = remember { etat.jeu.seances.lastOrNull() }
     val cible = seance?.minutes ?: etat.regle.minutes
@@ -696,24 +697,13 @@ fun EcranGagne(etat: EtatApp, ouvrir: () -> Unit, garder: () -> Unit) {
     }
     val maintenant = remember { System.currentTimeMillis() }
     val plageEnCours = etat.jeu.plageActive(maintenant, etat.zone)
-    val texte = if (plageEnCours) {
-        t(R.string.gagne_texte_plage)
-    } else {
-        // On calcule sur une copie ce que donnerait l'ouverture maintenant, plages à venir comprises.
-        val essai = etat.jeu.ouvrirFenetre(maintenant, etat.zone).first
-        f(R.string.gagne_texte, heure(essai.finDOuverture(maintenant, etat.zone) ?: maintenant, etat))
-    }
+    val texte = t(if (plageEnCours) R.string.gagne_texte_plage else R.string.gagne_texte_usage)
     val sombre = Tokens.Couleurs.texteSurAccent
     EcranKova(
         fond = Tokens.Couleurs.accent,
         espacement = Tokens.Espacements.e13,
         bas = {
-            if (plageEnCours) {
-                BoutonPrincipal(t(R.string.gagne_garder), Modifier.entree(14), style = StyleBouton.SOMBRE, action = garder)
-            } else {
-                BoutonPrincipal(t(R.string.gagne_ouvrir), Modifier.entree(14), style = StyleBouton.SOMBRE, action = ouvrir)
-                BoutonSecondaire(t(R.string.gagne_garder), couleur = sombre, action = garder)
-            }
+            BoutonPrincipal(t(R.string.commun_continuer), Modifier.entree(14), style = StyleBouton.SOMBRE, action = continuer)
         },
     ) {
         val valide = f(etat.exercice.texteValide(), seance?.repetitions ?: etat.repetitionsDeLaSeance)

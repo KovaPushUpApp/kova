@@ -60,8 +60,10 @@ fun EtatJeu.mettreAJour(maintenant: Long): EtatJeu {
     // Mode hardcore : à minuit, le temps gagné est perdu. La fenêtre est déjà bornée à minuit.
     val effacement = etat.effacementLe
     if (effacement != null && maintenant >= effacement) {
+        val efface = etat.hardcoreEnVigueur(effacement)
         etat = etat.copy(
-            soldeMinutes = if (etat.hardcoreEnVigueur(effacement)) 0 else etat.soldeMinutes,
+            soldeMinutes = if (efface) 0 else etat.soldeMinutes,
+            soldeSecondes = if (efface) 0 else etat.soldeSecondes,
             effacementLe = null,
         )
     }
@@ -170,6 +172,24 @@ fun EtatJeu.ajouterPlage(plage: Plage): EtatJeu =
     if (plages.size >= Plage.NOMBRE_MAXIMUM) this else copy(plages = plages + plage)
 
 // --- Fenêtre de déblocage -------------------------------------------------------
+//
+// Le temps gagné ne se décompte que pendant qu'on utilise une app verrouillée.
+// Ouvrir une de ces apps démarre la fenêtre avec tout le solde ; la quitter
+// suspend la fenêtre, et ce qui reste retourne au solde, à la seconde près.
+
+/** Tout le solde, en secondes. */
+val EtatJeu.soldeEnSecondes: Int get() = soldeMinutes * 60 + soldeSecondes
+
+/** Le solde à afficher, arrondi à la minute au-dessus : il reste "1 min" jusqu'à la dernière seconde. */
+val EtatJeu.minutesAffichees: Int get() = soldeMinutes + if (soldeSecondes > 0) 1 else 0
+
+/** Arrête la fenêtre en cours et remet au solde le temps qui n'a pas été utilisé. */
+fun EtatJeu.suspendreFenetre(maintenant: Long): EtatJeu {
+    val fin = fenetreFin ?: return this
+    if (fin <= maintenant) return copy(fenetreFin = null)
+    val total = soldeEnSecondes + ((fin - maintenant) / 1000).toInt()
+    return copy(fenetreFin = null, soldeMinutes = total / 60, soldeSecondes = total % 60)
+}
 
 fun EtatJeu.fenetreOuverte(maintenant: Long): Boolean = fenetreFin?.let { it > maintenant } ?: false
 
@@ -213,10 +233,11 @@ fun EtatJeu.finDOuverture(maintenant: Long, zone: ZoneId): Long? {
  * de la fenêtre, ou null si rien n'a été ouvert.
  */
 fun EtatJeu.ouvrirFenetre(maintenant: Long, zone: ZoneId): Pair<EtatJeu, Long?> {
-    if (soldeMinutes <= 0 || plageActive(maintenant, zone)) return this to null
+    if (soldeEnSecondes <= 0 || plageActive(maintenant, zone)) return this to null
     val depart = if (fenetreOuverte(maintenant)) fenetreFin ?: maintenant else maintenant
     // En mode hardcore, la fenêtre s'arrête à minuit : le reste est perdu.
-    val etat = copy(fenetreFin = depart + soldeMinutes * 60_000L, soldeMinutes = 0).bornerAMinuit(maintenant, zone)
+    val etat = copy(fenetreFin = depart + soldeEnSecondes * 1000L, soldeMinutes = 0, soldeSecondes = 0)
+        .bornerAMinuit(maintenant, zone)
     return etat to etat.fenetreFin
 }
 

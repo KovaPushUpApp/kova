@@ -83,6 +83,8 @@ import com.getkova.app.jeu.repetitionsDuJour
 import com.getkova.app.jeu.serie
 import com.getkova.app.Mesures
 import com.getkova.app.jeu.jokerUtilise
+import com.getkova.app.jeu.minutesAffichees
+import com.getkova.app.jeu.soldeEnSecondes
 import com.getkova.app.nom
 import com.getkova.app.verrou.AppInstallee
 import com.getkova.app.verrou.AppsInstallees
@@ -342,8 +344,8 @@ fun EcranAccueil(etat: EtatApp, gagnerDuTemps: () -> Unit, ouvrirVerrou: () -> U
                 GrosChiffre(ceil((fin - maintenant) / 60_000.0).toInt().coerceAtLeast(0))
             } else {
                 Legende(t(R.string.accueil_solde))
-                GrosChiffre(jeu.soldeMinutes)
-                if (jeu.soldeMinutes > 0 && jeu.effacementLe != null) {
+                GrosChiffre(jeu.minutesAffichees)
+                if (jeu.soldeEnSecondes > 0 && jeu.effacementLe != null) {
                     Legende(t(R.string.accueil_hardcore), couleur = Tokens.Couleurs.accent)
                 }
             }
@@ -353,8 +355,9 @@ fun EcranAccueil(etat: EtatApp, gagnerDuTemps: () -> Unit, ouvrirVerrou: () -> U
             }
             if (fin == null && jeu.plageActive(maintenant, etat.zone)) {
                 Legende(t(R.string.accueil_plage), couleur = Tokens.Couleurs.accent)
-            } else if (fin == null && jeu.soldeMinutes > 0) {
-                BoutonSecondaire(t(R.string.accueil_ouvrir), couleur = Tokens.Couleurs.accent) { etat.ouvrirFenetre() }
+            } else if (fin == null && jeu.soldeEnSecondes > 0) {
+                // Rien à ouvrir : le temps se décompte tout seul dès qu'on est sur une app verrouillée.
+                Legende(t(R.string.accueil_decompte), couleur = Tokens.Couleurs.accent)
             }
         }
         BoutonPrincipal(t(R.string.accueil_bouton), pulse = true, action = gagnerDuTemps)
@@ -768,6 +771,11 @@ fun EcranChantier(etat: EtatApp, retour: () -> Unit) {
             LigneReglage(t(R.string.chantier_comptage)) {
                 Interrupteur(etat.comptageSimule, t(R.string.chantier_comptage)) {
                     etat.definirOption("comptageSimule", !etat.comptageSimule)
+                }
+            }
+            LigneReglage(t(R.string.chantier_mesures_comptage)) {
+                Interrupteur(etat.mesuresDuComptage, t(R.string.chantier_mesures_comptage)) {
+                    etat.definirOption("mesuresDuComptage", !etat.mesuresDuComptage)
                 }
             }
             LigneReglage(t(R.string.socle_version)) { Legende(BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")") }
