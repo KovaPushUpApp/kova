@@ -70,7 +70,6 @@
 "seance.continuer" = "Série validée. Continue si tu veux.";
 
 /* App retirée, encore verrouillée 24 h. */
-"apps.reglage.sursis" = "Verrouillée jusqu'au %@";
 
 /* Paywall, rappels, joker, record, mesures. */
 "paywall.titre.jours" = "Récupère tes %lld jours par an.";
@@ -83,8 +82,6 @@
 "essai.rappel.canal" = "Abonnement";
 "essai.rappel.titre" = "Ton essai se termine demain";
 "essai.rappel.texte" = "Demain, ton abonnement démarre : %@ par an. Tu peux annuler avant sur Google Play.";
-"rappel.serie.titre_un" = "Ta série de %lld jour est en jeu";
-"rappel.serie.titre_autre" = "Ta série de %lld jours est en jeu";
 "rappel.serie.texte" = "Une série avant minuit pour la garder.";
 "accueil.joker" = "Joker utilisé cette semaine. Ta série tient.";
 "gagne.record" = "Record battu.";

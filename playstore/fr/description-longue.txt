@@ -1,0 +1,33 @@
+Gagne ton temps d'écran.
+
+Kova verrouille les apps qui te distraient et ne les rouvre que si tu fais tes pompes. La caméra les compte en direct. Pas de montre, pas de triche.
+
+COMMENT ÇA MARCHE
+1. Choisis les apps à verrouiller.
+2. Fixe ta règle. Par exemple : 10 pompes = 15 minutes.
+3. Pose ton téléphone au sol et fais ta série.
+4. Tes apps s'ouvrent. À la fin du temps, elles se reverrouillent toutes seules.
+
+UN COMPTAGE STRICT
+Une répétition ne compte que si le mouvement est complet. Bouger la tête ou plier les bras debout ne compte pas. Une série abandonnée ne donne rien.
+
+FAIT POUR TENIR
+- Garde ton temps au solde et ouvre tes apps quand tu veux.
+- Planning : des plages strictes où rien ne s'ouvre, même avec du temps en stock.
+- Anti-craquage : assouplir ta règle ou retirer une app prend effet 24 h plus tard.
+- Déblocage d'urgence : 5 minutes, 2 fois par semaine, pour les vraies urgences.
+- Série de jours et stats de la semaine.
+
+TA VIE PRIVÉE
+L'image de la caméra est analysée sur ton téléphone. Elle n'est jamais enregistrée ni envoyée. Aucun compte à créer. Tout reste sur ton téléphone.
+
+GRATUIT ET ABONNEMENT
+Sans abonnement : 1 app verrouillée, avec les pompes.
+Avec l'abonnement Kova : apps illimitées, squats, planning et stats.
+
+Formules : annuelle (avec 3 jours d'essai gratuit) ou hebdomadaire. L'abonnement se paie avec ton compte Google Play et se renouvelle automatiquement. Tu peux le gérer et l'annuler à tout moment dans Google Play, rubrique Paiements et abonnements.
+
+Certaines fonctionnalités demandent un abonnement payant.
+
+Conditions d'utilisation : https://kova-site-theta.vercel.app/conditions.html
+Politique de confidentialité : https://kova-site-theta.vercel.app/confidentialite.html

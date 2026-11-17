@@ -97,7 +97,7 @@
 "auto_camera.texte" = "Elle compte tes pompes en direct. Pas de montre, pas de triche.";
 "auto_camera.argument.1" = "La vidéo est analysée sur ton téléphone";
 "auto_camera.argument.2" = "Rien n'est enregistré ni envoyé";
-"auto_camera.argument.3" = "La caméra s'éteint dès la série finie";
+"auto_camera.argument.3" = "La caméra s'éteint dès que ta séance est validée";
 "auto_camera.bouton" = "Autoriser la caméra";
 
 /* 9. Essai */

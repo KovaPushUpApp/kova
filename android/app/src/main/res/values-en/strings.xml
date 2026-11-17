@@ -52,13 +52,13 @@
     <string name="apps_compte_un">%1$d app will be locked.</string>
     <string name="apps_recherche">Search for an app</string>
     <string name="apps_recherche_vide">No app matches \"%1$s\".</string>
-    <string name="apps_reglage_sursis">Locked until %1$s</string>
     <string name="apps_titre">Which apps steal your time?</string>
+    <string name="apps_reglage_sursis">Locked until %1$s</string>
     <string name="apps_reglage_texte_autre">%1$d apps locked. Removing an app takes effect in 24 h, so you don\'t cave.</string>
     <string name="apps_reglage_texte_un">%1$d app locked. Removing an app takes effect in 24 h, so you don\'t cave.</string>
     <string name="auto_camera_argument_1">Video is analyzed on your phone</string>
     <string name="auto_camera_argument_2">Nothing is recorded or sent</string>
-    <string name="auto_camera_argument_3">The camera turns off when the set is done</string>
+    <string name="auto_camera_argument_3">The camera turns off once your session is validated</string>
     <string name="auto_camera_bouton">Allow the camera</string>
     <string name="auto_camera_refus">Without the camera, Kova can\'t count your push-ups. Allow it in Settings.</string>
     <string name="auto_camera_texte">It counts your push-ups live. No watch, no cheating.</string>
@@ -252,7 +252,6 @@
     <string name="regle_unite_minutes">minutes of screen</string>
     <string name="regle_unite_pompes">push-ups</string>
     <string name="reserve_stats">Your weekly stats are part of the subscription.</string>
-    <string name="seance_bouton">Claim my time</string>
     <string name="seance_bouton_minutes">Claim %1$d min</string>
     <string name="seance_continuer">Set done. Keep going if you like.</string>
     <string name="seance_en_position">Get into position.</string>

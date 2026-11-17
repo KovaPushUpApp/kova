@@ -30,9 +30,9 @@ import java.util.Locale
  * (voir appstore/A_FAIRE.md). Un lien vide n'est pas affiché.
  */
 object Liens {
-    const val CONDITIONS = ""
-    const val CONFIDENTIALITE = ""
-    const val CONTACT = ""
+    const val CONDITIONS = "https://kova-site-theta.vercel.app/conditions.html"
+    const val CONFIDENTIALITE = "https://kova-site-theta.vercel.app/confidentialite.html"
+    const val CONTACT = "supportkovaapp@gmail.com"
     const val ABONNEMENTS = "https://play.google.com/store/account/subscriptions"
 }
 

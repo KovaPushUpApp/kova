@@ -69,7 +69,6 @@
 "seance.continuer" = "Set done. Keep going if you like.";
 
 /* App retirée, encore verrouillée 24 h. */
-"apps.reglage.sursis" = "Locked until %@";
 
 /* Paywall, rappels, joker, record, mesures. */
 "paywall.titre.jours" = "Take back your %lld days a year.";
@@ -82,8 +81,6 @@
 "essai.rappel.canal" = "Subscription";
 "essai.rappel.titre" = "Your trial ends tomorrow";
 "essai.rappel.texte" = "Tomorrow your subscription starts: %@ per year. You can cancel before then on Google Play.";
-"rappel.serie.titre_un" = "Your %lld-day streak is on the line";
-"rappel.serie.titre_autre" = "Your %lld-day streak is on the line";
 "rappel.serie.texte" = "One set before midnight to keep it.";
 "accueil.joker" = "Streak saver used this week. Your streak holds.";
 "gagne.record" = "New record.";

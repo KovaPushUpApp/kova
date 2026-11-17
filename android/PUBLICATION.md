@@ -26,10 +26,10 @@ finale, et celle-ci ne sert plus qu'à envoyer les mises à jour. Elle peut êtr
 |---|---|---|
 | 1 | Créer le compte Google Play Console | 25 $, une fois. Vérification d'identité demandée |
 | 2 | Test fermé | Un compte personnel récent doit faire tester l'app par 12 personnes pendant 14 jours avant la mise en ligne. À vérifier dans la console, la règle évolue |
-| 3 | Publier la politique de confidentialité et les conditions | Brouillons dans `appstore/`. Mettre ensuite les adresses dans `Liens` (`ecrans/Outils.kt`), avec l'adresse de contact |
+| 3 | Politique de confidentialité et conditions | Fait : en ligne sur kova-site-theta.vercel.app, adresses dans `Liens` (`ecrans/Outils.kt`). À changer si le site prend un nom de domaine |
 | 4 | Déclarer le service d'accessibilité | Texte et scénario de la vidéo plus bas |
 | 5 | Remplir "Sécurité des données" | Réponses plus bas |
-| 6 | Fiche, captures, classification du contenu | Textes de la fiche dans `appstore/` |
+| 6 | Fiche, captures, classification du contenu | Textes de la fiche dans `playstore/` (titre, description courte, description longue, en français et en anglais) |
 | 7 | Créer les abonnements | Annuel 29,99 € avec 3 jours d'essai, hebdomadaire 4,99 €, offre de rattrapage à 19,99 € la première année. Me le dire ensuite : les achats ne sont pas encore branchés dans l'app |
 
 ## Ce qui reste à coder

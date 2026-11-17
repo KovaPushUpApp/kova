@@ -29,5 +29,5 @@ Plans: yearly (with a 3-day free trial) or weekly. Payment is charged to your Ap
 
 Some features require a paid subscription.
 
-Terms of use: [ADDRESS TO FILL IN]
-Privacy policy: [ADDRESS TO FILL IN]
+Terms of use: https://kova-site-theta.vercel.app/conditions.html
+Privacy policy: https://kova-site-theta.vercel.app/confidentialite.html

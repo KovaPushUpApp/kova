@@ -41,11 +41,11 @@ settings:
     # Identifiant de l'app dans TelemetryDeck. Vide : aucune mesure d'audience.
     KOVA_TELEMETRYDECK_ID: ""
     # Adresse de la politique de confidentialité (obligatoire avant la mise en ligne).
-    KOVA_LIEN_CONFIDENTIALITE: ""
+    KOVA_LIEN_CONFIDENTIALITE: "https://kova-site-theta.vercel.app/confidentialite.html"
     # Adresse des conditions d'utilisation. Vide : contrat standard d'Apple.
-    KOVA_LIEN_CONDITIONS: ""
+    KOVA_LIEN_CONDITIONS: "https://kova-site-theta.vercel.app/conditions.html"
     # Adresse e-mail de contact affichée dans les réglages.
-    KOVA_CONTACT: ""
+    KOVA_CONTACT: "supportkovaapp@gmail.com"
 
 targets:
   Kova:

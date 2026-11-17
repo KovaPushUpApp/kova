@@ -97,7 +97,7 @@
 "auto_camera.texte" = "It counts your push-ups live. No watch, no cheating.";
 "auto_camera.argument.1" = "Video is analyzed on your phone";
 "auto_camera.argument.2" = "Nothing is recorded or sent";
-"auto_camera.argument.3" = "The camera turns off when the set is done";
+"auto_camera.argument.3" = "The camera turns off once your session is validated";
 "auto_camera.bouton" = "Allow the camera";
 
 /* 9. Trial */

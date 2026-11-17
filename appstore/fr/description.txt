@@ -29,5 +29,5 @@ Formules : annuelle (avec 3 jours d'essai gratuit) ou hebdomadaire. Le paiement 
 
 Certaines fonctionnalités demandent un abonnement payant.
 
-Conditions d'utilisation : [ADRESSE À RENSEIGNER]
-Politique de confidentialité : [ADRESSE À RENSEIGNER]
+Conditions d'utilisation : https://kova-site-theta.vercel.app/conditions.html
+Politique de confidentialité : https://kova-site-theta.vercel.app/confidentialite.html
