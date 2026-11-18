@@ -31,4 +31,4 @@ livraison/
 android/keystore.properties
 
 # Captures de la CI
-captures/
+/captures/
