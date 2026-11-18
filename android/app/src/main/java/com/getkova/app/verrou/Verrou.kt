@@ -8,9 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.ui.graphics.toArgb
@@ -25,12 +28,25 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.getkova.app.jeu.EtatJeu
 import com.getkova.app.Mesures
 import com.getkova.app.jeu.fenetreOuverte
@@ -95,13 +111,63 @@ object AppsInstallees {
     }.getOrNull()
 }
 
+/** L'écran de verrou, avec le nom et l'icône de l'app bloquée. Sert au rideau du service et à [VerrouActivity]. */
+@Composable
+private fun ContenuDuVerrou(
+    contexte: Context,
+    paquet: String?,
+    jeu: EtatJeu,
+    maintenant: Long,
+    commencer: () -> Unit,
+    utiliserLeStock: () -> Unit,
+    fermer: () -> Unit,
+    urgence: () -> Unit,
+) {
+    val app by produceState<AppInstallee?>(null, paquet) {
+        value = paquet?.let { AppsInstallees.trouver(contexte, it) }
+    }
+    EcranVerrou(
+        nomDeLApp = app?.nom ?: paquet?.let { AppsInstallees.nom(contexte, it) },
+        icone = app?.icone,
+        jeu = jeu,
+        maintenant = maintenant,
+        zone = ZoneId.systemDefault(),
+        commencer = commencer,
+        utiliserLeStock = utiliserLeStock,
+        fermer = fermer,
+        urgence = urgence,
+    )
+}
+
+/** Ce qu'une vue Compose attend d'un écran, pour vivre dans une fenêtre posée par le service. */
+private class ProprietaireDuRideau : LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
+    private val cycle = LifecycleRegistry(this)
+    private val sauvegarde = SavedStateRegistryController.create(this)
+    override val lifecycle: Lifecycle get() = cycle
+    override val savedStateRegistry: SavedStateRegistry get() = sauvegarde.savedStateRegistry
+    override val viewModelStore = ViewModelStore()
+
+    fun demarrer() {
+        sauvegarde.performRestore(null)
+        cycle.currentState = Lifecycle.State.RESUMED
+    }
+
+    fun arreter() {
+        cycle.currentState = Lifecycle.State.DESTROYED
+        viewModelStore.clear()
+    }
+}
+
 /**
  * Le verrouillage réel des apps sur Android.
  *
  * Ce service d'accessibilité ne reçoit qu'une information : le nom du paquet de
  * l'app qui passe au premier plan. Il ne lit pas le contenu des écrans (voir
  * res/xml/service_verrou.xml) et n'enregistre rien. Si l'app est verrouillée,
- * il affiche l'écran de verrou de Kova par dessus.
+ * il pose tout de suite l'écran de verrou par dessus, dans une fenêtre à lui (le
+ * "rideau"), puis ouvre [VerrouActivity] qui prend le relais. Le rideau ne dépend
+ * pas du bon vouloir du téléphone : certains retardent ou refusent l'ouverture d'un
+ * écran par une app en arrière-plan, et l'app bloquée restait alors utilisable.
  *
  * Tant que le service est actif, il tourne même quand Kova est fermée : c'est
  * lui qui reverrouille à la fin d'une fenêtre.
@@ -130,6 +196,29 @@ class ServiceVerrou : AccessibilityService() {
         }
     }
 
+    /** Le rideau : l'écran de verrou posé par dessus l'app bloquée. */
+    private var rideau: View? = null
+    private var proprietaire: ProprietaireDuRideau? = null
+    private var paquetDuRideau by mutableStateOf<String?>(null)
+    private var jeuDuRideau by mutableStateOf(EtatJeu())
+    private var instantDuRideau by mutableStateOf(0L)
+
+    /** Vrai quand le rideau a dû renvoyer lui-même à l'accueil : il reste alors par dessus. */
+    private var renvoyeALAccueil = false
+
+    /** [VerrouActivity] n'est pas arrivée à temps : on ferme l'app bloquée, le rideau fait le verrou. */
+    private val secours = Runnable {
+        if (rideau != null) {
+            renvoyeALAccueil = true
+            performGlobalAction(GLOBAL_ACTION_HOME)
+        }
+    }
+    private val retirerLeRideauPlusTard = Runnable { retirerLeRideau() }
+
+    private val paquetDeLAccueil: String? by lazy {
+        packageManager.resolveActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)?.activityInfo?.packageName
+    }
+
     override fun onAccessibilityEvent(evenement: AccessibilityEvent?) {
         if (evenement?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val paquet = evenement.packageName?.toString() ?: return
@@ -140,6 +229,8 @@ class ServiceVerrou : AccessibilityService() {
             // sinon il se retirerait tout seul et annulerait le reverrouillage.
             if (evenement.className?.toString().orEmpty().startsWith(packageName)) {
                 oublier()
+                // Un écran de Kova est devant : il remplace le rideau.
+                retirerLeRideau()
                 suspendre()
             }
             return
@@ -158,6 +249,7 @@ class ServiceVerrou : AccessibilityService() {
         override fun onReceive(contexte: Context, intention: Intent) {
             if (intention.action == Intent.ACTION_SCREEN_OFF) {
                 oublier()
+                retirerLeRideau()
                 suspendre()
             } else {
                 controler(paquetAuPremierPlan)
@@ -167,12 +259,15 @@ class ServiceVerrou : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        enService = this
         val filtre = android.content.IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_USER_PRESENT) }
         registerReceiver(ecran, filtre)
     }
 
     override fun onDestroy() {
         oublier()
+        retirerLeRideau()
+        if (enService === this) enService = null
         runCatching { unregisterReceiver(ecran) }
         suspendre()
         super.onDestroy()
@@ -214,6 +309,11 @@ class ServiceVerrou : AccessibilityService() {
         val zone = ZoneId.systemDefault()
         var etat = Depot.lire(this).mettreAJour(maintenant)
         if (paquet !in etat.apps && paquet !in etat.appsRetirees) {
+            // Une autre app est devant : le rideau n'a plus rien à couvrir. Sauf sur
+            // l'accueil où il a lui-même renvoyé : là, il reste jusqu'à ce qu'on réponde.
+            if (!(renvoyeALAccueil && paquet == paquetDeLAccueil)) {
+                retirerLeRideau()
+            }
             suspendre()
             return
         }
@@ -228,18 +328,140 @@ class ServiceVerrou : AccessibilityService() {
         }
         if (etat.estBloquee(paquet, maintenant, zone)) {
             Mesures.suivre(this, "verrou_affiche")
-            startActivity(
-                Intent(this, VerrouActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                    .putExtra(VerrouActivity.PAQUET, paquet),
-            )
+            // Le rideau d'abord : il couvre l'app à l'instant, quoi que fasse le téléphone ensuite.
+            afficherLeRideau(paquet, etat, maintenant)
+            // Réglage d'essai, version de test seulement : le rideau seul, comme sur un
+            // téléphone qui refuse d'ouvrir l'écran de Kova.
+            if (com.getkova.app.BuildConfig.DEBUG && getSharedPreferences("kova", MODE_PRIVATE).getBoolean("essaiRideauSeul", false)) return
+            runCatching {
+                startActivity(
+                    Intent(this, VerrouActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                        .putExtra(VerrouActivity.PAQUET, paquet),
+                )
+            }
         } else {
+            retirerLeRideau()
             // L'app est ouverte pendant une fenêtre : on la reverrouille à la fin, même si Kova est fermée.
             val fin = etat.finDOuverture(maintenant, zone) ?: return
             finDeLaBulle = fin
             principal.postDelayed(montrerLaBulle, (fin - maintenant - DERNIERE_MINUTE).coerceAtLeast(0))
             principal.postDelayed(reverifier, (fin - maintenant).coerceAtLeast(0) + MARGE)
         }
+    }
+
+    /**
+     * Pose l'écran de verrou par dessus l'app bloquée, en plein écran. Il capte les
+     * appuis et le bouton retour : l'app dessous n'est plus utilisable.
+     */
+    private fun afficherLeRideau(paquet: String, etat: EtatJeu, maintenant: Long) {
+        paquetDuRideau = paquet
+        jeuDuRideau = etat
+        instantDuRideau = maintenant
+        principal.removeCallbacks(retirerLeRideauPlusTard)
+        principal.removeCallbacks(secours)
+        if (!renvoyeALAccueil) {
+            principal.postDelayed(secours, DELAI_DE_SECOURS)
+        }
+        if (rideau != null) return
+
+        val cycle = ProprietaireDuRideau()
+        val contenu = ComposeView(this).apply {
+            setContent {
+                ContenuDuVerrou(
+                    contexte = this@ServiceVerrou,
+                    paquet = paquetDuRideau,
+                    jeu = jeuDuRideau,
+                    maintenant = instantDuRideau,
+                    commencer = { ouvrirKovaDepuisLeRideau(MainActivity.ACTION_SEANCE) },
+                    utiliserLeStock = { utiliserLeStockDepuisLeRideau() },
+                    fermer = { fermerLeRideau() },
+                    urgence = { ouvrirKovaDepuisLeRideau(MainActivity.ACTION_URGENCE) },
+                )
+            }
+        }
+        val boite = object : FrameLayout(this) {
+            // Le bouton retour ne doit pas ramener dans l'app bloquée.
+            override fun dispatchKeyEvent(evenement: KeyEvent): Boolean {
+                if (evenement.keyCode == KeyEvent.KEYCODE_BACK) {
+                    if (evenement.action == KeyEvent.ACTION_UP) fermerLeRideau()
+                    return true
+                }
+                return super.dispatchKeyEvent(evenement)
+            }
+        }.apply {
+            // Opaque dès la première image, avant même que le contenu soit dessiné.
+            setBackgroundColor(Tokens.Couleurs.fond.toArgb())
+            setViewTreeLifecycleOwner(cycle)
+            setViewTreeSavedStateRegistryOwner(cycle)
+            setViewTreeViewModelStoreOwner(cycle)
+            addView(contenu, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }
+        val place = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.OPAQUE,
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+        cycle.demarrer()
+        val ajoutee = runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).addView(boite, place) }.isSuccess
+        if (!ajoutee) {
+            cycle.arreter()
+            principal.removeCallbacks(secours)
+            return
+        }
+        rideau = boite
+        proprietaire = cycle
+    }
+
+    /** Retire le rideau. Sans effet s'il n'est pas affiché. Appelé aussi par [VerrouActivity] quand elle arrive. */
+    fun retirerLeRideau() {
+        principal.removeCallbacks(secours)
+        principal.removeCallbacks(retirerLeRideauPlusTard)
+        renvoyeALAccueil = false
+        val vue = rideau ?: return
+        rideau = null
+        runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).removeView(vue) }
+        proprietaire?.arreter()
+        proprietaire = null
+    }
+
+    /** "Plus tard" ou le bouton retour : on quitte l'app bloquée pour l'accueil du téléphone. */
+    private fun fermerLeRideau() {
+        performGlobalAction(GLOBAL_ACTION_HOME)
+        retirerLeRideau()
+    }
+
+    /** Ouvre Kova sur la séance ou l'urgence. Le rideau part quand l'écran de Kova est devant. */
+    private fun ouvrirKovaDepuisLeRideau(action: String) {
+        principal.removeCallbacks(secours)
+        runCatching {
+            startActivity(
+                Intent(this, MainActivity::class.java)
+                    .setAction(action)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            )
+        }
+        // Filet : si l'arrivée de Kova n'est pas signalée, le rideau ne reste pas par dessus.
+        principal.postDelayed(retirerLeRideauPlusTard, DELAI_DE_SECOURS)
+    }
+
+    /** Ouvre une fenêtre avec tout le temps en stock, puis rend l'app qui était bloquée. */
+    private fun utiliserLeStockDepuisLeRideau() {
+        val paquet = paquetDuRideau
+        val maintenant = System.currentTimeMillis()
+        val zone = ZoneId.systemDefault()
+        val (etat, fin) = Depot.lire(this).mettreAJour(maintenant).ouvrirFenetre(maintenant, zone)
+        if (fin == null) return
+        Depot.ecrire(this, etat)
+        Minuteur.mettreAJour(this, etat, maintenant, zone)
+        retirerLeRideau()
+        paquet?.let { packageManager.getLaunchIntentForPackage(it) }?.let { runCatching { startActivity(it) } }
     }
 
     /**
@@ -305,6 +527,14 @@ class ServiceVerrou : AccessibilityService() {
     companion object {
         private const val MARGE = 500L
 
+        /** Délai laissé à [VerrouActivity] pour arriver avant que le rideau ferme lui-même l'app bloquée. */
+        private const val DELAI_DE_SECOURS = 1_500L
+
+        /** Le service en marche, pour que [VerrouActivity] retire le rideau en arrivant. */
+        @Volatile
+        var enService: ServiceVerrou? = null
+            private set
+
         /** Le minuteur s'affiche quand il reste une minute. */
         private const val DERNIERE_MINUTE = 60_000L
         private val paquetsIgnores = setOf("com.android.systemui", "android")
@@ -338,6 +568,8 @@ class VerrouActivity : ComponentActivity() {
         super.onResume()
         instant = System.currentTimeMillis()
         etatDuJeu = Depot.lire(this).mettreAJour(instant)
+        // Cet écran est devant : le rideau posé par le service a fini son travail.
+        ServiceVerrou.enService?.retirerLeRideau()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -347,18 +579,11 @@ class VerrouActivity : ComponentActivity() {
         setContent {
             // Le bouton retour ne doit pas ramener dans l'app bloquée.
             BackHandler { quitterVersLAccueil() }
-            val bloque = paquet
-            val maintenant = instant
-            val jeu = etatDuJeu
-            val app by produceState<AppInstallee?>(null, bloque) {
-                value = bloque?.let { AppsInstallees.trouver(this@VerrouActivity, it) }
-            }
-            EcranVerrou(
-                nomDeLApp = app?.nom ?: bloque?.let { AppsInstallees.nom(this, it) },
-                icone = app?.icone,
-                jeu = jeu,
-                maintenant = maintenant,
-                zone = ZoneId.systemDefault(),
+            ContenuDuVerrou(
+                contexte = this,
+                paquet = paquet,
+                jeu = etatDuJeu,
+                maintenant = instant,
                 commencer = { ouvrirKova(MainActivity.ACTION_SEANCE) },
                 utiliserLeStock = { utiliserLeStock() },
                 fermer = { quitterVersLAccueil() },
@@ -371,6 +596,7 @@ class VerrouActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         paquet = intent.getStringExtra(PAQUET)
+        ServiceVerrou.enService?.retirerLeRideau()
     }
 
     /** Ouvre une fenêtre avec tout le temps en stock, puis retourne dans l'app qui était bloquée. */

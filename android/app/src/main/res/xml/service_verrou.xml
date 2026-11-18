@@ -7,4 +7,4 @@
     android:canRetrieveWindowContent="false"
     android:description="@string/service_description"
     android:isAccessibilityTool="false"
-    android:notificationTimeout="100" />
+    android:notificationTimeout="0" />
