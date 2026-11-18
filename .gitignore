@@ -29,3 +29,6 @@ android/.kotlin/
 *.keystore
 livraison/
 android/keystore.properties
+
+# Captures de la CI
+captures/

@@ -377,3 +377,10 @@
 
 /* Health notice */
 "sante.avertissement" = "Kova is not a medical device. If you feel pain or have any doubt, stop and ask a doctor.";
+
+/* App Store screenshots (capture mode, Debug only) */
+"capture.app.reseaux" = "Social media";
+"capture.app.videos" = "Videos";
+"capture.app.jeux" = "Games";
+"capture.plage.travail" = "Work";
+"capture.plage.nuit" = "Night";

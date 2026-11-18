@@ -22,7 +22,7 @@ struct ParcoursOnboarding: View {
     @EnvironmentObject private var etat: EtatApp
     @EnvironmentObject private var apps: GestionApps
     @EnvironmentObject private var abonnements: Abonnements
-    @State private var chemin: [EtapeOnboarding] = []
+    @State private var chemin: [EtapeOnboarding] = ModeCapture.etapes
     @State private var ecranRefuse = false
     @State private var cameraRefusee = false
     @State private var demandeEnCours = false

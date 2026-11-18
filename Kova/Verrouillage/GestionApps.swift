@@ -21,7 +21,7 @@ final class GestionApps: ObservableObject {
     init() {
         selection = Verrouillage.disponible ? Verrouillage.lireSelection() : FamilyActivitySelection()
         if !Verrouillage.disponible {
-            fictives = ["Instagram", "TikTok", "YouTube"]
+            fictives = ModeCapture.actif ? ModeCapture.apps : ["Instagram", "TikTok", "YouTube"]
             autorise = true
         }
         relireSursis()

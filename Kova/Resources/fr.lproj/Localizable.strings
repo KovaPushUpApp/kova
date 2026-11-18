@@ -377,3 +377,10 @@
 
 /* Avertissement santé */
 "sante.avertissement" = "Kova n'est pas un dispositif médical. En cas de douleur ou de doute, arrête et demande l'avis d'un médecin.";
+
+/* Captures d'écran de la fiche App Store (mode capture, Debug seulement) */
+"capture.app.reseaux" = "Réseaux sociaux";
+"capture.app.videos" = "Vidéos";
+"capture.app.jeux" = "Jeux";
+"capture.plage.travail" = "Travail";
+"capture.plage.nuit" = "Nuit";

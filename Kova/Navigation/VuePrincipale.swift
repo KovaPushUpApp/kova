@@ -7,8 +7,8 @@ struct VuePrincipale: View {
     @EnvironmentObject private var apps: GestionApps
     @Environment(\.scenePhase) private var phase
 
-    @State private var onglet: Onglet = .accueil
-    @State private var chemin: [Destination] = []
+    @State private var onglet: Onglet = ModeCapture.onglet
+    @State private var chemin: [Destination] = ModeCapture.chemin
     @State private var paywallOuvert = false
     /// La caméra de la séance, partagée entre le placement et le compteur.
     @StateObject private var camera = CameraSeance()

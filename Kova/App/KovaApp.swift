@@ -6,6 +6,11 @@ struct KovaApp: App {
     @StateObject private var apps = GestionApps()
     @StateObject private var abonnements = Abonnements()
 
+    init() {
+        // Captures d'écran de la fiche App Store : état d'exemple, en Debug seulement.
+        ModeCapture.preparer()
+    }
+
     var body: some Scene {
         WindowGroup {
             VueRacine()
@@ -15,6 +20,11 @@ struct KovaApp: App {
                 .preferredColorScheme(.dark)
                 .tint(Tokens.Couleurs.accent)
                 .onAppear {
+                    if ModeCapture.actif {
+                        // Ni achats ni mesure d'audience pendant une capture.
+                        abonnements.simulation = ModeCapture.ecran != .paywall
+                        return
+                    }
                     Analytique.demarrer()
                     abonnements.demarrer()
                 }
