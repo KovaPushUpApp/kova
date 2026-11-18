@@ -37,7 +37,7 @@ settings:
     # --- À renseigner par Julien (voir appstore/A_FAIRE.md) ---
     # Clé publique du SDK RevenueCat pour iOS (commence par "appl_").
     # Vide : les achats sont indisponibles dans l'app.
-    KOVA_REVENUECAT_CLE: ""
+    KOVA_REVENUECAT_CLE: "appl_FSJYIEQGrdTEQNJbVJuxcKbjpVG"
     # Identifiant de l'app dans TelemetryDeck. Vide : aucune mesure d'audience.
     KOVA_TELEMETRYDECK_ID: ""
     # Adresse de la politique de confidentialité (obligatoire avant la mise en ligne).

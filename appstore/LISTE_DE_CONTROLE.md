@@ -52,7 +52,7 @@ jour des consignes : 16 octobre 2026). Dans l'ordre où ça bloque.
 - [ ] Pour chacun : nom affiché et description en français et en anglais, capture d'écran pour la revue, statut « Prêt à soumettre »
 - [ ] Les deux abonnements joints à la version 1.0 (« Ajouter pour la revue »). Le premier abonnement d'une app part forcément avec une version
 - [ ] Pas d'offre de rattrapage dans la version 1.0 : coupée dans le code (`Abonnements.offreDeRattrapageActive`). Une remise affichée à la fermeture du paywall a déjà valu des refus (règle 5.6)
-- [ ] RevenueCat : droit `premium`, offre courante avec les forfaits annuel et hebdomadaire, clé `appl_` dans `KOVA_REVENUECAT_CLE`
+- [x] RevenueCat : droit `premium`, offre courante avec les forfaits annuel et hebdomadaire, clé `appl_` dans `KOVA_REVENUECAT_CLE`
 - [ ] Achat, essai et restauration testés en bac à sable sur un iPhone : les prix s'affichent, l'achat aboutit
 
 ### Build
