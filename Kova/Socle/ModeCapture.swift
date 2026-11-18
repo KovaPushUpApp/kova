@@ -59,11 +59,17 @@ enum ModeCapture {
 
         var jeu = EtatJeu()
         // Douze jours de suite, la séance du jour en dernier : c'est elle que
-        // montre l'écran de récompense.
-        let repetitions = [15, 10, 20, 15, 25, 10, 20, 15, 20, 25, 15, 20]
-        for (rang, faites) in repetitions.enumerated() {
-            let recul = repetitions.count - 1 - rang
+        // montre l'écran de récompense. Les jours de la semaine en cours sont plus
+        // chargés que les précédents, pour que l'écran des stats montre une semaine
+        // en hausse. La comparaison se fait avec la semaine d'avant entière : les
+        // captures sont donc à prendre du mercredi au dimanche.
+        let lundi = Semaine.debut(maintenant, calendrier)
+        let cetteSemaine = [30, 25, 30, 20, 30, 25, 30]
+        let joursDeSuite = 12
+        for rang in 0..<joursDeSuite {
+            let recul = joursDeSuite - 1 - rang
             guard let jour = calendrier.date(byAdding: .day, value: -recul, to: aujourdHui) else { continue }
+            let faites = jour >= lundi ? cetteSemaine[Semaine.jour(jour, calendrier) - 1] : 10
             let date = recul == 0
                 ? maintenant.addingTimeInterval(-60)
                 : calendrier.date(bySettingHour: 18, minute: 30, second: 0, of: jour) ?? jour

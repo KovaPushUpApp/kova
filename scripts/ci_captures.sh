@@ -57,6 +57,9 @@ capturer() {
   echo "Captures $TAILLE pouces sur $APPAREIL"
   xcrun simctl boot "$APPAREIL" || true
   xcrun simctl bootstatus "$APPAREIL" -b
+  # Un simulateur neuf affiche des notifications du système dans la minute qui
+  # suit son démarrage. On les laisse passer avant la première capture.
+  sleep 60
   # Barre d'état propre : 9:41, batterie pleine, réseau complet.
   xcrun simctl status_bar "$APPAREIL" override --time "9:41" \
     --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4 || true
