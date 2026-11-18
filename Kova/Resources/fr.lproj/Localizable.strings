@@ -384,3 +384,10 @@
 "capture.app.jeux" = "Jeux";
 "capture.plage.travail" = "Travail";
 "capture.plage.nuit" = "Nuit";
+
+/* Accord pour la mesure d'audience anonyme */
+"mesure.titre" = "Aider à améliorer Kova ?";
+"mesure.texte" = "Kova peut compter, de façon anonyme, les écrans que tu utilises. Jamais l'image de la caméra, jamais le nom de tes apps. Tu peux changer d'avis dans les réglages.";
+"mesure.accepter" = "Accepter";
+"mesure.refuser" = "Refuser";
+"reglages.mesure" = "Statistiques anonymes";

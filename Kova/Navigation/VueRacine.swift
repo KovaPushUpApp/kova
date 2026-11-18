@@ -28,6 +28,8 @@ struct ParcoursOnboarding: View {
     @State private var demandeEnCours = false
     /// Vrai juste après un essai réussi : le titre du paywall félicite.
     @State private var essaiReussi = false
+    /// La question sur la mesure d'audience, posée une seule fois.
+    @State private var demandeMesure = false
 
     var body: some View {
         NavigationStack(path: $chemin) {
@@ -39,13 +41,40 @@ struct ParcoursOnboarding: View {
                         }
                 }
         }
+        // Écart avec le brief (section 7) : une question en plus, avant l'étape 2.
+        // Sans réponse "Accepter", aucune statistique ne part.
+        .alert(
+            L.t("mesure.titre"),
+            isPresented: $demandeMesure,
+            actions: {
+                Button(L.t("mesure.accepter")) { repondreMesure(true) }
+                Button(L.t("mesure.refuser"), role: .cancel) { repondreMesure(false) }
+            },
+            message: {
+                Text(verbatim: L.t("mesure.texte"))
+            }
+        )
+    }
+
+    private func commencer() {
+        if etat.mesureDemandee {
+            aller(.temps)
+        } else {
+            demandeMesure = true
+        }
+    }
+
+    private func repondreMesure(_ acceptee: Bool) {
+        etat.mesureDemandee = true
+        etat.mesureAcceptee = acceptee
+        aller(.temps)
     }
 
     @ViewBuilder
     private func ecran(_ etape: EtapeOnboarding) -> some View {
         switch etape {
         case .bienvenue:
-            EcranBienvenue(commencer: { aller(.temps) }, restaurer: restaurer)
+            EcranBienvenue(commencer: commencer, restaurer: restaurer)
                 .alerteAchat(abonnements)
         case .temps:
             EcranTemps(retour: reculer, suivant: { aller(.choc) })

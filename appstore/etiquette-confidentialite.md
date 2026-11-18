@@ -11,7 +11,9 @@ SDK compris. À revoir si un SDK est ajouté ou retiré.
 | Identifiants : identifiant de l'appareil | TelemetryDeck (identifiant haché) | Analyse | Non | Non |
 | Données d'utilisation : interactions avec le produit | TelemetryDeck | Analyse | Non | Non |
 
-Si `KOVA_TELEMETRYDECK_ID` reste vide, les deux lignes TelemetryDeck ne s'appliquent pas.
+La mesure TelemetryDeck est branchée (`KOVA_TELEMETRYDECK_ID` renseigné) : les trois lignes sont à
+déclarer. Elle ne tourne que si l'utilisateur l'accepte (question au premier lancement, interrupteur
+dans les réglages), mais Apple demande de déclarer ce que l'app peut collecter.
 
 ## Données non collectées
 

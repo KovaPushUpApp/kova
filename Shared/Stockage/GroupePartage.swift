@@ -36,6 +36,9 @@ enum CleStockage {
     /// Options.
     static let rappelQuotidien = "rappelQuotidien"
     static let compterAVoixHaute = "compterAVoixHaute"
+    /// Accord pour la mesure d'audience anonyme, et le fait de l'avoir déjà demandé.
+    static let mesureAcceptee = "mesureAcceptee"
+    static let mesureDemandee = "mesureDemandee"
     /// Posé par l'extension de verrou quand l'utilisateur touche "Faire mes pompes".
     static let seanceDemandee = "seanceDemandee"
     /// Heure de cette demande, pour le rappel affiché sur l'écran de verrou.

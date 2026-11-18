@@ -39,7 +39,7 @@ settings:
     # Vide : les achats sont indisponibles dans l'app.
     KOVA_REVENUECAT_CLE: "appl_FSJYIEQGrdTEQNJbVJuxcKbjpVG"
     # Identifiant de l'app dans TelemetryDeck. Vide : aucune mesure d'audience.
-    KOVA_TELEMETRYDECK_ID: ""
+    KOVA_TELEMETRYDECK_ID: "AEDF2017-BD92-4C93-967A-EBC89D47AB52"
     # Adresse de la politique de confidentialité (obligatoire avant la mise en ligne).
     KOVA_LIEN_CONFIDENTIALITE: "https://kova-site-theta.vercel.app/confidentialite.html"
     # Adresse des conditions d'utilisation. Vide : contrat standard d'Apple.

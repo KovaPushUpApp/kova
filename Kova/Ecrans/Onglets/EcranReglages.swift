@@ -54,6 +54,11 @@ struct EcranReglages: View {
                         etat.compterAVoixHaute.toggle()
                     }
                 }
+                LigneReglage(L.t("reglages.mesure")) {
+                    Interrupteur(actif: etat.mesureAcceptee, libelle: L.t("reglages.mesure")) {
+                        etat.mesureAcceptee.toggle()
+                    }
+                }
             }
             .entree(rang: 2)
             GroupeReglages {

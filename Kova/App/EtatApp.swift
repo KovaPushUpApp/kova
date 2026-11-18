@@ -35,6 +35,19 @@ final class EtatApp: ObservableObject {
         }
     }
 
+    /// Accord pour la mesure d'audience anonyme. Non tant qu'on n'a pas dit oui.
+    @Published var mesureAcceptee: Bool {
+        didSet {
+            reglages.set(mesureAcceptee, forKey: CleStockage.mesureAcceptee)
+            Analytique.regler(acceptee: mesureAcceptee)
+        }
+    }
+    /// Vrai une fois la question posée : on ne la repose pas.
+    var mesureDemandee: Bool {
+        get { reglages.bool(forKey: CleStockage.mesureDemandee) }
+        set { reglages.set(newValue, forKey: CleStockage.mesureDemandee) }
+    }
+
     /// L'offre de rattrapage ne s'affiche qu'une fois.
     @Published var offreDejaVue: Bool {
         didSet { reglages.set(offreDejaVue, forKey: CleStockage.offreDejaVue) }
@@ -65,6 +78,7 @@ final class EtatApp: ObservableObject {
         self.compterAVoixHaute = reglages.bool(forKey: CleStockage.compterAVoixHaute)
         self.rappelQuotidien = reglages.bool(forKey: CleStockage.rappelQuotidien)
         self.offreDejaVue = reglages.bool(forKey: CleStockage.offreDejaVue)
+        self.mesureAcceptee = reglages.bool(forKey: CleStockage.mesureAcceptee)
     }
 
     var regle: Regle { jeu.regle }

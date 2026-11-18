@@ -2,6 +2,8 @@ import Foundation
 import TelemetryDeck
 
 /// Mesure d'audience légère et sans identifiant publicitaire (TelemetryDeck).
+/// Elle ne tourne que si l'utilisateur a dit oui (accord demandé au début de
+/// l'onboarding, modifiable dans les réglages).
 /// Seuls les événements du brief (section 10) partent. Aucune image, aucun nom
 /// d'app, aucune donnée personnelle.
 enum Analytique {
@@ -24,10 +26,25 @@ enum Analytique {
 
     private static var actif = false
 
-    /// Démarre la mesure si un identifiant d'app TelemetryDeck est renseigné
-    /// (réglage KOVA_TELEMETRYDECK_ID de project.base.yml). Sinon, rien ne part.
+    /// Au lancement : la mesure ne démarre que si l'utilisateur a donné son accord.
     static func demarrer() {
-        guard let identifiant = Bundle.main.object(forInfoDictionaryKey: "KovaTelemetryDeckID") as? String,
+        regler(acceptee: GroupePartage.reglages.bool(forKey: CleStockage.mesureAcceptee))
+    }
+
+    /// Applique l'accord. Sans accord, rien ne part : le SDK n'est pas démarré,
+    /// ou il est arrêté si l'accord vient d'être retiré.
+    /// Il faut aussi un identifiant d'app TelemetryDeck (réglage
+    /// KOVA_TELEMETRYDECK_ID de project.base.yml).
+    static func regler(acceptee: Bool) {
+        guard acceptee else {
+            if actif {
+                TelemetryDeck.terminate()
+                actif = false
+            }
+            return
+        }
+        guard !actif,
+              let identifiant = Bundle.main.object(forInfoDictionaryKey: "KovaTelemetryDeckID") as? String,
               !identifiant.isEmpty else {
             return
         }

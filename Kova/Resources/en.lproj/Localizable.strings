@@ -384,3 +384,10 @@
 "capture.app.jeux" = "Games";
 "capture.plage.travail" = "Work";
 "capture.plage.nuit" = "Night";
+
+/* Consent for anonymous usage statistics */
+"mesure.titre" = "Help improve Kova?";
+"mesure.texte" = "Kova can count, anonymously, the screens you use. Never the camera image, never the names of your apps. You can change your mind in Settings.";
+"mesure.accepter" = "Accept";
+"mesure.refuser" = "Decline";
+"reglages.mesure" = "Anonymous statistics";
