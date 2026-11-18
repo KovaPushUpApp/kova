@@ -61,8 +61,7 @@ enum ModeCapture {
         // Douze jours de suite, la séance du jour en dernier : c'est elle que
         // montre l'écran de récompense. Les jours de la semaine en cours sont plus
         // chargés que les précédents, pour que l'écran des stats montre une semaine
-        // en hausse. La comparaison se fait avec la semaine d'avant entière : les
-        // captures sont donc à prendre du mercredi au dimanche.
+        // en hausse.
         let lundi = Semaine.debut(maintenant, calendrier)
         let cetteSemaine = [30, 25, 30, 20, 30, 25, 30]
         let joursDeSuite = 12

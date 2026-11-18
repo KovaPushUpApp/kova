@@ -400,8 +400,14 @@ extension EtatJeu {
         }
         let total = parJour.reduce(0, +)
         var progression: Int?
-        if let lundiPrecedent = calendrier.date(byAdding: .day, value: -7, to: lundi) {
-            let avant = seancesDeLaSemaine(commencantLe: lundiPrecedent, calendrier)
+        // On compare à jours égaux : du lundi d'avant jusqu'au même jour de la
+        // semaine d'avant, inclus. Sinon une semaine en cours paraît toujours en baisse.
+        let demain = calendrier.date(byAdding: .day, value: 1, to: calendrier.startOfDay(for: maintenant))
+        if let lundiPrecedent = calendrier.date(byAdding: .day, value: -7, to: lundi),
+           let demain,
+           let borne = calendrier.date(byAdding: .day, value: -7, to: demain) {
+            let avant = seances
+                .filter { $0.date >= lundiPrecedent && $0.date < borne }
                 .reduce(0) { $0 + $1.repetitions }
             if avant > 0 {
                 progression = Int((Double(total - avant) * 100 / Double(avant)).rounded())
@@ -431,7 +437,8 @@ struct BilanSemaine: Equatable {
     var rangAujourdHui: Int
     var seances: Int
     var minutesGagnees: Int
-    /// Évolution du total par rapport à la semaine précédente. Nil s'il n'y a pas de comparaison.
+    /// Évolution du total par rapport aux mêmes jours de la semaine précédente.
+    /// Nil s'il n'y a pas de comparaison.
     var progressionPourcent: Int?
 
     var total: Int { repetitionsParJour.reduce(0, +) }

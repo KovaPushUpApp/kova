@@ -33,7 +33,7 @@ workflows:
       - /tmp/xcodebuild_logs/*.log
 
   # Captures d'écran de la fiche App Store, prises dans le simulateur en français
-  # et en anglais (6,9 et 6,3 pouces). À lancer à la main. Les images sont dans
+  # et en anglais (6,9 et 6,3 pouces). À lancer à la main, ou en poussant la branche "captures". Les images sont dans
   # les artefacts du build. Ne demande ni compte Apple, ni signature, ni secret.
   captures:
     name: Kova - Captures App Store
@@ -41,6 +41,13 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       xcode: latest
+    # Se lance aussi en poussant la branche "captures".
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: captures
+          include: true
     scripts:
       - name: Installer XcodeGen
         script: brew install xcodegen
@@ -66,6 +73,13 @@ workflows:
         XCODE_PROJECT: "Kova.xcodeproj"
         XCODE_SCHEME: "Kova"
       xcode: latest
+    # Se lance aussi en poussant la branche "testflight".
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: testflight
+          include: true
     scripts:
       - name: Installer XcodeGen
         script: brew install xcodegen

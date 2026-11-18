@@ -360,7 +360,11 @@ fun EtatJeu.bilanDeLaSemaine(maintenant: Long, zone: ZoneId): BilanSemaine {
         parJour[Semaine.jour(seance.date, zone) - 1] += seance.repetitions
     }
     val total = parJour.sum()
-    val avant = seances.filter { it.date in lundiPrecedent until lundi }.sumOf { it.repetitions }
+    // On compare à jours égaux : du lundi d'avant jusqu'au même jour de la semaine
+    // d'avant, inclus. Sinon une semaine en cours paraît toujours en baisse.
+    val borne = Semaine.date(maintenant, zone).toLocalDate().plusDays(1).minusDays(7)
+        .atStartOfDay(zone).toInstant().toEpochMilli()
+    val avant = seances.filter { it.date in lundiPrecedent until borne }.sumOf { it.repetitions }
     return BilanSemaine(
         repetitionsParJour = parJour,
         rangAujourdHui = Semaine.jour(maintenant, zone) - 1,
