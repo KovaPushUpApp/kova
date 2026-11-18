@@ -3,8 +3,8 @@
 # Générer :  xcodegen generate
 #
 # Ce projet demande la capacité Family Controls sur les 4 identifiants.
-# Tant qu'Apple ne l'a pas accordée pour la distribution, il ne peut pas partir
-# sur TestFlight : la CI le compile seulement, et envoie project.base.yml.
+# Apple l'a accordée pour la distribution le 18 novembre 2026 : il part sur
+# TestFlight par le workflow "complet-testflight" de Codemagic.
 #
 # Identifiants :
 #   com.getkova.app                app
