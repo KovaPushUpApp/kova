@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -155,7 +156,7 @@ private fun ParcoursOnboarding(etat: EtatApp) {
     var serviceDemande by rememberSaveable { mutableStateOf(false) }
     var cameraRefusee by rememberSaveable { mutableStateOf(false) }
     var essaiReussi by rememberSaveable { mutableStateOf(false) }
-    var messageAchat by remember { mutableStateOf(false) }
+    val activite = contexte as? Activity
 
     LaunchedEffect(etape) { Mesures.suivre(contexte, "onboarding_etape_vue", "etape" to etape.name, "rang" to etape.ordinal) }
 
@@ -170,18 +171,21 @@ private fun ParcoursOnboarding(etat: EtatApp) {
         if (!etat.abonne && etat.jeu.apps.size > 1) aller(Etape.LIMITE) else etat.terminerOnboarding()
     }
 
-    // Version de test : toucher le bouton du paywall donne tout de suite accès à tout.
-    // Version publiée : le vrai achat Google Play, pas encore branché.
-    fun acheter(essai: Boolean) {
-        Mesures.suivre(contexte, "achat_demande", "origine" to etape.name, "essai" to essai)
-        if (BuildConfig.DEBUG) {
+    // Le vrai achat passe par Google Play. Dans la version de test, tant que Google Play
+    // ne connaît pas les offres, toucher le bouton donne tout de suite accès à tout.
+    fun acheter(annuel: Boolean) {
+        Mesures.suivre(contexte, "achat_demande", "origine" to etape.name, "essai" to annuel)
+        if (BuildConfig.DEBUG && etat.achats.prixAnnuel == null) {
             etat.definirOption("abonnementSimule", true)
-            // Promis sur le paywall : un rappel la veille de la fin de l'essai.
-            if (essai) Rappel.programmerFinEssai(contexte)
+            if (annuel) Rappel.programmerFinEssai(contexte)
             etat.terminerOnboarding()
-        } else {
-            messageAchat = true
+        } else if (activite != null) {
+            etat.acheter(activite, annuel)
         }
+    }
+    // L'abonnement vient de devenir actif pendant le paywall : l'onboarding est fini.
+    LaunchedEffect(etat.abonne, etape) {
+        if (etat.abonne && (etape == Etape.PAYWALL || etape == Etape.OFFRE)) etat.terminerOnboarding()
     }
 
     BackHandler(enabled = chemin.size > 1) { reculer() }
@@ -264,34 +268,32 @@ private fun ParcoursOnboarding(etat: EtatApp) {
             fermer = {
                 Mesures.suivre(contexte, "paywall_ferme", "origine" to "onboarding")
                 // Fermer le paywall sans payer montre l'offre de rattrapage, une seule fois.
-                if (etat.offreDejaVue) {
+                if (etat.offreDejaVue || !Achats.OFFRE_DE_RATTRAPAGE_ACTIVE) {
                     terminer()
                 } else {
                     etat.definirOption("offreDejaVue", true)
                     aller(Etape.OFFRE)
                 }
             },
-            acheter = { annuel -> acheter(essai = annuel) },
-            restaurer = { messageAchat = true },
+            acheter = { annuel -> acheter(annuel) },
+            restaurer = { etat.achats.rafraichir(restauration = true) },
         )
         Etape.OFFRE -> EcranOffre(
             fermer = {
                 Mesures.suivre(contexte, "offre_refusee")
                 terminer()
             },
-            // L'offre de rattrapage n'a pas d'essai gratuit.
-            prendre = { acheter(essai = false) },
+            // L'offre de rattrapage est coupée pour la première version (voir Achats).
+            prendre = { etat.messageAchat = R.string.achat_indisponible },
         )
         Etape.LIMITE -> EcranLimiteGratuite(etat, voirAbonnement = { aller(Etape.PAYWALL) }, terminer = ::terminer)
     }
-    if (messageAchat) {
-        MessageAchat { messageAchat = false }
-    }
+    etat.messageAchat?.let { message -> MessageAchat(message) { etat.messageAchat = null } }
 }
 
-/** Les achats Google Play ne sont pas encore branchés : le message le dit clairement. */
+/** Un achat ou une restauration n'a pas abouti : le message dit pourquoi. */
 @Composable
-private fun MessageAchat(fermer: () -> Unit) {
+private fun MessageAchat(message: Int, fermer: () -> Unit) {
     androidx.compose.material3.AlertDialog(
         onDismissRequest = fermer,
         confirmButton = {
@@ -300,7 +302,7 @@ private fun MessageAchat(fermer: () -> Unit) {
             }
         },
         title = { androidx.compose.material3.Text(t(R.string.achat_titre), color = Tokens.Couleurs.texte) },
-        text = { androidx.compose.material3.Text(t(R.string.achat_indisponible), color = Tokens.Couleurs.texteSecondaire) },
+        text = { androidx.compose.material3.Text(t(message), color = Tokens.Couleurs.texteSecondaire) },
         containerColor = Tokens.Couleurs.carte,
     )
 }
@@ -312,7 +314,7 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
     var onglet by rememberSaveable { mutableStateOf(Onglet.ACCUEIL) }
     var chemin by rememberSaveable { mutableStateOf(listOf<Destination>()) }
     var paywall by rememberSaveable { mutableStateOf(false) }
-    var messageAchat by remember { mutableStateOf(false) }
+    val activite = contexte as? Activity
     val camera = remember { CameraSeance(contexte) }
     var serviceActif by remember { mutableStateOf(ServiceVerrou.actif(contexte)) }
 
@@ -330,7 +332,13 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         etat.rafraichir()
+        // Un abonnement résilié ou arrivé à terme se voit ici, au retour dans l'app.
+        etat.achats.rafraichir()
         serviceActif = ServiceVerrou.actif(contexte)
+    }
+    // L'abonnement vient de devenir actif : le paywall se ferme.
+    LaunchedEffect(etat.abonne) {
+        if (etat.abonne) paywall = false
     }
     // L'utilisateur arrive de l'écran de verrou d'une app bloquée.
     LaunchedEffect(actionDemandee) {
@@ -398,16 +406,16 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
             },
             acheter = { annuel ->
                 Mesures.suivre(contexte, "achat_demande", "origine" to "app", "essai" to annuel)
-                // Version de test : accès immédiat. Version publiée : achat Google Play, pas encore branché.
-                if (BuildConfig.DEBUG) {
+                // Version de test, tant que Google Play ne connaît pas les offres : accès immédiat.
+                if (BuildConfig.DEBUG && etat.achats.prixAnnuel == null) {
                     etat.definirOption("abonnementSimule", true)
                     if (annuel) Rappel.programmerFinEssai(contexte)
                     paywall = false
-                } else {
-                    messageAchat = true
+                } else if (activite != null) {
+                    etat.acheter(activite, annuel)
                 }
             },
-            restaurer = { messageAchat = true },
+            restaurer = { etat.achats.rafraichir(restauration = true) },
         )
     } else when (chemin.lastOrNull()) {
         null -> Column(Modifier.fillMaxSize()) {
@@ -488,14 +496,14 @@ private fun AppPrincipale(etat: EtatApp, actionDemandee: String?, actionTraitee:
         Destination.APPS_REGLAGE -> EcranAppsReglage(etat, ::reculer) { paywall = true }
         Destination.REGLE -> EcranRegle(etat, onboarding = false, retour = ::reculer, valider = ::reculer)
         Destination.EXERCICE_PAR_DEFAUT -> EcranExercice(etat, parDefaut = true, retour = ::reculer, valider = ::reculer) { paywall = true }
-        Destination.ABONNEMENT -> EcranAbonnement(etat, ::reculer, { paywall = true }) { messageAchat = true }
+        Destination.ABONNEMENT -> EcranAbonnement(etat, ::reculer, { paywall = true }) {
+            etat.achats.rafraichir(restauration = true)
+        }
         Destination.EDITEUR_PLAGE -> EcranEditeurPlage(annuler = ::reculer) { plage ->
             etat.ajouterPlage(plage)
             reculer()
         }
         Destination.CHANTIER -> EcranChantier(etat, ::reculer)
     }
-    if (messageAchat) {
-        MessageAchat { messageAchat = false }
-    }
+    etat.messageAchat?.let { message -> MessageAchat(message) { etat.messageAchat = null } }
 }

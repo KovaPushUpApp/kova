@@ -8,6 +8,7 @@ camerax = "1.4.2"
 mlkitPose = "18.0.0-beta5"
 serialization = "1.7.3"
 junit = "4.13.2"
+billing = "8.0.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -23,6 +24,7 @@ compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 junit = { module = "junit:junit", version.ref = "junit" }
+billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

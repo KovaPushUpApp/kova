@@ -696,7 +696,13 @@ fun EcranReglages(etat: EtatApp, ouvrir: (Destination) -> Unit) {
             GroupeReglages {
                 LigneReglageLien(
                     t(R.string.reglages_abonnement),
-                    t(if (etat.abonne) R.string.formule_annuel else R.string.formule_gratuite),
+                    t(
+                        when {
+                            !etat.abonne -> R.string.formule_gratuite
+                            etat.abonnementAnnuel -> R.string.formule_annuel
+                            else -> R.string.formule_hebdomadaire
+                        },
+                    ),
                 ) { ouvrir(Destination.ABONNEMENT) }
                 if (Liens.CONTACT.isNotEmpty()) {
                     LigneReglageLien(t(R.string.reglages_aide)) { ouvrirLien("mailto:" + Liens.CONTACT) }
@@ -742,11 +748,22 @@ fun EcranAbonnement(etat: EtatApp, retour: () -> Unit, ouvrirPaywall: () -> Unit
         ) {
             Legende(t(R.string.abonnement_actuelle), couleur = sombre, graisse = Graisse.DEMI_GRAS)
             Titre(
-                t(if (etat.abonne) R.string.formule_annuel else R.string.formule_gratuite),
+                t(
+                    when {
+                        !etat.abonne -> R.string.formule_gratuite
+                        etat.abonnementAnnuel -> R.string.formule_annuel
+                        else -> R.string.formule_hebdomadaire
+                    },
+                ),
                 taille = Tokens.TaillesTexte.titreAccueil, couleur = sombre,
             )
             Corps(
-                if (etat.abonne) f(R.string.abonnement_prix_annuel, t(R.string.prix_annuel)) else t(R.string.abonnement_gratuit),
+                when {
+                    !etat.abonne -> t(R.string.abonnement_gratuit)
+                    etat.abonnementAnnuel ->
+                        f(R.string.abonnement_prix_annuel, etat.achats.prixAnnuel ?: t(R.string.prix_annuel))
+                    else -> f(R.string.abonnement_prix_hebdo, etat.achats.prixHebdo ?: t(R.string.prix_hebdomadaire))
+                },
                 couleur = sombre,
             )
         }

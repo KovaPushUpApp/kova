@@ -30,13 +30,14 @@ finale, et celle-ci ne sert plus qu'à envoyer les mises à jour. Elle peut êtr
 | 4 | Déclarer le service d'accessibilité | Texte et scénario de la vidéo plus bas |
 | 5 | Remplir "Sécurité des données" | Réponses plus bas |
 | 6 | Fiche, captures, classification du contenu | Textes de la fiche dans `playstore/` (titre, description courte, description longue, en français et en anglais) |
-| 7 | Créer les abonnements | Annuel 29,99 € avec 3 jours d'essai, hebdomadaire 4,99 €, offre de rattrapage à 19,99 € la première année. Me le dire ensuite : les achats ne sont pas encore branchés dans l'app |
+| 7 | Créer l'abonnement | Détail dans « Les abonnements dans la Play Console », plus bas. Les identifiants doivent être exactement ceux indiqués |
 
 ## Ce qui reste à coder
 
-- **Les achats.** Dans la version publiée, le bouton d'abonnement affiche "achats indisponibles".
-  Il faudra redonner l'accès Internet à l'app (retiré dans `AndroidManifest.xml`) et afficher
-  les prix venus de Google Play au lieu des prix écrits dans les textes.
+- **Les achats sont branchés** (`Achats.kt`, Google Play Billing), mais jamais essayés : il faut
+  le compte Play Console, l'abonnement créé et l'app envoyée dans une piste de test.
+  Tant que Google Play ne connaît pas l'abonnement, la version publiée affiche
+  "achats indisponibles" et la version de test donne l'accès sans payer.
 - **Le comptage** rate encore des pompes sur un vrai téléphone. Seuils à régler avec des mesures réelles.
 
 ## Statistiques d'usage (PostHog, région Union européenne)
@@ -99,6 +100,26 @@ Le service est déclaré avec `isAccessibilityTool="false"`.
 5. Faire une série, revenir : l'app s'ouvre, la notification affiche le temps restant.
 6. Montrer le minuteur de la dernière minute, puis le reverrouillage.
 
+## Les abonnements dans la Play Console
+
+L'app cherche ces identifiants, à la lettre près. Menu Monétiser > Produits > Abonnements.
+
+| Élément | Identifiant | Réglage |
+|---|---|---|
+| Abonnement | `kova_premium` | Nom affiché : Kova Premium |
+| Forfait de base annuel | `annuel` | Renouvellement automatique, 1 an, 29,99 € |
+| Offre sur le forfait annuel | `essai` | Nouveaux abonnés seulement, essai gratuit de 3 jours |
+| Forfait de base hebdomadaire | `hebdo` | Renouvellement automatique, 1 semaine, 4,99 € |
+
+Activer les deux forfaits et l'offre. L'offre de rattrapage à 19,99 € est coupée pour la
+première version, comme sur iPhone (`Achats.OFFRE_DE_RATTRAPAGE_ACTIVE`).
+
+Pour essayer un achat sans payer : envoyer l'app dans la piste de test interne, puis ajouter
+son compte Google dans Configuration > Test des licences.
+
+Les achats passent par l'app Google Play du téléphone : Kova n'a toujours pas accès à Internet.
+RevenueCat n'est pas utilisé sur Android, pour garder cette promesse.
+
 ## Sécurité des données
 
 - Données collectées : **aucune**.
@@ -107,4 +128,5 @@ Le service est déclaré avec `isAccessibilityTool="false"`.
   enregistrée ni envoyée.
 - Liste des apps installées : lue sur le téléphone pour proposer les apps à verrouiller, jamais envoyée.
 
-Ces réponses devront changer le jour où les achats ou des statistiques d'usage seront ajoutés.
+Les achats ne changent pas ces réponses : Google Play traite le paiement, Kova ne reçoit que
+"abonnement actif ou non". Elles devront changer le jour où des statistiques d'usage seront envoyées.

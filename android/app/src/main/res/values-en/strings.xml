@@ -84,6 +84,11 @@
     <string name="camera_indisponible">No usable camera on this device.</string>
     <string name="camera_ouvrir_reglages">Open Settings</string>
     <string name="camera_refusee">Kova can\'t use the camera. Allow it in Settings to count your push-ups.</string>
+    <string name="capture_app_jeux">Games</string>
+    <string name="capture_app_reseaux">Social media</string>
+    <string name="capture_app_videos">Videos</string>
+    <string name="capture_plage_nuit">Night</string>
+    <string name="capture_plage_travail">Work</string>
     <string name="chantier_comptage">Count without camera (1 per second)</string>
     <string name="chantier_mesures">Recorded events</string>
     <string name="chantier_mesures_comptage">Show counting measurements</string>
@@ -147,6 +152,10 @@
     <string name="limite_abonnement">See the subscription</string>
     <string name="limite_texte">Without a subscription, you can lock one app. Keep the one that takes most of your time.</string>
     <string name="limite_titre">One app without a subscription</string>
+    <string name="mesure_accepter">Accept</string>
+    <string name="mesure_refuser">Decline</string>
+    <string name="mesure_texte">Kova can count, anonymously, the screens you use. Never the camera image, never the names of your apps. You can change your mind in Settings.</string>
+    <string name="mesure_titre">Help improve Kova?</string>
     <string name="mesures_accepter">OK</string>
     <string name="mesures_argument_1">Never the camera image</string>
     <string name="mesures_argument_2">Never the names of your apps</string>
@@ -232,6 +241,7 @@
     <string name="reglages_apps_autre">%1$d apps</string>
     <string name="reglages_apps_un">%1$d app</string>
     <string name="reglages_exercice">Default exercise</string>
+    <string name="reglages_mesure">Anonymous statistics</string>
     <string name="reglages_mesures">Anonymous statistics</string>
     <string name="reglages_rappel">Daily reminder</string>
     <string name="reglages_regle">My rule</string>

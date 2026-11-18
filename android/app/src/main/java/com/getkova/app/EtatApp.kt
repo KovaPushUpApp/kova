@@ -1,8 +1,11 @@
 package com.getkova.app
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,6 +26,7 @@ import com.getkova.app.jeu.suspendreFenetre
 import com.getkova.app.jeu.utiliserUrgence
 import com.getkova.app.jeu.validerSeance
 import com.getkova.app.verrou.Minuteur
+import com.getkova.app.verrou.Rappel
 import kotlinx.serialization.json.Json
 import java.time.ZoneId
 
@@ -129,11 +133,52 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Abonnement. Les achats Google Play ne sont pas encore branchés : ce réglage
-     * de chantier sert à essayer les fonctions réservées.
+     * Abonnement Google Play actif, d'après la dernière réponse de Google Play.
+     * Gardé sur le téléphone : l'app démarre avec, même sans réseau.
      */
-    var abonne by mutableStateOf(reglages.getBoolean("abonnementSimule", false))
+    private var abonnementAchete by mutableStateOf(reglages.getBoolean("abonnementAchete", false))
+
+    /** Réglage de chantier : donne accès à tout sans achat. Sans effet dans la version publiée. */
+    private var abonnementSimule by mutableStateOf(reglages.getBoolean("abonnementSimule", false))
+
+    val abonne: Boolean get() = abonnementAchete || (BuildConfig.DEBUG && abonnementSimule)
+
+    /** Faux si le dernier achat fait sur ce téléphone est l'abonnement hebdomadaire. */
+    var abonnementAnnuel by mutableStateOf(reglages.getBoolean("abonnementAnnuel", true))
         private set
+
+    /** Message d'achat à montrer (identifiant de texte), ou rien. */
+    var messageAchat by mutableStateOf<Int?>(null)
+
+    private val filPrincipal = Handler(Looper.getMainLooper())
+
+    /** Les achats Google Play. Ses réponses arrivent sur un autre fil : on revient sur le principal. */
+    val achats = Achats(
+        application,
+        surEtat = { actif ->
+            filPrincipal.post {
+                if (actif != abonnementAchete) {
+                    abonnementAchete = actif
+                    reglages.edit().putBoolean("abonnementAchete", actif).apply()
+                }
+            }
+        },
+        surAchat = { essai ->
+            filPrincipal.post {
+                reglages.edit().putBoolean("abonnementAnnuel", abonnementAnnuel).apply()
+                // Promis sur le paywall : un rappel la veille de la fin de l'essai.
+                if (essai) Rappel.programmerFinEssai(contexte)
+                Mesures.suivre(contexte, "achat", "annuel" to abonnementAnnuel, "essai" to essai)
+            }
+        },
+        surProbleme = { message -> filPrincipal.post { messageAchat = message } },
+    )
+
+    /** Ouvre la fenêtre d'achat de Google Play pour la formule choisie. */
+    fun acheter(activite: Activity, annuel: Boolean) {
+        abonnementAnnuel = annuel
+        achats.acheter(activite, annuel)
+    }
 
     /** Réglage de chantier : compte une répétition par seconde, sans caméra. */
     var comptageSimule by mutableStateOf(reglages.getBoolean("comptageSimule", false))
@@ -155,6 +200,7 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
 
     init {
         Mesures.suivre(application, "app_ouverte", "onboarding_termine" to onboardingTermine)
+        achats.demarrer()
     }
 
     private fun maintenant() = System.currentTimeMillis()
@@ -207,7 +253,7 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
             "compterAVoixHaute" -> compterAVoixHaute = valeur
             "rappelQuotidien" -> rappelQuotidien = valeur
             "offreDejaVue" -> offreDejaVue = valeur
-            "abonnementSimule" -> abonne = valeur
+            "abonnementSimule" -> abonnementSimule = valeur
             "comptageSimule" -> comptageSimule = valeur
             "mesuresDuComptage" -> mesuresDuComptage = valeur
             "notificationsDemandees" -> notificationsDemandees = valeur

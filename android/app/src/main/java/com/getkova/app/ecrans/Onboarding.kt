@@ -365,17 +365,23 @@ fun EcranPaywall(
     essaiReussi: Boolean = false,
 ) {
     var annuel by remember { mutableStateOf(true) }
-    val prixAnnuel = t(R.string.prix_annuel)
-    val prixHebdo = t(R.string.prix_hebdomadaire)
+    // Les prix viennent de Google Play. Ceux des textes ne servent que de secours.
+    val prixAnnuel = etat.achats.prixAnnuel ?: t(R.string.prix_annuel)
+    val prixHebdo = etat.achats.prixHebdo ?: t(R.string.prix_hebdomadaire)
+    val avecEssai = annuel && etat.achats.essaiDisponible
     EcranKova(
         espacement = Tokens.Espacements.e13,
         bas = {
             BoutonPrincipal(
-                t(if (annuel) R.string.paywall_bouton_essai else R.string.commun_continuer),
+                t(if (avecEssai) R.string.paywall_bouton_essai else R.string.commun_continuer),
                 pulse = true,
             ) { acheter(annuel) }
             Legende(
-                if (annuel) f(R.string.paywall_mentions_annuel_essai, prixAnnuel) else f(R.string.paywall_mentions_hebdo, prixHebdo),
+                when {
+                    avecEssai -> f(R.string.paywall_mentions_annuel_essai, prixAnnuel)
+                    annuel -> f(R.string.paywall_mentions_annuel, prixAnnuel)
+                    else -> f(R.string.paywall_mentions_hebdo, prixHebdo)
+                },
                 Modifier.padding(top = Tokens.Espacements.e3.dp),
                 centre = true,
             )
@@ -412,14 +418,16 @@ fun EcranPaywall(
         ) {
             CarteFormule(
                 annuel, { annuel = true }, t(R.string.formule_annuel), t(R.string.paywall_annuel_detail),
-                prixAnnuel, t(R.string.paywall_annuel_etiquette), accent = true,
+                prixAnnuel,
+                t(if (etat.achats.essaiDisponible) R.string.paywall_annuel_etiquette else R.string.paywall_annuel_par_an),
+                accent = true,
             )
             CarteFormule(
                 !annuel, { annuel = false }, t(R.string.formule_hebdomadaire), t(R.string.paywall_hebdo_detail),
                 prixHebdo, t(R.string.paywall_hebdo_etiquette), accent = false,
             )
         }
-        if (annuel) {
+        if (avecEssai) {
             // Ce qui se passe pendant l'essai, jour par jour. Le rappel du jour 2 est programmé à l'achat.
             Column(
                 Modifier.fillMaxWidth().carte().entree(5),

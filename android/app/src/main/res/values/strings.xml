@@ -84,6 +84,11 @@
     <string name="camera_indisponible">Aucune caméra utilisable sur cet appareil.</string>
     <string name="camera_ouvrir_reglages">Ouvrir les Réglages</string>
     <string name="camera_refusee">Kova n\'a pas accès à la caméra. Autorise-la dans les Réglages pour compter tes pompes.</string>
+    <string name="capture_app_jeux">Jeux</string>
+    <string name="capture_app_reseaux">Réseaux sociaux</string>
+    <string name="capture_app_videos">Vidéos</string>
+    <string name="capture_plage_nuit">Nuit</string>
+    <string name="capture_plage_travail">Travail</string>
     <string name="chantier_comptage">Compter sans caméra (1 par seconde)</string>
     <string name="chantier_mesures">Événements enregistrés</string>
     <string name="chantier_mesures_comptage">Afficher les mesures du comptage</string>
@@ -147,6 +152,10 @@
     <string name="limite_abonnement">Voir l\'abonnement</string>
     <string name="limite_texte">Sans abonnement, tu peux verrouiller une seule app. Garde celle qui te prend le plus de temps.</string>
     <string name="limite_titre">Une seule app sans abonnement</string>
+    <string name="mesure_accepter">Accepter</string>
+    <string name="mesure_refuser">Refuser</string>
+    <string name="mesure_texte">Kova peut compter, de façon anonyme, les écrans que tu utilises. Jamais l\'image de la caméra, jamais le nom de tes apps. Tu peux changer d\'avis dans les réglages.</string>
+    <string name="mesure_titre">Aider à améliorer Kova ?</string>
     <string name="mesures_accepter">D\'accord</string>
     <string name="mesures_argument_1">Jamais l\'image de la caméra</string>
     <string name="mesures_argument_2">Jamais le nom de tes apps</string>
@@ -232,6 +241,7 @@
     <string name="reglages_apps_autre">%1$d apps</string>
     <string name="reglages_apps_un">%1$d app</string>
     <string name="reglages_exercice">Exercice par défaut</string>
+    <string name="reglages_mesure">Statistiques anonymes</string>
     <string name="reglages_mesures">Statistiques anonymes</string>
     <string name="reglages_rappel">Rappel quotidien</string>
     <string name="reglages_regle">Ma règle</string>

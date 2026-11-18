@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.pose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.billing)
 
     testImplementation(libs.junit)
 }
