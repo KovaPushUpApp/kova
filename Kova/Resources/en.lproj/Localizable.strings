@@ -391,3 +391,10 @@
 "mesure.accepter" = "Accept";
 "mesure.refuser" = "Decline";
 "reglages.mesure" = "Anonymous statistics";
+"essai.conseil" = "Phone upright at 90°, 1 meter away from you.";
+"verrou.app.stock" = "You have %lld min saved. Use them now or earn more.";
+"verrou.app.utiliser" = "Use my %lld min";
+"verrou.app.gagner_plus" = "Earn more time";
+"verrou.app.serie" = "streak";
+"verrou.app.urgences" = "emergency unlocks this week";
+"verrou.app.stock_legende" = "saved";

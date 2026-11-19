@@ -3,6 +3,17 @@ import Combine
 import Foundation
 import Vision
 
+/// Le squelette vu par la caméra, pour le dessiner par dessus l'aperçu. Il est à
+/// part pour que seul le dessin se refasse à chaque image, pas tout l'écran.
+/// Ce ne sont que des positions d'articulations : aucune image n'est gardée.
+final class SqueletteCamera: ObservableObject {
+    /// Positions dans un repère où une unité vaut la hauteur de l'image,
+    /// verticale vers le haut.
+    @Published fileprivate(set) var points: [Articulation: CGPoint] = [:]
+    /// Largeur de l'image divisée par sa hauteur.
+    fileprivate(set) var rapport: CGFloat = 0
+}
+
 /// La caméra d'une séance : elle filme, détecte la posture sur le téléphone et
 /// compte les répétitions.
 ///
@@ -25,6 +36,9 @@ final class CameraSeance: NSObject, ObservableObject {
     @Published private(set) var etat: Etat = .arretee
     @Published private(set) var repetitions = 0
     @Published private(set) var corpsVisible = false
+
+    /// Le squelette détecté sur la dernière image.
+    let squelette = SqueletteCamera()
 
     /// Session de capture, pour l'aperçu à l'écran.
     let session = AVCaptureSession()
@@ -65,6 +79,7 @@ final class CameraSeance: NSObject, ObservableObject {
         self.objectif = objectif
         repetitions = 0
         corpsVisible = false
+        squelette.points = [:]
         guard CameraSeance.disponible else {
             simuler(objectif: objectif)
             return
@@ -94,6 +109,7 @@ final class CameraSeance: NSObject, ObservableObject {
         minuterieSimulee = nil
         etat = .arretee
         corpsVisible = false
+        squelette.points = [:]
         file.async { [weak self] in
             guard let self else { return }
             if self.session.isRunning {
@@ -142,6 +158,11 @@ final class CameraSeance: NSObject, ObservableObject {
         if let connexion = sortie.connection(with: .video), connexion.isVideoOrientationSupported {
             connexion.videoOrientation = .portrait
         }
+        // Image en miroir, comme l'aperçu : le squelette dessiné tombe sur le corps.
+        if let connexion = sortie.connection(with: .video), connexion.isVideoMirroringSupported {
+            connexion.automaticallyAdjustsVideoMirroring = false
+            connexion.isVideoMirrored = true
+        }
         return true
     }
 
@@ -176,8 +197,19 @@ final class CameraSeance: NSObject, ObservableObject {
     ]
 
     /// Met à jour ce que l'écran affiche. Toujours sur le fil principal.
-    private func publier(compte: Int, visible: Bool, comptee: Bool, numero: Int) {
+    private func publier(
+        compte: Int,
+        visible: Bool,
+        comptee: Bool,
+        numero: Int,
+        points: [Articulation: CGPoint] = [:],
+        rapport: CGFloat = 0
+    ) {
         guard etat == .active, numero == serie else { return }
+        squelette.rapport = rapport
+        if !(points.isEmpty && squelette.points.isEmpty) {
+            squelette.points = points
+        }
         if corpsVisible != visible {
             corpsVisible = visible
         }
@@ -214,12 +246,22 @@ extension CameraSeance: AVCaptureVideoDataOutputSampleBufferDelegate {
         from connection: AVCaptureConnection
     ) {
         guard let image = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let comptee = compteur.traiter(detecter(image))
+        let pose = detecter(image)
+        let points = pose?.points ?? [:]
+        let rapport = CGFloat(CVPixelBufferGetWidth(image)) / CGFloat(max(CVPixelBufferGetHeight(image), 1))
+        let comptee = compteur.traiter(pose)
         let compte = compteur.compte
         let visible = compteur.corpsVisible
         let numero = serieDeLaFile
         DispatchQueue.main.async { [weak self] in
-            self?.publier(compte: compte, visible: visible, comptee: comptee, numero: numero)
+            self?.publier(
+                compte: compte,
+                visible: visible,
+                comptee: comptee,
+                numero: numero,
+                points: points,
+                rapport: rapport
+            )
         }
     }
 }

@@ -391,3 +391,10 @@
 "mesure.accepter" = "Accepter";
 "mesure.refuser" = "Refuser";
 "reglages.mesure" = "Statistiques anonymes";
+"essai.conseil" = "Téléphone debout à 90°, à 1 mètre de toi.";
+"verrou.app.stock" = "Tu as %lld min en stock. Utilise-les maintenant ou gagnes-en plus.";
+"verrou.app.utiliser" = "Utiliser mes %lld min";
+"verrou.app.gagner_plus" = "Gagner plus de temps";
+"verrou.app.serie" = "de série";
+"verrou.app.urgences" = "urgences cette semaine";
+"verrou.app.stock_legende" = "en stock";

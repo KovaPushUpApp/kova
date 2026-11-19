@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Écran 16 : la séance. Vue caméra, compteur géant, barre à segments.
+/// Écran 16 : la séance. Caméra en plein écran, compteur géant, barre à segments.
 /// Le bouton de validation apparaît quand la série de la règle est faite. On
 /// peut continuer : chaque répétition en plus ajoute du temps, et c'est le
 /// bouton qui termine la séance. Abandonner ne donne rien.
@@ -25,19 +25,16 @@ struct EcranCompteur: View {
     }
 
     var body: some View {
-        EcranKova(espacement: Tokens.Espacements.e13) {
-            HStack {
-                BoutonFermer(libelle: L.t("a11y.arreter_seance")) {
-                    Analytique.envoyer(.seanceAbandonnee)
-                    abandonner()
-                }
-                Spacer()
-                Text(verbatim: gagnees > 0
-                    ? L.f("seance.gagnees", gagnees)
-                    : L.f("seance.pour_minutes", etat.regle.minutes))
-                    .legende(graisse: .moyen)
+        EcranCamera(camera: camera) {
+            BoutonFermer(libelle: L.t("a11y.arreter_seance")) {
+                Analytique.envoyer(.seanceAbandonnee)
+                abandonner()
             }
-            VueCamera(camera: camera, hauteur: Tokens.Composants.VueCamera.hauteurSeance)
+            Spacer()
+            EtiquetteCamera(texte: gagnees > 0
+                ? L.f("seance.gagnees", gagnees)
+                : L.f("seance.pour_minutes", etat.regle.minutes))
+        } bas: {
             CompteurGeant(
                 faites: faites,
                 total: total,
@@ -46,7 +43,6 @@ struct EcranCompteur: View {
                 messageValide: L.t("seance.continuer")
             )
             BarreSegments(faits: segmentsFaits, total: Tokens.Composants.BarreProgression.segments)
-        } bas: {
             if faites >= total {
                 BoutonPrincipal(L.f("seance.bouton.minutes", gagnees)) {
                     valider(faites)

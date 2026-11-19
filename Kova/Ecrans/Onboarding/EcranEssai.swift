@@ -55,7 +55,8 @@ func ouvrirReglagesSysteme() {
 }
 
 /// Écran 9 : le moment de preuve. Trois vraies pompes comptées en direct,
-/// puis le bouton "Continuer" apparaît.
+/// puis le bouton "Continuer" apparaît. La caméra remplit l'écran, comme
+/// pendant la séance.
 struct EcranEssai: View {
     let retour: () -> Void
     /// Reçoit vrai si les 3 pompes ont été faites, faux si l'essai a été passé.
@@ -69,13 +70,17 @@ struct EcranEssai: View {
     }
 
     var body: some View {
-        EcranKova(espacement: Tokens.Espacements.e13) {
+        EcranCamera(camera: camera) {
             EnTeteEtapes(etape: 8, total: EtapeOnboarding.nombreEtapes, retour: retour)
+        } bas: {
             Text(verbatim: L.t("essai.titre"))
                 .titreCarte()
-                .padding(.top, Tokens.Espacements.e13)
-                .entree(rang: 1)
-            VueCamera(camera: camera, hauteur: Tokens.Composants.VueCamera.hauteurEssai)
+                .multilineTextAlignment(.center)
+            if camera.repetitions == 0 {
+                Text(verbatim: L.t("essai.conseil"))
+                    .legende(Tokens.Couleurs.texte)
+                    .multilineTextAlignment(.center)
+            }
             CompteurGeant(
                 faites: camera.repetitions,
                 total: total,
@@ -87,7 +92,6 @@ struct EcranEssai: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .fixedSize(horizontal: false, vertical: true)
-        } bas: {
             if camera.repetitions >= total {
                 BoutonPrincipal(L.t("essai.bouton")) {
                     Analytique.envoyer(.essaiReussi)
