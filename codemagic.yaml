@@ -156,6 +156,30 @@ workflows:
       - name: Construire l'ipa
         script: |
           xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-xcargs "COMPILER_INDEX_STORE_ENABLE=NO CURRENT_PROJECT_VERSION=$PROJECT_BUILD_NUMBER"
+
+      # Apple refuse le build si l'app ou une extension est signée sans Family
+      # Controls (refus 2.5.1 du 20 novembre 2026). On l'affiche et on s'arrête
+      # avant l'envoi si l'autorisation manque quelque part.
+      - name: Vérifier Family Controls dans le build signé
+        script: |
+          rm -rf /tmp/kova-ipa && mkdir /tmp/kova-ipa
+          unzip -q build/ios/ipa/*.ipa -d /tmp/kova-ipa
+          MANQUE=0
+          for LOT in /tmp/kova-ipa/Payload/*.app /tmp/kova-ipa/Payload/*.app/PlugIns/*.appex; do
+            echo "=== $LOT"
+            DROITS=$(codesign -d --entitlements - --xml "$LOT" 2>/dev/null | plutil -convert xml1 -o - - 2>/dev/null || true)
+            echo "$DROITS"
+            if ! echo "$DROITS" | grep -q "com.apple.developer.family-controls"; then
+              echo "Family Controls absent de $LOT"
+              MANQUE=1
+            fi
+          done
+          echo "=== Profils utilisés"
+          for PROFIL in /tmp/kova-ipa/Payload/*.app/embedded.mobileprovision /tmp/kova-ipa/Payload/*.app/PlugIns/*.appex/embedded.mobileprovision; do
+            echo "--- $PROFIL"
+            security cms -D -i "$PROFIL" 2>/dev/null | plutil -extract Entitlements xml1 -o - - || true
+          done
+          exit $MANQUE
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
