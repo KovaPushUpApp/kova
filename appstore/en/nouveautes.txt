@@ -1,0 +1,3 @@
+Your rule now changes right away. When you edit the number of push-ups or minutes in settings, it applies immediately.
+
+The "I'm in position" button is always available. Start your session whenever you want, even if the camera hasn't spotted you yet.

@@ -274,8 +274,8 @@ fun EcranRegle(etat: EtatApp, onboarding: Boolean, retour: () -> Unit, valider: 
     EcranKova(
         bas = {
             BoutonPrincipal(t(R.string.regle_bouton), Modifier.entree(5)) {
-                // Dans les réglages, assouplir la règle prend effet 24 h plus tard.
-                etat.proposerRegle(brouillon, immediat = onboarding)
+                // La nouvelle règle s'applique tout de suite, aussi depuis les réglages.
+                etat.proposerRegle(brouillon, immediat = true, onboarding = onboarding)
                 if (hardcore != etat.jeu.hardcore) etat.definirHardcore(hardcore, immediat = onboarding)
                 valider()
             }

@@ -77,8 +77,8 @@
 
 /* 6. Rule */
 "regle.titre" = "Set your rule.";
-"regle.texte" = "You can change it later, with a 24 h delay.";
-"regle.texte_reglages" = "Making your rule easier takes effect in 24 h. Making it harder is instant.";
+"regle.texte" = "You can change it anytime in settings.";
+"regle.texte_reglages" = "Your new rule applies right away.";
 "regle.unite.pompes" = "push-ups";
 "regle.unite.minutes" = "minutes of screen";
 "regle.par_heure" = "That's %lld push-ups for 1 h of scrolling.";

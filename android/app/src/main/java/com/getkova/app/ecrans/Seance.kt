@@ -571,7 +571,7 @@ fun EcranExercice(etat: EtatApp, parDefaut: Boolean, retour: () -> Unit, valider
     }
 }
 
-/** Écran 15 : mise en place du téléphone. Le bouton apparaît quand le corps est détecté. */
+/** Écran 15 : mise en place du téléphone. Le bouton « Je suis en position » est toujours actif. */
 @Composable
 fun EcranPlacement(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suivant: () -> Unit) {
     val proprietaire = LocalLifecycleOwner.current
@@ -584,10 +584,11 @@ fun EcranPlacement(etat: EtatApp, camera: CameraSeance, retour: () -> Unit, suiv
     val refusee = camera.etat == CameraSeance.Etat.REFUSEE || camera.etat == CameraSeance.Etat.INDISPONIBLE
     EcranKova(
         bas = {
-            when {
-                camera.corpsVisible -> BoutonPrincipal(t(R.string.placement_bouton), Modifier.entree(), action = suivant)
-                refusee -> BoutonPrincipal(t(R.string.camera_ouvrir_reglages)) { ouvrirFicheDeLApp(contexte) }
-                else -> Spacer(Modifier.height(Tokens.Hauteurs.boutonPrincipal.dp))
+            // Toujours actif : on peut lancer la séance même si la détection tarde.
+            if (refusee) {
+                BoutonPrincipal(t(R.string.camera_ouvrir_reglages)) { ouvrirFicheDeLApp(contexte) }
+            } else {
+                BoutonPrincipal(t(R.string.placement_bouton), action = suivant)
             }
         },
     ) {

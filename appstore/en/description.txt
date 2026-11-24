@@ -14,7 +14,7 @@ A rep only counts if the movement is complete. Nodding your head or bending your
 BUILT TO LAST
 - Save your time and open your apps whenever you want.
 - Schedule: strict slots where nothing opens, even with time saved up.
-- No caving in: making your rule easier or removing an app takes effect 24 hours later.
+- No caving in: removing an app takes effect 24 hours later.
 - Emergency unlock: 5 minutes, twice a week, for real emergencies.
 - Day streak and weekly stats.
 

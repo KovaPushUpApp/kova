@@ -14,7 +14,7 @@ Une répétition ne compte que si le mouvement est complet. Bouger la tête ou p
 FAIT POUR TENIR
 - Garde ton temps au solde et ouvre tes apps quand tu veux.
 - Planning : des plages strictes où rien ne s'ouvre, même avec du temps en stock.
-- Anti-craquage : assouplir ta règle ou retirer une app prend effet 24 h plus tard.
+- Anti-craquage : retirer une app prend effet 24 h plus tard.
 - Déblocage d'urgence : 5 minutes, 2 fois par semaine, pour les vraies urgences.
 - Série de jours et stats de la semaine.
 

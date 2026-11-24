@@ -28,7 +28,7 @@ packages:
 
 settings:
   base:
-    MARKETING_VERSION: "1.0.0"
+    MARKETING_VERSION: "1.0.1"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     # Vide dans le socle. project.yml y met l'identifiant de l'App Group.

@@ -291,11 +291,14 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
         return fin
     }
 
-    /** Change la règle. Renvoie vrai si le changement est différé de 24 h. */
-    fun proposerRegle(regle: Regle, immediat: Boolean): Boolean {
+    /**
+     * Change la règle. Avec [immediat], elle s'applique tout de suite. Sans, assouplir
+     * est différé de 24 h. Renvoie vrai si le changement est différé.
+     */
+    fun proposerRegle(regle: Regle, immediat: Boolean, onboarding: Boolean = immediat): Boolean {
         val differe = modifier { etat, instant ->
             if (immediat) {
-                // Pendant l'onboarding, il n'y a pas encore de règle à protéger.
+                // Onboarding et réglages : la règle change tout de suite, dans les deux sens.
                 etat.copy(regle = regle, regleEnAttente = null, regleEnAttenteLe = null) to false
             } else {
                 etat.proposerRegle(regle, instant)
@@ -303,7 +306,7 @@ class EtatApp(application: Application) : AndroidViewModel(application) {
         }
         Mesures.suivre(
             contexte, "regle_validee",
-            "repetitions" to regle.repetitions, "minutes" to regle.minutes, "differe" to differe, "onboarding" to immediat,
+            "repetitions" to regle.repetitions, "minutes" to regle.minutes, "differe" to differe, "onboarding" to onboarding,
         )
         return differe
     }

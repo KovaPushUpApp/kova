@@ -180,12 +180,13 @@ final class EtatApp: ObservableObject {
         return fin
     }
 
-    /// Change la règle. Renvoie vrai si le changement est différé de 24 h.
+    /// Change la règle. Avec `immediat`, elle s'applique tout de suite. Sans, assouplir
+    /// est différé de 24 h. Renvoie vrai si le changement est différé.
     @discardableResult
     func proposerRegle(_ regle: Regle, immediat: Bool = false) -> Bool {
         let differe = modifier { etat, maintenant, _ -> Bool in
             if immediat {
-                // Pendant l'onboarding, il n'y a pas encore de règle à protéger.
+                // Onboarding et réglages : la règle change tout de suite, dans les deux sens.
                 etat.regle = regle
                 etat.regleEnAttente = nil
                 etat.regleEnAttenteLe = nil

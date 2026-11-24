@@ -256,8 +256,8 @@
     <string name="regle_hardcore_texte">Ton temps gagné s\'efface chaque jour à minuit. Pas de stock.</string>
     <string name="regle_hardcore_texte_reglages">Ton temps gagné s\'efface chaque jour à minuit. Le couper prend 24 h.</string>
     <string name="regle_par_heure">Soit %1$d pompes pour 1 h de scroll.</string>
-    <string name="regle_texte">Tu pourras la changer plus tard, avec un délai de 24 h.</string>
-    <string name="regle_texte_reglages">Assouplir ta règle prend effet dans 24 h. La durcir, tout de suite.</string>
+    <string name="regle_texte">Tu pourras la changer quand tu veux dans les réglages.</string>
+    <string name="regle_texte_reglages">Ta nouvelle règle s\'applique tout de suite.</string>
     <string name="regle_titre">Fixe ta règle.</string>
     <string name="regle_unite_minutes">minutes d\'écran</string>
     <string name="regle_unite_pompes">pompes</string>

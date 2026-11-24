@@ -1,0 +1,3 @@
+Ta règle change tout de suite. Quand tu modifies le nombre de pompes ou de minutes dans les réglages, c'est pris en compte immédiatement.
+
+Le bouton « Je suis en position » est toujours actif. Tu lances ta séance quand tu veux, même si la caméra ne t'a pas encore repéré.

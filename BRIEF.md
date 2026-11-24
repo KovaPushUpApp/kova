@@ -79,7 +79,7 @@ Hors V1 :
 4. **La fenêtre de déblocage** : pendant la fenêtre, toutes les apps verrouillées sont accessibles. Le temps s'écoule en temps réel, que l'app soit ouverte ou non. À la fin, les apps se reverrouillent toutes seules, même si Kova est fermée.
 5. **Planning** : pendant une plage stricte active, les apps restent verrouillées même avec du solde. Seul le déblocage d'urgence passe.
 6. **Déblocage d'urgence** : 5 minutes sans exercice, 2 fois par semaine maximum (remise à zéro le lundi). Désactivable dans les réglages.
-7. **Anti-craquage** : retirer une app de la liste, assouplir la règle ou désactiver une plage prend effet 24 h plus tard. Durcir prend effet tout de suite.
+7. **Anti-craquage** : retirer une app de la liste ou désactiver une plage prend effet 24 h plus tard. Durcir prend effet tout de suite. La règle (répétitions et minutes) change tout de suite, dans les deux sens : décision du 24 novembre 2026, après la sortie de la version 1.0.0.
 8. **Série** : un jour compte dans la série si au moins une séance a été validée.
 9. **Comptage** : une répétition ne compte que si le mouvement est complet (descente puis remontée). Une séance abandonnée ne donne rien.
 10. **Confidentialité** : l'image de la caméra est analysée sur le téléphone, jamais enregistrée ni envoyée. C'est une promesse affichée à l'utilisateur, elle doit être vraie dans le code.

@@ -256,8 +256,8 @@
     <string name="regle_hardcore_texte">The time you earn is wiped every day at midnight. No stockpiling.</string>
     <string name="regle_hardcore_texte_reglages">The time you earn is wiped every day at midnight. Turning it off takes 24 h.</string>
     <string name="regle_par_heure">That\'s %1$d push-ups for 1 h of scrolling.</string>
-    <string name="regle_texte">You can change it later, with a 24 h delay.</string>
-    <string name="regle_texte_reglages">Making your rule easier takes effect in 24 h. Making it harder is instant.</string>
+    <string name="regle_texte">You can change it anytime in settings.</string>
+    <string name="regle_texte_reglages">Your new rule applies right away.</string>
     <string name="regle_titre">Set your rule.</string>
     <string name="regle_unite_minutes">minutes of screen</string>
     <string name="regle_unite_pompes">push-ups</string>

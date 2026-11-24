@@ -51,8 +51,8 @@ struct EcranRegle: View {
             }
         } bas: {
             BoutonPrincipal(L.t("regle.bouton")) {
-                // Dans les réglages, assouplir la règle prend effet 24 h plus tard.
-                etat.proposerRegle(brouillon, immediat: contexte == .onboarding)
+                // La nouvelle règle s'applique tout de suite, aussi depuis les réglages.
+                etat.proposerRegle(brouillon, immediat: true)
                 // Activer le mode hardcore est immédiat, le couper prend 24 h.
                 if hardcore != etat.jeu.hardcore {
                     etat.definirHardcore(hardcore, immediat: contexte == .onboarding)

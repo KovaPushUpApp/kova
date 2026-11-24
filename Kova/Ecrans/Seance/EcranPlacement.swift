@@ -63,12 +63,9 @@ struct EcranPlacement: View {
         } bas: {
             if cameraRefusee {
                 BoutonPrincipal(L.t("camera.ouvrir_reglages"), action: ouvrirReglagesSysteme)
-            } else if camera.corpsVisible {
-                BoutonPrincipal(L.t("placement.bouton"), action: partir)
-                    .entree()
             } else {
-                // Personne ne reste coincé ici si la détection tarde.
-                BoutonSecondaire(L.t("placement.bouton"), action: partir)
+                // Toujours actif : on peut lancer la séance même si la détection tarde.
+                BoutonPrincipal(L.t("placement.bouton"), action: partir)
             }
         }
         .task(id: camera.corpsVisible) {

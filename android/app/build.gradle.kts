@@ -41,8 +41,8 @@ android {
         applicationId = "com.getkova.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         buildConfigField("String", "CLE_MESURES", "\"" + mesures.getProperty("cle", "").trim() + "\"")
 
         // Pour un APK plus léger destiné à un vrai téléphone : ./gradlew assembleDebug -Pabi=arm64-v8a

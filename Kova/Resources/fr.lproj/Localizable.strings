@@ -77,8 +77,8 @@
 
 /* 6. Règle */
 "regle.titre" = "Fixe ta règle.";
-"regle.texte" = "Tu pourras la changer plus tard, avec un délai de 24 h.";
-"regle.texte_reglages" = "Assouplir ta règle prend effet dans 24 h. La durcir, tout de suite.";
+"regle.texte" = "Tu pourras la changer quand tu veux dans les réglages.";
+"regle.texte_reglages" = "Ta nouvelle règle s'applique tout de suite.";
 "regle.unite.pompes" = "pompes";
 "regle.unite.minutes" = "minutes d'écran";
 "regle.par_heure" = "Soit %lld pompes pour 1 h de scroll.";
